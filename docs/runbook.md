@@ -7,19 +7,34 @@ make install PY=python3.12     # venv + analyzer[dev]
 make ci                        # everything a PR runs -- no model, no key, no network
 ```
 
-## The local generation model
+## The local generation model — first-time setup (M1-15, W2-0)
 
 ```
-make models        # ollama pull gpt-oss:20b  (~13 GB)
-make serve-local   # ollama serve
-make pin-local     # record the pin tuple -> paste into .env
+brew install ollama                    # or the app from ollama.com
+ollama serve                           # keep running. Native, NEVER in Docker.
+make models                            # ollama pull gpt-oss:20b   (~13 GB)
+make pin-local                         # emits the pin tuple -> paste into .env
+make spike-s1 ARGS="--only local"      # confirm raw reasoning actually arrives
+make spike-s6                          # confirm tool calling. GATES ARM 3.
 ```
 
 **Serve it natively, never in Docker.** Containerised inference on macOS loses Metal, and a
 20B model on CPU is unusable. Compose reaches the host model at `host.docker.internal`.
 
+**The pin is the deliverable, not the pull.** `make pin-local` exits non-zero if it cannot
+discover a field, because a report built on an incomplete pin is not reproducible — better a
+failed command than a number that cannot be defended.
+
 **If it is too slow to iterate against**, switch to the approved fallback `qwen3:14b`
 (~9 GB, roughly twice the speed). Update the pin tuple; nothing structural changes.
+
+| Symptom | Response |
+| --- | --- |
+| Connection refused on :11434 | `ollama serve` is not running |
+| Model too slow, or won't fit | `qwen3:14b`. **Never** a 32B model — 24 GB will not hold it plus the KV cache |
+| No raw reasoning in the response | Check both shapes: a `reasoning`/`reasoning_content` field *and* inline `<think>` tags. Which one it is matters — the segmenter has to strip it consistently |
+| No reasoning tokens in `usage` | Fine. Count locally with the model's own tokenizer: exact, and better than a provider's number |
+| S6 below 90% on any scenario | Try `qwen3:14b`. Do **not** move arm 3 to OpenAI — that measures vendors, not strategies |
 
 `MOCK_LLM=1` is the default in `docker-compose.yml` and in CI: local dev and CI are
 **deterministic and cost-free** by construction (C7.1). Cassettes are recorded once per

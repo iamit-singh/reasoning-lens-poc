@@ -10,7 +10,7 @@
 > | **2** Provider / model pin | **Decided** — hybrid runtime: local `gpt-oss:20b` generates, OpenAI analyses (ADR-001). No Anthropic access, and OpenAI does not return raw reasoning |
 > | **4** DNS delegation | **Cancelled** — nothing is deployed (ADR-003). The ticket was drafted and never filed, correctly |
 > | **7** Reviewer ack | Still worth sending; the drafted text below stands |
-> | **5** Second annotator | ✅ **A colleague is committed for ~2 h in W6.** Still to be *named* |
+> | **5** Second annotator | ✅ **Ankit**, committed for ~2 h in W6. Hand him the rubric **cold** |
 >
 > The asks below are kept as the record of what was drafted and why.
 
@@ -123,5 +123,6 @@ requirement: B4 #1 (κ ≥ 0.70) is unmeasurable without a second independent la
 
 | Field | Value |
 | --- | --- |
-| Named second annotator | *pending* |
-| Confirmed for W6 | *pending* |
+| Named second annotator | **Ankit** |
+| Confirmed for W6 | ✅ ~2 h |
+| Briefed beforehand | **must be no** — see `calibration/README.md` |

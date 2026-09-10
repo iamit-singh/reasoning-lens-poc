@@ -31,9 +31,16 @@ two-part frame exists to protect (C5.1).
 
 ## The second annotator — confirmed, and why it was nearly lost
 
-A colleague is committed for **~2 hours in W6** to independently label the 50 held-out steps.
+**Ankit** is committed for **~2 hours in W6** to independently label the 50 held-out steps.
 Amit is the sole contributor to this PoC, so this was the one role he could not fill himself,
 and for a day it was the most fragile thing on the board.
+
+| Field | Value |
+| --- | --- |
+| Second annotator | **Ankit** |
+| Commitment | ~2 h, W6 |
+| Labels | the 50 held-out steps, independently, rubric-only |
+| Briefed? | **must be NO** — record this in `annotator-2.md` |
 
 **Why no substitute works.** The headline claim is *two people, given only a written rulebook
 and no discussion, agreed this often*. It is what separates a measurement from one person
@@ -45,10 +52,14 @@ something real, but only whether the rulebook is precise enough to give **one pe
 same answer twice. It cannot detect a rulebook that is clear to its author and ambiguous to
 everyone else, which is the exact failure the number exists to catch.
 
-> **⚠️ If the colleague falls through, the fallback is self-consistency labeling — and the
+> **⚠️ If Ankit becomes unavailable, the fallback is self-consistency labeling — and the
 > published claim must be renamed.** Never publish a self-consistency number under the word
 > *agreement*.
 
-**Hand them the rulebook cold.** No walkthrough, no worked examples beyond what is written
+**Hand Ankit the rulebook cold.** No walkthrough, no worked examples beyond what is written
 down, no discussion of hard cases beforehand. A briefed second annotator measures the
-briefing, not the rubric. Record in `annotator-2.md` that they were not briefed.
+briefing, not the rubric. Record in `annotator-2.md` that he was not briefed.
+
+**This shapes M1-11, three weeks earlier.** The rubric must stand entirely on its own, because
+in W6 someone who has never seen this project reads it and nothing else. Write it for Ankit,
+not for yourself — that is the difference between a rubric and a set of personal notes.
