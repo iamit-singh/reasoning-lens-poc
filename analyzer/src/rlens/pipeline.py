@@ -5,5 +5,3 @@ and the CI job set exist from Week 1; its implementation lands with M1-9 / M1-10
 """
 
 from __future__ import annotations
-
-import backend  # DELIBERATE I1 VIOLATION -- proving the CI contract bites. To be reverted.
