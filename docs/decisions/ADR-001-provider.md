@@ -104,7 +104,7 @@ architecture. The gate now asks three things of the **local** model:
 | # | Check | Pass condition | Result — 10 Sep 2026 |
 | - | --- | --- | --- |
 | 1 | Full raw reasoning text returned | present and complete; no elision | ✅ **PASS** — 2535 chars in a `reasoning` field (not inline `<think>` tags), unelided, answer correct. [S1](../spikes/S1-provider.md) |
-| 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** | ❌ **NOT MET** — `usage` reports `completion_tokens: 1020` for reasoning **and** answer combined, and no `reasoning_tokens`. The runtime has no tokenize endpoint (404). Needs a tokenizer dependency; see below |
+| 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** | ✅ **PASS** — the runtime reports none, so counted locally with `o200k_harmony`: **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. [S1](../spikes/S1-provider.md) |
 | 3 | **Tool contract held** | calculator + lookup called correctly and repeatably — gates arm 3, must pass **before** W3 | ✅ **PASS** — 20/20, 100% on all four scenarios incl. tool-choice and the false-positive check. [S6](../spikes/S6-tools.md) |
 | 4 | Pin tuple recorded | every field above, reproducibly | ✅ **PASS** — recorded below and in `.env`; `make pin-local` reproduces it |
 | 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias | ⬜ **OPEN** — no OpenAI key yet; `MODEL_ANALYZE` / `MODEL_ESCALATE` unset |
@@ -124,6 +124,7 @@ GEN_TEMPERATURE=0
 GEN_TOP_P=1.0
 GEN_SEED=20260910
 LOCAL_REASONING_EFFORT=medium
+LOCAL_TOKENIZER=o200k_harmony        # gpt-oss. qwen3 would need a different encoding
 ```
 
 > **The digest is the weights-file sha256, not ollama's short id.** `ollama list` prints a
@@ -132,23 +133,23 @@ LOCAL_REASONING_EFFORT=medium
 > artifact digest from the modelfile's `FROM` line. The short id is kept as a convenience
 > field and is **not** part of the pin.
 
-### Check 2 is the one open measurement risk
+### Check 2, closed — and the tokenizer joins the pin
 
-The ADR asserts local counting is an *improvement* on a provider's number. That is still
-the right expectation — a local tokenizer is exact — but **it is currently unevidenced**,
-and the cheap routes are closed: ollama 0.33.3 exposes no `/api/tokenize`, and
-`completion_tokens` bundles reasoning with the answer. Separating them needs `tiktoken`
-(harmony encoding) or a direct GGUF vocab read, neither declared in
-`analyzer/pyproject.toml` nor budgeted in Month 1.
+The ADR asserted that counting reasoning tokens locally is an *improvement* on a provider's
+number. That is now **evidenced rather than asserted**: `tiktoken>=0.9` is a declared
+analyzer dependency, and `make spike-s1` counts the trace with `o200k_harmony` on every run.
 
-Until it lands, every cost-of-thought figure is an **estimate** from a chars-per-token
-ratio (3.25 observed), and must be labelled as such wherever it is published. G0 check 2
-stays unticked.
+The reconciliation is what makes it evidence. Counted reasoning (741) plus answer (269) is
+1010 against the runtime's billed 1020 — a **+10 structural residual**, which is the harmony
+channel wrapper the runtime bills and the extracted text does not contain. A large or
+negative residual would mean the encoding is wrong for the model, so the residual is
+reported on every run rather than discarded.
 
-**S1 must still run.** The claim about OpenAI's summarisation is a strong expectation, not a
-measurement, and this project's thesis is that the difference matters. If OpenAI exposes more
-than expected, that is a finding worth having — it does not reverse this ADR, because the
-local model is now preferred on **reproducibility** grounds independent of fidelity.
+**`LOCAL_TOKENIZER` is now part of the pin tuple**, for the same reason the digest is:
+counting one model's text with another model's encoding yields a plausible **wrong** number,
+and nothing looks broken when it happens. The approved fallback `qwen3:14b` does not use
+harmony. The spike therefore refuses to guess — an unrecognised model reports *no count*
+rather than falling back to a default encoding.
 
 ## Consequences
 

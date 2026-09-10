@@ -11,6 +11,11 @@ license = { text = "Proprietary" }
 dependencies = [
   "pydantic>=2.7",
   "jsonschema>=4.22",
+  # Local reasoning-token counting (ADR-001, G0 check 2). Not a provider SDK -- it is a
+  # tokenizer, and the boundary contract's concern is provider response shapes. gpt-oss
+  # uses the o200k_harmony encoding; a different local model needs a different encoding,
+  # which is why LOCAL_TOKENIZER is part of the pin rather than a default.
+  "tiktoken>=0.9",
 ]
 
 [project.optional-dependencies]

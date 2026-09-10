@@ -66,27 +66,49 @@ safer contract than scraping `<think>` tags out of prose — no delimiter to be 
 mid-sentence, no ambiguity when the model mentions the tag. The segmenter should read the
 field and treat inline tags as a fallback for other models, not the primary path.
 
-### ⚠️ G0 check 2 is **not** satisfied by this run
+### G0 check 2 — **satisfied by a local count**, not by the provider
 
-ADR-001 claims local token counting is *"an improvement: this measurement gets more
-accurate, not less"*, on the grounds that the trace can be counted with the model's own
-tokenizer. **This run does not evidence that claim.** What it establishes is the weaker
-half: the provider does not report `reasoning_tokens`.
-
-`usage.completion_tokens` is a **combined** figure (1020 tokens for 3318 chars of reasoning
-plus answer). Cost-of-thought needs reasoning tokens *separated* from answer tokens, and
-nothing in the response provides that split. Two routes were checked and closed:
+The runtime reports no `reasoning_tokens`, and `usage.completion_tokens` (1020) bundles
+reasoning **with** the answer. Two cheap routes to a split were checked and closed:
 
 | Route | Result |
 | --- | --- |
 | `POST /api/tokenize` on the runtime | **404** — ollama 0.33.3 exposes no tokenize endpoint |
-| `POST /api/embed` | **501** — server not started with `--embeddings`, and embeddings would not give a token count anyway |
+| `POST /api/embed` | **501** — and embeddings would not give a token count anyway |
 
-Counting it exactly therefore needs a tokenizer dependency (`tiktoken` with the harmony
-encoding, or the GGUF vocab read directly) — **not currently declared in
-`analyzer/pyproject.toml`, and not budgeted by the plan.** Until that lands the check is
-**unticked**, and any cost-of-thought number is an estimate from a chars-per-token ratio
-(3.25 chars/token observed here), not a measurement.
+So the split is counted locally with the model's own encoding — `o200k_harmony`, which is
+gpt-oss's actual tokenizer. `tiktoken>=0.9` is now a declared analyzer dependency and
+`make spike-s1` reports the count on every run:
+
+| Measure | Value |
+| --- | --- |
+| Tokenizer | `o200k_harmony` |
+| **Reasoning tokens (exact)** | **741** |
+| Answer tokens (exact) | 269 |
+| Counted total | 1010 |
+| Runtime's `completion_tokens` | 1020 |
+| **Structural residual** | **+10** |
+| **Reasoning share of output** | **73.4%** |
+| chars/token, reasoning only | 3.42 |
+
+**The +10 residual is the check on the check, and it is why this counts as evidence.** The
+harmony format wraps each channel in structural tokens (`<|channel|>analysis<|message|>` and
+friends) that the runtime bills and the extracted text does not contain, so a small positive
+residual is expected. A large residual, or a negative one, would mean the encoding is wrong
+for this model — which is exactly the failure that a lone plausible-looking number would
+hide. At 1.0% of output, the account reconciles.
+
+> **The tokenizer is therefore part of the pin, not a default.** `LOCAL_TOKENIZER` travels
+> with `LOCAL_MODEL`. Counting one model's text with another model's encoding produces a
+> plausible **wrong** number — the worst kind of measurement error, because nothing looks
+> broken. The approved fallback `qwen3:14b` does **not** use harmony, so a model swap
+> without a tokenizer swap would silently corrupt every cost-of-thought figure. The spike
+> refuses to guess: an unrecognised model reports *no count* rather than a default.
+
+**This is the measurement ADR-001 predicted would improve.** A provider's
+`reasoning_tokens`, where offered at all, is a number you must trust. This one is
+recomputable from committed text with a pinned encoding, and it reconciles against the
+runtime's own billing to within the structural overhead.
 
 ### OpenAI analysis tier — not yet run
 
@@ -102,5 +124,5 @@ matters.
 | --- | --- |
 | G0 passes | `llm.py` (M1-6) is written against this provider; `MODEL_PIN` enters every cache key (C2.3) |
 | Thinking is summarised | `trace_quality: "provider_summarised"` becomes a `ReasoningReport` field frozen at G1, and a permanent UI banner (FE-8) — the demo's central artifact is a summary and the reviewer hears it in W1 |
-| No `reasoning_tokens` | B4 #7 is estimated, not measured; the calibration page carries the caveat |
+| No `reasoning_tokens` | ~~B4 #7 is estimated~~ — **resolved**: counted exactly with `o200k_harmony` (741 for the probe, 73.4% of output). No caveat needed; the tokenizer is pinned |
 | No candidate qualifies | Arm 2 becomes a hosted open-weight R1-class model (B6.5), decided in W1 |

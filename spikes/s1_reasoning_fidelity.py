@@ -63,6 +63,17 @@ class Probe:
     reasoning_text_present: bool = False
     reasoning_text_chars: int = 0
     reasoning_tokens_reported: int | None = None
+    #: G0 check 2. Counted locally with the model's own tokenizer -- exact, where a
+    #: provider's number is at best rounded and at worst absent.
+    tokenizer: str | None = None
+    reasoning_tokens_exact: int | None = None
+    answer_tokens_exact: int | None = None
+    #: reported completion_tokens minus (reasoning + answer). The harmony format wraps
+    #: each channel in structural tokens which the runtime counts and the extracted text
+    #: does not contain, so a small positive residual is expected and is NOT an error.
+    #: A large or negative residual means the encoding is wrong for this model.
+    structural_token_residual: int | None = None
+    reasoning_token_share: float | None = None
     #: chars-per-reported-token. ~3-5 means the text we hold is the text that was billed.
     #: Far above that means we are holding a summary of something longer.
     chars_per_reasoning_token: float | None = None
@@ -83,6 +94,53 @@ def _post(
     req = urllib.request.Request(url, data=body, headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode())
+
+
+#: Which tiktoken encoding belongs to which local model. Deliberately a lookup and not a
+#: default: gpt-oss uses harmony, the approved fallback qwen3 does not, and silently
+#: counting one model's text with another's tokenizer produces a plausible wrong number --
+#: the worst kind. An unknown model reports "no count", which is honest.
+TOKENIZERS: dict[str, str] = {"gpt-oss": "o200k_harmony"}
+
+
+def _encoding_for(model: str) -> str | None:
+    """The encoding for this model, or None if we do not know it.
+
+    ``LOCAL_TOKENIZER`` overrides, because it is part of the pin: swapping the model
+    without swapping the tokenizer is exactly the mistake this refuses to make quietly.
+    """
+    override = os.environ.get("LOCAL_TOKENIZER")
+    if override:
+        return override
+    for prefix, enc in TOKENIZERS.items():
+        if model.startswith(prefix):
+            return enc
+    return None
+
+
+def _count_exact(p: Probe, reasoning: str, answer: str) -> None:
+    """Count reasoning and answer tokens with the model's own tokenizer (G0 check 2)."""
+    enc_name = _encoding_for(p.model)
+    if not enc_name:
+        p.tokenizer = None
+        return
+    try:
+        import tiktoken
+
+        enc = tiktoken.get_encoding(enc_name)
+    except Exception as exc:  # a spike records failures; it does not raise
+        p.tokenizer = f"{enc_name} (unavailable: {type(exc).__name__})"
+        return
+
+    p.tokenizer = enc_name
+    p.reasoning_tokens_exact = len(enc.encode(reasoning))
+    p.answer_tokens_exact = len(enc.encode(answer))
+    total = p.reasoning_tokens_exact + p.answer_tokens_exact
+    if total:
+        p.reasoning_token_share = round(p.reasoning_tokens_exact / total, 3)
+    billed = p.usage.get("completion_tokens")
+    if isinstance(billed, int):
+        p.structural_token_residual = billed - total
 
 
 def _dig(usage: dict[str, Any]) -> int | None:
@@ -147,6 +205,7 @@ def probe_local(out: pathlib.Path, timeout: int) -> Probe:
     p.usage = data.get("usage") or {}
     p.reasoning_tokens_reported = _dig(p.usage)
     p.answer_correct = str(PROBE_ANSWER) in text
+    _count_exact(p, trace, text)
     if p.reasoning_tokens_reported:
         p.chars_per_reasoning_token = round(len(trace) / p.reasoning_tokens_reported, 2)
 
@@ -156,10 +215,17 @@ def probe_local(out: pathlib.Path, timeout: int) -> Probe:
         where = "a reasoning field" if reasoning else "inline <think> tags"
         p.verdict = f"PASS -- full raw trace recovered from {where} ({len(trace)} chars)."
         if not p.reasoning_tokens_reported:
-            p.verdict += (
-                " Token count absent from usage -- count it locally with the model's own"
-                " tokenizer, which is exact and better than any provider's number."
-            )
+            if p.reasoning_tokens_exact is not None:
+                p.verdict += (
+                    f" No reasoning_tokens in usage, but counted exactly locally:"
+                    f" {p.reasoning_tokens_exact} reasoning tokens via {p.tokenizer}."
+                    " G0 check 2 is satisfied by the local count, not by the provider."
+                )
+            else:
+                p.verdict += (
+                    " Token count absent from usage AND no local tokenizer available --"
+                    " G0 check 2 is NOT satisfied. Cost-of-thought would be an estimate."
+                )
     p.ok = True
     return p
 
@@ -242,8 +308,27 @@ def render(probes: list[Probe]) -> str:
             f"  reasoning tokens billed       {p.reasoning_tokens_reported}",
             f"  chars per billed token        {p.chars_per_reasoning_token}",
             f"  probe answer correct          {p.answer_correct}",
-            f"  -> {p.verdict}",
         ]
+        if p.tokenizer and p.reasoning_tokens_exact is not None:
+            share = (
+                f"{p.reasoning_token_share:.1%}" if p.reasoning_token_share is not None else "n/a"
+            )
+            lines += [
+                f"  tokenizer (G0 check 2)        {p.tokenizer}",
+                f"  reasoning tokens EXACT        {p.reasoning_tokens_exact}",
+                f"  answer tokens exact           {p.answer_tokens_exact}",
+                f"  reasoning share of output     {share}",
+                f"  structural residual           {p.structural_token_residual}"
+                "  (billed - counted; small + is the harmony channel wrapper)",
+            ]
+        elif p.tokenizer:
+            lines.append(f"  tokenizer (G0 check 2)        {p.tokenizer} -- NO COUNT")
+        else:
+            lines.append(
+                "  tokenizer (G0 check 2)        UNKNOWN for this model -- no exact count."
+                " Set LOCAL_TOKENIZER; it is part of the pin"
+            )
+        lines.append(f"  -> {p.verdict}")
     lines += [
         "",
         "G0 also requires: the tool contract held (run spike-s6 -- it gates arm 3), the",

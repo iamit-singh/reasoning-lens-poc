@@ -47,6 +47,12 @@ echo "GEN_TEMPERATURE=${GEN_TEMPERATURE:-0}"
 echo "GEN_TOP_P=${GEN_TOP_P:-1.0}"
 echo "GEN_SEED=${GEN_SEED:-20260910}"
 echo "LOCAL_REASONING_EFFORT=${LOCAL_REASONING_EFFORT:-medium}"
+echo
+echo "# The tokenizer is part of the pin (G0 check 2): reasoning tokens are counted"
+echo "# locally because the runtime does not report them. Counting one model's text with"
+echo "# another model's encoding yields a plausible WRONG number, so this travels with"
+echo "# the model. gpt-oss = o200k_harmony; the qwen3 fallback would need a different one."
+echo "LOCAL_TOKENIZER=${LOCAL_TOKENIZER:-o200k_harmony}"
 
 if [ "${digest:-UNKNOWN}" = "UNKNOWN" ] || [ "${quant:-UNKNOWN}" = "UNKNOWN" ]; then
   echo >&2
