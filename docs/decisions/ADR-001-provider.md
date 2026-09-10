@@ -101,14 +101,49 @@ known quantity with known numbers, not an untested fallback.
 The original question ("does the provider return unsummarised thinking?") is answered by
 architecture. The gate now asks three things of the **local** model:
 
-| # | Check | Pass condition |
-| - | --- | --- |
-| 1 | Full raw reasoning text returned | present and complete; no elision |
-| 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** |
-| 3 | **Tool contract held** | calculator + lookup called correctly and repeatably — gates arm 3, must pass **before** W3 |
-| 4 | Pin tuple recorded | every field above, reproducibly |
-| 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias |
-| 6 | This ADR committed | ✅ |
+| # | Check | Pass condition | Result — 10 Sep 2026 |
+| - | --- | --- | --- |
+| 1 | Full raw reasoning text returned | present and complete; no elision | ✅ **PASS** — 2535 chars in a `reasoning` field (not inline `<think>` tags), unelided, answer correct. [S1](../spikes/S1-provider.md) |
+| 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** | ❌ **NOT MET** — `usage` reports `completion_tokens: 1020` for reasoning **and** answer combined, and no `reasoning_tokens`. The runtime has no tokenize endpoint (404). Needs a tokenizer dependency; see below |
+| 3 | **Tool contract held** | calculator + lookup called correctly and repeatably — gates arm 3, must pass **before** W3 | ✅ **PASS** — 20/20, 100% on all four scenarios incl. tool-choice and the false-positive check. [S6](../spikes/S6-tools.md) |
+| 4 | Pin tuple recorded | every field above, reproducibly | ✅ **PASS** — recorded below and in `.env`; `make pin-local` reproduces it |
+| 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias | ⬜ **OPEN** — no OpenAI key yet; `MODEL_ANALYZE` / `MODEL_ESCALATE` unset |
+| 6 | This ADR committed | ✅ | ✅ |
+
+### The generation pin, as run
+
+`.env` is gitignored, so the pin is recorded here — a pin that exists only in an
+uncommitted file is not reproducible evidence. Regenerate with `make pin-local`.
+
+```
+LOCAL_MODEL=gpt-oss:20b
+LOCAL_MODEL_DIGEST=sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb
+LOCAL_QUANTIZATION=MXFP4
+LOCAL_RUNTIME="ollama 0.33.3"          # served natively, Metal
+GEN_TEMPERATURE=0
+GEN_TOP_P=1.0
+GEN_SEED=20260910
+LOCAL_REASONING_EFFORT=medium
+```
+
+> **The digest is the weights-file sha256, not ollama's short id.** `ollama list` prints a
+> 12-character truncated manifest id (`17052f91a42e`); `pin_local.sh` was recording that,
+> which is exactly the weakness this ADR rejects hosted ids for. It now reads the full
+> artifact digest from the modelfile's `FROM` line. The short id is kept as a convenience
+> field and is **not** part of the pin.
+
+### Check 2 is the one open measurement risk
+
+The ADR asserts local counting is an *improvement* on a provider's number. That is still
+the right expectation — a local tokenizer is exact — but **it is currently unevidenced**,
+and the cheap routes are closed: ollama 0.33.3 exposes no `/api/tokenize`, and
+`completion_tokens` bundles reasoning with the answer. Separating them needs `tiktoken`
+(harmony encoding) or a direct GGUF vocab read, neither declared in
+`analyzer/pyproject.toml` nor budgeted in Month 1.
+
+Until it lands, every cost-of-thought figure is an **estimate** from a chars-per-token
+ratio (3.25 observed), and must be labelled as such wherever it is published. G0 check 2
+stays unticked.
 
 **S1 must still run.** The claim about OpenAI's summarisation is a strong expectation, not a
 measurement, and this project's thesis is that the difference matters. If OpenAI exposes more

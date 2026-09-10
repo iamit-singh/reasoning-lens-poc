@@ -20,15 +20,27 @@ INFO=$(ollama show "$MODEL" 2>/dev/null) || {
   exit 2
 }
 
-digest=$(ollama list 2>/dev/null | awk -v m="$MODEL" '$1==m {print $2}' | head -1)
+# The digest must be the WEIGHTS FILE digest, not ollama's short manifest id.
+# ADR-001 is explicit that an id does not reproduce a number and that the value of a local
+# pin is precisely that a file digest cannot change under you. `ollama list` prints a
+# 12-char truncated manifest id -- too weak to be the pin. The modelfile's FROM line
+# carries the full sha256 of the actual model artifact.
+digest=$(ollama show "$MODEL" --modelfile 2>/dev/null \
+  | awk '/^FROM/ {print $2; exit}' \
+  | sed -n 's|.*/sha256-\([0-9a-f]\{64\}\)$|sha256:\1|p')
+short_id=$(ollama list 2>/dev/null | awk -v m="$MODEL" '$1==m {print $2}' | head -1)
 quant=$(printf '%s\n' "$INFO" | awk '/quantization/ {print $2; exit}')
 runtime="ollama $(ollama --version 2>/dev/null | awk '{print $NF}')"
 
 echo "# generation pin, recorded $(date -u +%Y-%m-%dT%H:%M:%SZ) by scripts/pin_local.sh"
 echo "LOCAL_MODEL=$MODEL"
 echo "LOCAL_MODEL_DIGEST=${digest:-UNKNOWN}"
+echo "LOCAL_MODEL_SHORT_ID=${short_id:-UNKNOWN}"   # convenience only -- NOT the pin
 echo "LOCAL_QUANTIZATION=${quant:-UNKNOWN}"
-echo "LOCAL_RUNTIME=$runtime"
+# Quoted: this value contains a space. Unquoted it truncates to "ollama" when .env is
+# sourced, and the shell tries to execute the version number -- a pin field that corrupts
+# itself on load is worse than a missing one, because it looks recorded.
+echo "LOCAL_RUNTIME=\"$runtime\""
 echo
 echo "# Sampling settings are part of the pin too -- set them explicitly, never by default:"
 echo "GEN_TEMPERATURE=${GEN_TEMPERATURE:-0}"

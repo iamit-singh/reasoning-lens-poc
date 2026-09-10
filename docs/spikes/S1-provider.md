@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | **Task** | M1-1 · W1 · 1.5 h · **Gate G0** |
-| **Status** | Harness written and self-tested; **run pending an API key** |
+| **Status** | **Local arm run 10 Sep 2026 — PASS.** OpenAI arm still pending a key |
 | **Decision doc** | [`../decisions/ADR-001-provider.md`](../decisions/ADR-001-provider.md) |
-| **Harness** | `spikes/s1_provider_fidelity.py` · `make spike-s1` |
+| **Harness** | `spikes/s1_reasoning_fidelity.py` · `make spike-s1` |
 
 ## The question, precisely
 
@@ -41,11 +41,60 @@ finding attached to an alias expires silently.
 
 ## Findings
 
-*To be filled by the run.*
+### Local generation — `gpt-oss:20b` · **PASS**
 
-| Candidate | Check 1 text | Check 2 unsummarised | Check 3 `reasoning_tokens` | Ratio | Verdict |
-| --- | --- | --- | --- | --- | --- |
-| | | | | | |
+Run 10 Sep 2026 against the pin recorded by `make pin-local`
+(`sha256:e7b273f963…`, MXFP4, ollama 0.33.3, temp 0, seed 20260910, effort medium).
+
+| Measure | Value |
+| --- | --- |
+| Raw reasoning text present | **yes** |
+| Where it arrives | a **`reasoning` field** on the message — *not* inline `<think>` tags |
+| Reasoning text length | 2535 chars |
+| Answer text length | 783 chars |
+| Probe answer correct | **yes** (18678) |
+| `usage.completion_tokens` | 1020 — **reasoning and answer combined** |
+| `reasoning_tokens` in usage | **absent** |
+| Wall clock | 32.5 s for 1183 tokens, cold load excluded |
+
+**Verdict: full raw trace recovered, unelided.** There is no server withholding it, which
+is the architectural reason ADR-001 moved generation local.
+
+**Which field it is matters, and is the actionable half of this finding.** M1-8's segmenter
+has to strip the trace consistently, and a `reasoning` field is a materially easier and
+safer contract than scraping `<think>` tags out of prose — no delimiter to be emitted
+mid-sentence, no ambiguity when the model mentions the tag. The segmenter should read the
+field and treat inline tags as a fallback for other models, not the primary path.
+
+### ⚠️ G0 check 2 is **not** satisfied by this run
+
+ADR-001 claims local token counting is *"an improvement: this measurement gets more
+accurate, not less"*, on the grounds that the trace can be counted with the model's own
+tokenizer. **This run does not evidence that claim.** What it establishes is the weaker
+half: the provider does not report `reasoning_tokens`.
+
+`usage.completion_tokens` is a **combined** figure (1020 tokens for 3318 chars of reasoning
+plus answer). Cost-of-thought needs reasoning tokens *separated* from answer tokens, and
+nothing in the response provides that split. Two routes were checked and closed:
+
+| Route | Result |
+| --- | --- |
+| `POST /api/tokenize` on the runtime | **404** — ollama 0.33.3 exposes no tokenize endpoint |
+| `POST /api/embed` | **501** — server not started with `--embeddings`, and embeddings would not give a token count anyway |
+
+Counting it exactly therefore needs a tokenizer dependency (`tiktoken` with the harmony
+encoding, or the GGUF vocab read directly) — **not currently declared in
+`analyzer/pyproject.toml`, and not budgeted by the plan.** Until that lands the check is
+**unticked**, and any cost-of-thought number is an estimate from a chars-per-token ratio
+(3.25 chars/token observed here), not a measurement.
+
+### OpenAI analysis tier — not yet run
+
+`--only openai` still needs a key, and `MODEL_ANALYZE` / `MODEL_ESCALATE` are unset. G0
+check 5 (analyzer tier pinned to an exact dated id, never an alias) is therefore also open.
+Per ADR-001, S1 must still run against OpenAI: the claim that it summarises thinking is a
+strong expectation, not a measurement, and this project's thesis is that the difference
+matters.
 
 ## What this changes downstream
 
