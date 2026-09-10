@@ -21,13 +21,14 @@ keep it honest, including when it is unflattering.
 | 2026-09-10 | W1 | M1-1 | 0.6 | **S1 local arm: PASS.** 2535 chars of raw reasoning in a `reasoning` field, not inline `<think>` tags. ADR-001's G0 table filled from the real run. **G0 check 2 closed off as NOT met** |
 | 2026-09-10 | W1 | M1-16 | 0.6 | **S6: PASS, 20/20** — 100% on all four scenarios incl. tool-choice and the false-positive check. Arm 3 is buildable; the `qwen3:14b` fallback is not needed |
 | 2026-09-10 | W1 | M1-1 | 0.5 | **G0 check 2 closed.** `tiktoken>=0.9` declared; `o200k_harmony` counting wired into `make spike-s1`. **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. `LOCAL_TOKENIZER` joined the pin tuple |
+| 2026-09-10 | W2 | M1-2 | 2.1 | **S2: complete.** Stock LangGraph agent, 15 spans, fixture committed. 6 C3.1 rows confirmed, 2 corrected, **1 absent**. **No `gen_ai.*` attribute arrives at all** — the live namespace is OpenInference `llm.*`, so five of nine rows were dead. **Reasoning text never reaches a span**; the control proves the runtime sends it and LangChain drops it. ADR-002 filed. **0.6 over the 1.5 h estimate** — see the W2 note
 
 ## Month-1 planned-vs-actual
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
-| W2 | 6.7 | *(1.4 delivered in W1)* | | M1-15 and M1-16 are **done** — 1.0 h planned, 1.4 h actual. 5.7 h of W2 remains |
+| W2 | 6.7 | 3.5 *(so far)* | | M1-15, M1-16, **M1-2 done** — 2.5 h planned, 3.5 h actual, **+1.0**. **3.2 h of W2 remains** (M1-6 at 2.5 + 0.5, M1-4 at 1.7 — see below) |
 | W3 | 7.5 | | | |
 | W4 | 8.0 | | | |
 | **Total** | **25.5** *(was 25.0: −0.5 DNS, +1.0 new spikes)* | | | |
@@ -66,3 +67,56 @@ keep it honest, including when it is unflattering.
 >
 > **W2 is now 5.7 h against a 6.7 h plan**, and it still holds S2, the runner and the bank.
 > The first reading that means anything is still **end of W4**.
+
+---
+
+## W2 — S2 landed, and it changed M1-6's shape before M1-6 was written
+
+**M1-2 cost 2.1 h against 1.5 h planned, +0.6.** Where the overrun went, in order of size:
+
+| | Hrs | Budgeted? |
+| --- | --- | --- |
+| Harness, stock agent, capture, delta table | ~1.1 | yes |
+| **ADR-002** — the finding contradicts C3.1 | ~0.4 | **in scope, not in the estimate**: breakdown §4.1 says a contradiction with C3.1 "is a plan amendment that goes in an ADR, not a silent code fix" |
+| **The control probe** — same request, raw HTTP, no LangChain | ~0.3 | **no** |
+| Probe defect: re-specify the SKU and re-run | ~0.15 | no |
+| `test_third_party_spans.py` — 5 contract tests guarding the capture | ~0.15 | no |
+
+**The 0.3 h control was the most valuable 0.3 h in the task.** Without it the finding is
+"reasoning is missing from the spans", which has three possible causes — the runtime, the
+LangChain adapter, the instrumentor — needing three different fixes, one of which would
+put ADR-001's whole local-generation decision back in question. The control issues the
+identical request over raw HTTP, gets 173 chars of reasoning back, and narrows it to the
+adapter. **A named cause is a half-hour fix; an unnamed one is a week of W3.**
+
+**The unflattering part is the probe defect.** The first probe asked the model to look up a
+price without saying which SKU. The model reasonably asked a clarifying question, never
+called the tool, no TOOL span was emitted, and the delta duly reported the tool rows as
+*absent* — a wrong finding, in a document whose only purpose is to be a correct finding.
+It was caught only because **S6 had already measured this model at 20/20 on tool calls**, so
+"this model does not call tools" was visibly false. Absent that prior spike it would have
+shipped. An unexercised path reads exactly like a missing one, and nothing in the harness
+distinguished them. It does now.
+
+### Effect on the remaining W2 estimate — recorded this week, per breakdown §4.3
+
+§4.3 asked whether S2 grows M1-6. **Both directions, and they nearly cancel:**
+
+| | |
+| --- | --- |
+| Ingest half | **cheaper than 2.5 h** — five `gen_ai.*` precedence chains collapse to a single candidate each, and two branches (`tool.parameters`, span events) are deleted before being written |
+| Emission half | **+0.5 h** — the runner must emit `llm.output_messages.0.message.reasoning` itself (ADR-002) |
+
+**M1-6 is carried at 3.0 h (2.5 + 0.5).** W3 does not compress. W2 now stands at 3.5 h
+spent with 3.2 h remaining against a 6.7 h plan — but that plan already absorbed 1.4 h into
+W1, so W2's real remaining load is M1-6 (3.0) and M1-4 (1.7) = **4.7 h, not 3.2**. The
+month total moves to **26.0 h** (was 25.5: M1-2 +0.6, M1-6 +0.5, less 0.6 of M1-6 ingest
+saving not yet bankable until the code is written).
+
+> **This is the ordering rule paying for itself, and it is worth saying plainly.** §4.1
+> made S2 a precondition of M1-6 on the argument that writing ingest first means "three
+> fallback branches, two of which are dead code, and discovering in W3 that the live
+> attribute is a fourth name nobody listed." What actually happened is worse than the
+> prediction: **five** rows were dead, and the load-bearing attribute is not a fourth name
+> — it does not exist. Had M1-6 gone first, W3 would have opened with a rewrite of the
+> ingest layer *and* an unresolved I1 question. The 2.1 h bought that.
