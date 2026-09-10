@@ -1,0 +1,30 @@
+# Local dev and test environment. Prod is a single App Runner service (B0 Condition #2);
+# this file is the whole of "environments" besides prod.
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      redis: { condition: service_healthy }
+    environment:
+      # MOCK_LLM=1 is the default here on purpose: local dev is cost-free and
+      # deterministic, and the frontend can develop against cassettes (C7.1).
+      MOCK_LLM: "1"
+      DEMO_MODE: "cached"
+      REDIS_URL: "redis://redis:6379/0"
+      MODEL_PIN: "${MODEL_PIN:-}"
+    env_file:
+      - path: .env
+        required: false
+    ports: ["8000:8000"]
+    volumes:
+      - ./analyzer:/app/analyzer
+      - ./backend:/app/backend

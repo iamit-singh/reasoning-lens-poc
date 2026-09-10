@@ -1,0 +1,11 @@
+# Repo-wide lint config (C7.2 "lint" job). One source of truth so analyzer, backend,
+# scripts and spikes are held to the same rules.
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "frontend", "node_modules"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[lint.per-file-ignores]
+"spikes/*.py" = ["T201"]  # spikes print; that is their output

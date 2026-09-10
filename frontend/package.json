@@ -1,0 +1,13 @@
+{
+  "name": "reasoning-lens-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Next.js static export. Starts W5, after the G1 ReasoningReport freeze.",
+  "scripts": {
+    "lint": "eslint .",
+    "build": "echo 'frontend not yet implemented (owner: FE-1..FE-8, W5+)' && exit 2"
+  },
+  "devDependencies": {
+    "eslint": "^9.11.0"
+  }
+}

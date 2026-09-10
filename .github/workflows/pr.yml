@@ -1,0 +1,124 @@
+# C7.2 every-PR job set. All jobs must pass.
+#
+# Two notes on scope, both deliberate:
+#  * The measurement jobs (calibrate --dev on prompt PRs, the nightly suite) cost LLM
+#    spend and need a restricted API key. They are declared in ci-measurement.yml and
+#    stay disabled until M2-1 exists to be run.
+#  * Jobs whose tests are owned by a later task are wired now and report their
+#    emptiness loudly (scripts/run_marker.sh). A job that exists from W1 costs nothing;
+#    the same job added in W6 costs a refactor.
+name: pr
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+  MOCK_LLM: "1"
+  DEMO_MODE: "cached"
+
+jobs:
+  lint-python:
+    name: lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install "ruff>=0.6"
+      - run: ruff check .
+      - run: ruff format --check .
+
+  typecheck:
+    name: lint (mypy, strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - working-directory: analyzer
+        run: mypy
+
+  lint-frontend:
+    name: lint (eslint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - working-directory: frontend
+        run: npm install --no-audit --no-fund
+      - working-directory: frontend
+        run: npm run lint
+
+  unit:
+    name: unit (deterministic, no LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - working-directory: analyzer
+        run: pytest -q -m "not contract and not integration_mock and not measurement"
+
+  contract:
+    name: contract (span trees, ReasoningReport schema)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - working-directory: analyzer
+        run: pytest -q -m contract
+
+  integration-mock:
+    name: integration-mock (cassette replay)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      # No network: the point of MOCK_LLM=1 is that CI is deterministic and cost-free.
+      - run: ./scripts/run_marker.sh integration_mock
+        env:
+          MOCK_LLM: "1"
+
+  boundaries:
+    name: import-linter boundary contract (I1 / C2.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - name: import-linter contracts
+        working-directory: analyzer
+        run: lint-imports --config ../.importlinter
+      - name: provider-symbol grep (C2.2 rule 2)
+        run: ./scripts/check_provider_symbols.sh
+
+  schema-freeze:
+    name: schema-freeze check (heldout-50.jsonl, C5.4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - run: ./scripts/check_heldout_freeze.sh "${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
+
+  prompt-bundle-version:
+    name: prompt-bundle version is in step with prompts/ (C2.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - name: report the bundle version
+        run: |
+          python -c "from rlens import PROMPT_BUNDLE_VERSION as v; print('PROMPT_BUNDLE_VERSION =', v)"

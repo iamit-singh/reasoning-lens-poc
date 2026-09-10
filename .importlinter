@@ -1,0 +1,46 @@
+# C2.2 package boundary rules, enforced in CI. I1 is the invariant the whole
+# architecture rests on: the analyzer is a standalone pip package whose only input
+# is a span tree. A rule enforced from W1 costs nothing; the same rule introduced
+# in W6 costs a refactor.
+[importlinter]
+root_packages =
+    rlens
+include_external_packages = True
+
+[importlinter:contract:i1-standalone]
+name = I1 - analyzer must not import backend, frontend or problem-bank
+type = forbidden
+source_modules =
+    rlens
+forbidden_modules =
+    backend
+    frontend
+    problem_bank
+
+[importlinter:contract:provider-sdk-isolation]
+name = C2.2 - provider SDK symbols only in rlens.llm and rlens.ingest.otel
+type = forbidden
+source_modules =
+    rlens.contracts
+    rlens.segment
+    rlens.classify
+    rlens.judge
+    rlens.consistency
+    rlens.metrics
+    rlens.pipeline
+forbidden_modules =
+    anthropic
+    openai
+
+[importlinter:contract:analyzer-layers]
+name = Analyzer layering - contracts at the bottom, pipeline at the top
+type = layers
+layers =
+    rlens.pipeline
+    rlens.metrics
+    rlens.consistency | rlens.judge | rlens.classify
+    rlens.segment
+    rlens.ingest.otel
+    rlens.llm
+    rlens.contracts
+    rlens.versions

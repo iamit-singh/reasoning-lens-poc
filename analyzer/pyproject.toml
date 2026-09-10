@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reasoning-lens-analyzer"
+version = "0.1.0"
+description = "Reasoning Lens analyzer: OTEL span tree -> ReasoningReport. Standalone by construction (I1)."
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+dependencies = [
+  "pydantic>=2.7",
+  "jsonschema>=4.22",
+]
+
+[project.optional-dependencies]
+# Provider SDKs live here, but may only be imported from rlens.llm (C2.2 rule 2).
+providers = [
+  "anthropic>=0.40",
+]
+dev = [
+  "pytest>=8.2",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "import-linter>=2.0",
+]
+
+[project.scripts]
+rlens = "rlens.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rlens = ["prompts/*.md"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+packages = ["rlens"]
+strict = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_reexport = true
+
+[[tool.mypy.overrides]]
+module = ["jsonschema.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+  "contract: data-contract tests (span trees, ReasoningReport schema)",
+  "integration_mock: full pipeline under MOCK_LLM=1, cassette replay only",
+  "measurement: costs LLM spend; never runs on a plain PR",
+]

@@ -1,0 +1,40 @@
+# C7.2 measurement triggers. These cost LLM spend (~$10-15/month total, inside B7.2's
+# dev/calibration line) and need CI_API_KEY: a restricted key with its own low spend
+# cap, separate from the production key.
+#
+# DISABLED until M2-1 exists. Enabling before then would run a scorer that does not
+# exist against labels that do not exist. The file is committed now so the trigger
+# shape, the gate thresholds and the key requirement are all agreed in W1.
+name: measurement
+
+on:
+  workflow_dispatch:
+  # Uncomment with M2-1:
+  # pull_request:
+  #   paths: ["analyzer/**", "analyzer/src/rlens/prompts/**"]
+  # schedule:
+  #   - cron: "0 2 * * *"   # nightly on main
+
+jobs:
+  calibrate-dev:
+    name: calibrate --dev (kappa_dev >= 0.60, no per-class F1 regression > 0.05)
+    if: false # remove with M2-1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - run: make calibrate ARGS="--dev"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.CI_API_KEY }}
+      # Gate: kappa_dev >= 0.60 AND no per-class F1 regression > 0.05 vs main.
+      # Results posted as a PR comment (C7.2).
+
+  nightly-full:
+    name: calibrate --final + seeded recall + pooled precision + consistency FP
+    if: false # remove with M2-3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Failure opens an issue; it does not block (C7.2).
