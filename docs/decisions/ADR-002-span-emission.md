@@ -72,6 +72,14 @@ llm.output_messages.0.message.reasoning       # the raw trace, verbatim
 C3.1's second candidate — chosen so that the runner's own emission and any future
 instrumentation that fixes this upstream converge on one name rather than two.
 
+**Everything we compute rather than observe goes under `rlens.*`**, never into `llm.*`
+or `openinference.*`: the locally-counted reasoning split (`rlens.token_count.reasoning`,
+which is ours because S2 row 8 found no standard name for it), the pin tuple, the
+`budget_bound` flag, `trace_quality`. Those two namespaces should keep meaning "what a
+standard instrumentation would emit" — blending our metadata into them would make our
+trees quietly non-comparable with the third-party fixture, and that comparability is the
+whole of the B12 evidence.
+
 Three properties this must hold, because they are the difference between an emission and a
 workaround:
 

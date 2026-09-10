@@ -25,7 +25,16 @@ dependencies = [
 providers = [
   "openai>=1.40",
 ]
+# The OTEL SDK is what the RUNNER needs to emit spans. It is an extra, not a core
+# dependency, and that is I1 speaking: the analyzer INGESTS span trees, and must stay
+# installable without the machinery that produces them. `dev` pulls it in so the
+# span-contract test exercises the real emitter rather than a hand-written tree.
+runner = [
+  "opentelemetry-sdk>=1.20",
+  "opentelemetry-exporter-otlp-proto-http>=1.20",   # Langfuse ingests OTLP (Appendix D #6)
+]
 dev = [
+  "reasoning-lens-analyzer[runner]",
   "pytest>=8.2",
   "ruff>=0.6",
   "mypy>=1.11",

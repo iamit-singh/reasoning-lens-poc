@@ -1,0 +1,23 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 156,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 206,
+  "reasoning": "Compute Monday: 7 pallets=7*90=630 cartons, plus 43 cartons =673 cartons. Items per carton? Wait items are individual items. Carton holds 12 items. So Monday items=673*12=8076.\n\nTuesday: 2/3 of Monday's total item count = 2/3*8076=5384. 8076*2/3=5384 exactly? 8076/3=2692, *2=5384. No remainder. So Tuesday items=5384.\n\nWednesday: 150 fewer items than Tuesday: 5384-150=5234.\n\nTotal items=8076+5384+5234=18694.",
+  "reasoning_tokens": 144,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "18694",
+  "tokenizer": "o200k_harmony",
+  "total_tokens": 362
+}

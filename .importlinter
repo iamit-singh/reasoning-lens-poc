@@ -22,6 +22,7 @@ name = C2.2 - provider SDK symbols only in rlens.llm and rlens.ingest.otel
 type = forbidden
 source_modules =
     rlens.contracts
+    rlens.runner
     rlens.segment
     rlens.classify
     rlens.judge
@@ -36,6 +37,7 @@ forbidden_modules =
 name = Analyzer layering - contracts at the bottom, pipeline at the top
 type = layers
 layers =
+    rlens.runner
     rlens.pipeline
     rlens.metrics
     rlens.consistency | rlens.judge | rlens.classify
