@@ -10,7 +10,7 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze ci warm-cache calibrate faithfulness smoke \
-        record-cassettes spike-s1 clean
+        record-cassettes spike-s1 spike-s6 models pin-local serve-local demo clean
 
 help:  ## show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -59,14 +59,31 @@ calibrate:  ## STUB (M2-1/M2-3) -- kappa and per-class F1; --dev on PRs, --final
 faithfulness:  ## STUB (M2-9) -- cue-injection batch job and the committed panel
 	@echo "faithfulness: not implemented (owner M2-9). See docs/spikes/S4-cues.md"; exit 2
 
-smoke:  ## STUB (M3-4) -- post-deploy: 3 items from cache, panel, calibration, download, breaker trip
-	@echo "smoke: not implemented (owner M3-4). Lives in backend/tests/smoke.py"; exit 2
+smoke:  ## STUB (M3-4) -- local acceptance: 3 items from cache, panel, calibration, download
+	@echo "smoke: not implemented (owner M3-4). Runs against localhost (ADR-003: local-only)"; exit 2
 
 record-cassettes:  ## STUB (M1-14) -- record provider responses once per prompt-bundle version
 	@echo "record-cassettes: not implemented (owner M1-14, W4). This is the frontend's W5 unblock (E11)"; exit 2
 
-spike-s1:  ## S1 (M1-1) -- provider thinking-trace fidelity probe; needs a live API key
-	$(BIN)/python spikes/s1_provider_fidelity.py $(ARGS)
+# ---------------------------------------------------------------- local runtime (ADR-001)
+models:  ## pull the local generation model
+	ollama pull $${LOCAL_MODEL:-gpt-oss:20b}
+
+serve-local:  ## serve the local model natively (Metal). Do NOT containerise it on macOS.
+	ollama serve
+
+pin-local:  ## record the generation pin tuple -- an id alone does not reproduce a number
+	@./scripts/pin_local.sh
+
+demo:  ## the demo: cached-only, zero external dependency
+	DEMO_MODE=cached docker compose up
+
+# ---------------------------------------------------------------- spikes
+spike-s1:  ## S1 -- reasoning-trace fidelity: local (gates arm 2) + OpenAI
+	$(BIN)/python spikes/s1_reasoning_fidelity.py $(ARGS)
+
+spike-s6:  ## S6 -- local tool-calling reliability. GATES ARM 3; run before W3.
+	$(BIN)/python spikes/s6_local_tool_calling.py $(ARGS)
 
 clean:
 	rm -rf $(VENV) .pytest_cache .mypy_cache .ruff_cache

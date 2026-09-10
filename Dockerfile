@@ -1,6 +1,11 @@
-# Multi-stage: next build --export -> FastAPI static mount (C2.1, C7.3).
-# The frontend stage is a placeholder until FE work starts in W5 (post-G1); it builds
-# an empty export so the image shape is proven from W1 rather than discovered in W9.
+# Multi-stage: next build --export -> FastAPI static mount.
+#
+# ADR-003 deleted the cloud deploy, so this image is no longer a release artifact -- it
+# exists only so `docker compose up` gives a one-command local demo. The frontend stage is
+# a placeholder until FE work starts in W5 (post-G1).
+#
+# The generation model is NOT baked in or reached from here by default: it is served
+# natively on the host so it keeps Metal access. See docker-compose.yml.
 
 FROM node:22-alpine AS frontend
 WORKDIR /src

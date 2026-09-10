@@ -1,69 +1,55 @@
-# ADR-003 — Hosting and the DNS delegation
+# ADR-003 — Local-only demo: no deployment, no domain
 
 | | |
 | --- | --- |
-| **Status** | **Ticket drafted — not yet raised.** Needs a human to file it and name an owner. |
-| **Date raised** | 2026-09-10 (W1) |
-| **Task** | M1-3 (S5) · W1 · 0.5 h |
-| **Decision owner** | IT / marketing (Appendix D #4) |
-| **Gate** | M3-4 launch gate. Tracked on the **W4 and W8** gate checklists. |
+| **Status** | **Accepted** — 10 Sep 2026 (W1). Supersedes this ADR's own "ticket drafted" state |
+| **Decided by** | Amit Singh (sole contributor) |
+| **Amends** | Plan §C7.3, §C9.2, §C9.3, §C10.4, Appendix D #4 · see [plan amendment 001](../../../plan-amendment-001-local-hybrid.md) |
 
-## Context
+## Context and decision
 
-`reasoning-lens.demos.talentica.com` needs a DNS delegation. Fifteen minutes of work;
-**the value is entirely in the calendar time it starts consuming.** C13.1 puts S5 in Week 1
-precisely because *the request, not the work, is the risk* — and C13.2 rates the residual
-risk "low" **by construction only because the request goes out in W1**. A ticket sitting
-unassigned in W6 is a launch-gate risk that has not actually been retired.
+The demo is driven from a local machine. **There is no public URL, no cloud service, and no
+anonymous visitor.** Everything the plan built for a hosted public demo is therefore work
+without a consumer.
 
-Appendix D #4's own stated default is **raise the ticket regardless** of who ends up
-creating the record, so nothing here waits on the decision.
+> **The DNS delegation request is cancelled.** It was drafted and ready to file; it was never
+> filed, and it should not be. There is no public hostname to delegate. The ~0.4 h spent
+> drafting it is sunk — recorded in the ledger rather than quietly dropped.
 
-## Decision
+## Deleted outright — ≈ 6.2 h released
 
-Prod is a **single AWS App Runner service**, no staging tier, no manual deploy gate
-(B0 Condition #2). The frontend is a Next.js static export mounted by FastAPI from one
-image (C7.3). The only external dependency is the DNS delegation below.
+| Work | Hours | Why it is safe |
+| --- | --- | --- |
+| DNS delegation for `reasoning-lens.demos.talentica.com` | 0.5 *(0.4 sunk)* | no public hostname exists |
+| ECR, App Runner, custom domain, CI deploy pipeline | 2.0 | nothing is deployed |
+| Automatic rollback + the rollback drill | ~0.7 | nothing to roll back to |
+| Per-visitor rate limiting | ~0.7 | the operator is the only caller |
+| Abuse controls, CSP `frame-ancestors`, iframe embed handoff | ~0.7 | no embed, no hostile input path |
+| Managed Redis provisioning + fail-closed decision | ~0.8 | local Redis via compose, or the filesystem cache tier |
 
-## The ask — ready to file verbatim
+## Retained in reduced form — ≈ 1.2 h
 
-> **Title:** DNS delegation for `demos.talentica.com` — Reasoning Lens PoC demo
->
-> **Requested by:** Amit Singh (amit.singh1@talentica.com), Emerging Tech Team
-> **Raised:** 2026-09-10 · **Needed by:** 2026-10-30 (six weeks before the M3 launch gate)
->
-> **What we need:** delegation of the `demos.talentica.com` zone (or, if delegation is not
-> possible, a `CNAME` for `reasoning-lens.demos.talentica.com` plus the ACM validation
-> records we will supply), so a public demo can be served over TLS from AWS App Runner.
->
-> **Why the subdomain rather than a path on the main site:** the demo is an iframe-embedded
-> single service with its own CSP `frame-ancestors: https://talentica.com`. It must not
-> share an origin with the marketing site.
->
-> **What we will supply:** the App Runner default domain and the ACM DNS validation
-> CNAME records, as soon as the service exists (~W9).
->
-> **What we need back now:** (1) a **named owner** for this ticket, and (2) a **date** by
-> which the delegation will exist. We do not need the record created today — we need to
-> know who creates it and when, because the launch gate depends on it and this is the one
-> item in the project whose lead time we cannot compress.
->
-> **Marketing conversation, same thread:** who signs off on a public
-> `*.talentica.com` demo page, and what (if any) branding or disclaimer it must carry.
-
-## DoD, and why the wording matters
-
-**Not "raised" — named and dated.** A ticket without a named owner and a date has not
-retired the risk it was filed to retire.
-
-| Field | Value |
+| Work | Why it survives |
 | --- | --- |
-| Ticket ID | *pending* |
-| Named owner | *pending* |
-| Committed date | *pending* |
-| Marketing sign-off owner | *pending* |
+| **Smoke test** (~0.3 h) | still the acceptance script — it runs against `localhost`. It is the check that the demo works *before* an audience sees it, which was always its point |
+| **Kill switch `DEMO_MODE=cached`** (~0.2 h) | now the *demo-safety* switch rather than a spend control: a guaranteed zero-dependency run when the network or a key is unavailable. **More useful than before** |
+| Spend guard (~0.1 h) | analysis spend is a few dollars, but a runaway loop is still a runaway loop |
+| **Fallback video** (~0.3 h) | a local demo has *more* single points of failure than a hosted one, not fewer |
+| Packaging (~0.3 h) | clean-venv install proof + the analyzer wheel. Always the real handover artifact; unaffected by dropping the cloud |
 
-## Chase schedule
+## What the demo is now
 
-Per the risk table: **chase in W3 and W6**, and check this ADR on the **W4 and W8** gate
-checklists. If it is still unassigned at W6, escalate — do not simply chase a third time.
+`docker compose up` for Redis; the **local model served natively** so it reaches the GPU
+(not in Docker — containerised inference on macOS loses Metal); the UI served from the same
+process. The three arms replay from cache in seconds. A live re-run exists but is no longer
+the happy path.
+
+## Net effect
+
+**≈ 3.7 h released** after the 1.3 h this decision *adds* elsewhere (local runtime setup, the
+tool-calling spike, dual calibration reporting — see ADR-001 and the amendment). The saving
+is concentrated in Month 3, the month that was most over budget.
+
+**Risk accepted:** the demo now depends on one laptop. That is the trade for deleting the
+cloud path, and it is why the fallback video and the cached-only mode are retained rather
+than cut as ceremony.

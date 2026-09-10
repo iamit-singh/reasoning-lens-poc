@@ -1,7 +1,18 @@
 # Day-1 unblock list — the four Appendix D decisions due in W1
 
-**Status: all four drafted below, ready to send. None has been sent — each needs a human
-to put it in front of its owner.**
+> ### ✅ Resolved 10 Sep 2026 — see [plan amendment 001](../../plan-amendment-001-local-hybrid.md)
+>
+> All four are closed, three of them by decision rather than by asking:
+>
+> | # | Outcome |
+> | - | --- |
+> | **1** Capacity option | **Default taken** — Option 2, L1+L2 applied. 14 bank items, 12 facts |
+> | **2** Provider / model pin | **Decided** — hybrid runtime: local `gpt-oss:20b` generates, OpenAI analyses (ADR-001). No Anthropic access, and OpenAI does not return raw reasoning |
+> | **4** DNS delegation | **Cancelled** — nothing is deployed (ADR-003). The ticket was drafted and never filed, correctly |
+> | **7** Reviewer ack | Still worth sending; the drafted text below stands |
+> | **5** Second annotator | ✅ **A colleague is committed for ~2 h in W6.** Still to be *named* |
+>
+> The asks below are kept as the record of what was drafted and why.
 
 All four are asks of other people; none can be decided by the implementer. Each has a
 stated default, so **none of them blocks work** — but each one taken by default rather than

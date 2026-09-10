@@ -15,8 +15,10 @@ dependencies = [
 
 [project.optional-dependencies]
 # Provider SDKs live here, but may only be imported from rlens.llm (C2.2 rule 2).
+# Both the local runtime and OpenAI speak the OpenAI wire format (ADR-001), so one
+# client covers both -- the difference is a base URL, not a second integration.
 providers = [
-  "anthropic>=0.40",
+  "openai>=1.40",
 ]
 dev = [
   "pytest>=8.2",

@@ -4,8 +4,22 @@
 
 ```
 make install PY=python3.12     # venv + analyzer[dev]
-make ci                        # everything a PR runs
+make ci                        # everything a PR runs -- no model, no key, no network
 ```
+
+## The local generation model
+
+```
+make models        # ollama pull gpt-oss:20b  (~13 GB)
+make serve-local   # ollama serve
+make pin-local     # record the pin tuple -> paste into .env
+```
+
+**Serve it natively, never in Docker.** Containerised inference on macOS loses Metal, and a
+20B model on CPU is unusable. Compose reaches the host model at `host.docker.internal`.
+
+**If it is too slow to iterate against**, switch to the approved fallback `qwen3:14b`
+(~9 GB, roughly twice the speed). Update the pin tuple; nothing structural changes.
 
 `MOCK_LLM=1` is the default in `docker-compose.yml` and in CI: local dev and CI are
 **deterministic and cost-free** by construction (C7.1). Cassettes are recorded once per
@@ -29,25 +43,41 @@ docker compose up              # + redis, MOCK_LLM=1, DEMO_MODE=cached
 | schema-freeze | `make schema-freeze` | **stop** — someone edited the held-out labels |
 | prompt-bundle version | reported in CI | bump and re-record cassettes |
 
-## The two switches that stop spend
+## `DEMO_MODE=cached` — now the demo-safety switch
 
-| Switch | Effect |
-| --- | --- |
-| `DEMO_MODE=cached` | serve cache + faithfulness panel only, **zero LLM spend**. The kill switch (B7.4) |
-| `SPEND_BREAKER_USD=150` | hard flip to `cached` (B7.2) |
+It was a spend control. Generation is local and free, so its job changed: it guarantees a
+**zero-dependency run** when the network, the key or the model is unavailable. That makes it
+more useful than before, not less — a local demo has more single points of failure than a
+hosted one, not fewer.
 
-## Version discipline (C2.3)
+Run the demo with `make demo`. The spend guard survives at a token $5/$10, purely against a
+runaway loop.
 
-`CACHE_KEY = sha256(item_id, strategy, RUNNER_VERSION, MODEL_PIN, ANALYZER_VERSION, PROMPT_BUNDLE_VERSION)`
+## Version discipline
 
-A change to any of the four invalidates the cache and requires a warm-cache run. **A change
-to `MODEL_PIN` additionally requires re-running the calibration harness and the faithfulness
-batch job** (B7.4) — κ and hint-verbalisation rates are model-version-specific. `MODEL_PIN`
-is always an exact dated id; `rlens.versions.model_pin()` refuses to be absent and the S1
-harness refuses to probe an alias.
+The cache key covers the item, the strategy, the runner version, the **generation pin
+fingerprint**, the **analyzer pin**, the analyzer version, the prompt bundle version, and the
+backend choice (`hybrid` / `local`).
 
-## Deploy (C7.3)
+The generation pin is a **tuple**, not an id — model, file digest, quantization, runtime,
+temperature, top_p, seed, reasoning effort. An id alone does not reproduce a local number:
+the same tag can be re-pulled as different weights, and sampling settings change the output.
+Each field invalidates the cache on its own, and there is a test asserting exactly that.
 
-No manual gate, no staging tier (B0 Condition #2). Merge to main → build → ECR (tag = git
-sha) → App Runner → wait healthy → smoke → on failure, automatic redeploy of the previous
-image tag + alert. Owner: M3-4.
+`hybrid` and `local` never share cache entries — they are different analyzers, and both are
+reported side by side.
+
+**A change to the generation pin also requires re-running calibration and the faithfulness
+batch job** — agreement and hint-verbalisation rates are model-specific.
+
+`rlens.versions.analyzer_pin()` refuses to be absent *and* refuses a floating alias: a number
+pinned to an alias expires silently.
+
+## Deploy
+
+**There is none.** The demo runs from a laptop ([ADR-003](decisions/ADR-003-hosting.md)): no
+domain, no registry, no cloud service, no rollback, no rate limiting, no iframe embed.
+
+What survives: `make smoke` against `localhost` as the acceptance script, a clean-venv
+install proof plus the analyzer wheel as the real handover artifact, and a fallback video —
+because one laptop is a single point of failure and pretending otherwise is how demos die.

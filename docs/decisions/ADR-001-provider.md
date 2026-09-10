@@ -1,95 +1,125 @@
-# ADR-001 — Provider choice and model pins
+# ADR-001 — A hybrid runtime: the local model generates, OpenAI analyses
 
 | | |
 | --- | --- |
-| **Status** | **Proposed — blocked on execution of S1.** Not yet a decision. |
-| **Date raised** | 2026-09-10 (W1) |
-| **Decision owner** | Tech lead (Appendix D #2) |
-| **Gate** | **G0**, end of W1 |
-| **Produced by** | M1-1 (S1 spike) |
-| **Blocks** | M1-6 (`llm.py` abstraction), `MODEL_PIN` in every cache key (C2.3), B4 #7 cost-of-thought |
+| **Status** | **Accepted** — 10 Sep 2026 (W1) |
+| **Decided by** | Amit Singh (sole contributor) |
+| **Amends** | Plan §C2.3, §C4.3, §C4.4, §C8, Appendix D #2 · see [plan amendment 001](../../../plan-amendment-001-local-hybrid.md) |
+| **Gate** | **G0**, re-scoped by this ADR (§Gate below) |
 
 ## Context
 
-Month 1's first purchase is **a `no` that arrives cheaply**. S1 asks whether the chosen
-provider returns full, unsummarised thinking text via API, with token accounting. If it
-does not, there is no product in the shape the PoC describes, and the plan's own answer —
-fall back to a hosted open-weight R1-class model for arm 2 (B6.5) — is a **Week-1
-decision costing 1.5 hours**, not a Month-3 discovery costing the PoC.
+The plan assumed a frontier hosted provider would serve all three arms, and asked S1 to
+find which one returns full, unsummarised thinking text. Two facts changed the question:
 
-Two halves, both load-bearing:
+1. **Only an OpenAI key is available.** No Anthropic access.
+2. **OpenAI's reasoning models do not return raw thinking.** They return a summary plus a
+   reasoning-token count; the chain stays server-side.
 
-1. **Full, unsummarised thinking text.** This is the product. A provider summary is a
-   different artifact with a different claim attached to it.
-2. **`reasoning_tokens` in usage accounting.** This is B4 #7. Cost-of-thought is
-   unmeasurable without a reasoning-token count, and estimating it from output tokens is
-   exactly the kind of assertion this PoC exists to replace with measurement.
+Arm 2 exists to show a model's *own native thinking*. Built on OpenAI it would show a
+summary of thinking — a different artifact supporting a weaker claim, caveated on every
+screen. The plan pre-decided this branch (fall back to an open-weight R1-class model for
+arm 2); this ADR takes it, and further: **the fallback becomes primary, and runs locally.**
 
 ## Decision
 
-*Not yet taken.* To be filled by the S1 run.
+**Generation is local. Analysis is OpenAI. Local-only is a supported configuration.**
 
-```
-MODEL_PIN       = <exact dated generation-model id>
-MODEL_TRIAGE    = <exact dated id>
-MODEL_ESCALATE  = <exact dated id>
-```
-
-> **Never a floating alias.** G0 check 4. `spikes/s1_provider_fidelity.py` refuses to
-> probe an aliased id, so the constraint is enforced at the point of measurement and not
-> only asserted here.
-
-## Candidates and what each returned
-
-*Filled from `docs/spikes/S1-raw/s1-results.json`.*
-
-| Provider / tier | Thinking text returned? | Complete or elided? | `reasoning_tokens`? | Returned-vs-billed ratio | Provider documents summarisation? |
-| --- | --- | --- | --- | --- | --- |
-| | | | | | |
-
-**How the ratio is read.** The probe estimates tokens in the returned thinking text and
-divides by the provider's reported `reasoning_tokens`. ≈ 1.0 means the text we received is
-the text the model was billed for. Well below 1.0 is the signature of summarisation. The
-estimate is ~4 chars/token and deliberately crude; refine with the provider tokenizer
-before quoting the ratio to two decimals.
-
-## G0 checklist (§8.1)
-
-| # | Check | Pass condition | Result |
-| - | ----- | -------------- | ------ |
-| 1 | Thinking text returned via API | present and complete | — |
-| 2 | Thinking text is **not** a provider summary | token count ≈ `reasoning_tokens`; provider docs confirm | — |
-| 3 | `reasoning_tokens` exposed in usage | present and plausible against a hand count | — |
-| 4 | `MODEL_PIN` is an **exact dated model id** | recorded here and in config | — |
-| 5 | Triage and escalation tiers identified | `MODEL_TRIAGE`, `MODEL_ESCALATE` recorded | — |
-| 6 | This ADR committed | in `docs/decisions/` | ✅ (as *Proposed*) |
-
-## Consequences, branched in advance
-
-The branches are decided now so the gate is a reading rather than a discussion.
-
-| S1 finding | Consequence | Recorded where |
+| | Generation | Analysis |
 | --- | --- | --- |
-| No candidate returns unsummarised thinking | Arm 2 falls back to a **hosted open-weight R1-class model** (B6.5). **Decided in W1.** | This ADR + the reviewer, same week |
-| Thinking arrives, `reasoning_tokens` does not | B4 #7 degrades from **measured** to **estimated**. A published caveat and an ADR entry — never a silent substitution | This ADR + the calibration page |
-| Thinking arrives only as a provider summary | The PoC continues with `trace_quality: "provider_summarised"` surfaced in the UI throughout, and **the reviewer is told in W1** — it changes what the demo claims | `ReasoningReport` field (G1) + FE-8 banner |
-| A candidate passes all six checks | Pin it. Re-run S1 on any `MODEL_PIN` bump — the pin is a cache-key input, and a bump also forces re-calibration and a faithfulness re-run (B7.4) | This ADR |
+| What | all three arms — the reasoning traces that are the object of study | classify each step, flag unsound steps, whole-trace consistency |
+| Volume | high; traces are long | low; short texts in, structured rows out |
+| Hard requirement | **raw reasoning text must be recoverable** | **< 2% malformed responses over ~25-item batches** |
+| Runs on | **`gpt-oss:20b`, local** | **OpenAI** |
 
-## Execution status — what is blocking
+Three reasons, in descending weight:
 
-`spikes/s1_provider_fidelity.py` is written, lint-clean, and self-tested against the
-no-key and aliased-id paths. It needs **one thing** to produce the finding:
+1. **Raw traces by construction** — there is no server to withhold them.
+2. **A stronger examiner than the subject** — the escalation tier only means something if
+   the escalated verdict comes from a better model than the first pass. One local model for
+   every tier deletes that mechanism while keeping its name in the report.
+3. **Separation of subject and examiner — an improvement on the original plan.** One model
+   both producing and judging its own reasoning is self-evaluation, and it is the first
+   thing a reviewer attacks. The plan had that weakness; this split removes it.
 
-- **an API key for each candidate tier** (`ANTHROPIC_API_KEY`, etc.) in the local
-  environment. No key is present in the dev environment as of 2026-09-10.
+### All three arms run on the same model — non-negotiable
 
-Run, once a key exists:
+The arms compare reasoning **strategies**. Different models per arm would measure vendors
+instead, and the finding evaporates. This was implicit when one provider served all three;
+a hybrid runtime makes it easy to violate by accident, so it is stated explicitly.
+
+> **In particular: do not move arm 3 to OpenAI because its tool calling is better.** That
+> trade is not available. If no local model can hold the tool contract, the correct response
+> is a two-arm comparison, stated plainly.
+
+## Model choice
+
+Hardware: **Apple M4 Pro, 24 GB unified memory** — about 13–14 GB of weights once the OS,
+KV cache and toolchain are accounted for. Nothing at 32B fits.
+
+| Candidate | Size | Raw reasoning | Tool calling | Verdict |
+| --- | --- | --- | --- | --- |
+| **`gpt-oss:20b`** | ~13 GB | ✅ full CoT | ✅ | **Chosen.** Reasoning-effort dial is directly useful for cost-of-thought; OpenAI's own open weights sharpen the story — same lineage as the API, one hides its reasoning, one shows it |
+| `qwen3:14b` | ~9 GB | ✅ switchable | ✅ | **Approved fallback** if 20B is too slow to iterate against |
+| `deepseek-r1:14b` | ~9 GB | ✅ | ❌ weak | **Rejected** — see below |
+| `qwq:32b` | ~19 GB | ✅ | ✅ | **Rejected** — does not fit |
+
+> **Why the R1 distill is rejected despite being the model the plan names.** The distills
+> reason well and fumble the function-call format. Arm 3 must call a calculator and a lookup
+> tool, and the same-model rule forbids compensating by moving the arm. The failure would
+> surface in W3 *after* the arm was built, with no cheap repair.
+
+## `MODEL_PIN` is redefined
+
+An id does not reproduce a local number. The pin is now a tuple, and all of it travels with
+every report and enters the cache key:
 
 ```
-make spike-s1 ARGS="--provider anthropic --model <exact-dated-id>"
+model file digest (the exact GGUF/MLX artifact)
+quantization
+sampling params — temperature, top_p, seed
+runtime + version (e.g. ollama 0.x)
+reasoning-effort setting, where exposed
 ```
 
-Cost is a few cents per candidate. **This is the only Week-1 item that cannot be closed
-without an external input**, and it is the item G0 turns on — so it is the one to chase
-first. See [`../spikes/S1-provider.md`](../spikes/S1-provider.md) for the write-up
-template and the trap to avoid.
+This is **stricter** than the hosted pin it replaces: a hosted endpoint can change under a
+fixed id; a file digest cannot. The analyzer's own pin (the OpenAI model doing the
+classification) is recorded separately, because the two move independently.
+
+## Local-only as a measured configuration
+
+The analyzer's model is a config choice: **hybrid** (default) or **local-only**. Human labels
+are fixed ground truth, so scoring a second classifier against them is nearly free — the
+calibration harness runs both and reports both.
+
+"Can this run entirely on a laptop with no API access?" becomes a published number rather
+than an assumption. It also derisks the demo: if the key fails on the day, local-only is a
+known quantity with known numbers, not an untested fallback.
+
+## Gate G0, re-scoped
+
+The original question ("does the provider return unsummarised thinking?") is answered by
+architecture. The gate now asks three things of the **local** model:
+
+| # | Check | Pass condition |
+| - | --- | --- |
+| 1 | Full raw reasoning text returned | present and complete; no elision |
+| 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** |
+| 3 | **Tool contract held** | calculator + lookup called correctly and repeatably — gates arm 3, must pass **before** W3 |
+| 4 | Pin tuple recorded | every field above, reproducibly |
+| 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias |
+| 6 | This ADR committed | ✅ |
+
+**S1 must still run.** The claim about OpenAI's summarisation is a strong expectation, not a
+measurement, and this project's thesis is that the difference matters. If OpenAI exposes more
+than expected, that is a finding worth having — it does not reverse this ADR, because the
+local model is now preferred on **reproducibility** grounds independent of fidelity.
+
+## Consequences
+
+- Hosted generation spend: **$130–150 → $0.** Analysis: a few dollars total. The spend
+  breaker becomes vestigial (retained as a cheap guard, no longer a control).
+- Latency stops being a gate. Local generation is slower per token; a reasoning-heavy problem
+  may take 30–90 s per arm. The demo replays from cache, so this is a **footnote to measure
+  and report**, not a launch gate.
+- **New risk:** local tool-calling reliability. A W2 spike tests it before arm 3 is built.

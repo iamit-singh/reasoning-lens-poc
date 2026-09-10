@@ -1,0 +1,16 @@
+[
+  {
+    "target": "local",
+    "model": "gpt-oss:20b",
+    "ok": false,
+    "error": "cannot reach http://localhost:11434/v1: [Errno 61] Connection refused. Is the model served? `ollama serve` then `ollama pull gpt-oss:20b`",
+    "reasoning_text_present": false,
+    "reasoning_text_chars": 0,
+    "reasoning_tokens_reported": null,
+    "chars_per_reasoning_token": null,
+    "verdict": "",
+    "answer_correct": null,
+    "usage": {},
+    "raw_path": null
+  }
+]

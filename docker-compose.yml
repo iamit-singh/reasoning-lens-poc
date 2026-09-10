@@ -1,5 +1,8 @@
-# Local dev and test environment. Prod is a single App Runner service (B0 Condition #2);
-# this file is the whole of "environments" besides prod.
+# Local dev, test AND demo environment -- there is no other one (ADR-003: local-only).
+#
+# The local generation model is NOT in this file on purpose. Containerised inference on
+# macOS loses Metal, so the model is served natively (`ollama serve`) and reached at
+# host.docker.internal / localhost. Redis is the only thing worth containerising.
 services:
   redis:
     image: redis:7-alpine
@@ -20,11 +23,16 @@ services:
       MOCK_LLM: "1"
       DEMO_MODE: "cached"
       REDIS_URL: "redis://redis:6379/0"
-      MODEL_PIN: "${MODEL_PIN:-}"
+      ANALYZER_BACKEND: "${ANALYZER_BACKEND:-hybrid}"
+      # reach the natively-served local model from inside the container
+      LOCAL_BASE_URL: "http://host.docker.internal:11434/v1"
+      LOCAL_MODEL: "${LOCAL_MODEL:-gpt-oss:20b}"
     env_file:
       - path: .env
         required: false
     ports: ["8000:8000"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./analyzer:/app/analyzer
       - ./backend:/app/backend

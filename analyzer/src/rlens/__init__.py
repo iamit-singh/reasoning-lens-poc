@@ -9,12 +9,18 @@ from rlens.versions import (
     ANALYZER_VERSION,
     PROMPT_BUNDLE_VERSION,
     RUNNER_VERSION,
+    GenerationPin,
+    analyzer_pin,
     cache_key,
+    generation_pin,
 )
 
 __all__ = [
     "ANALYZER_VERSION",
     "PROMPT_BUNDLE_VERSION",
     "RUNNER_VERSION",
+    "GenerationPin",
+    "analyzer_pin",
     "cache_key",
+    "generation_pin",
 ]

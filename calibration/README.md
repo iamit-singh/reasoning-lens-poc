@@ -9,6 +9,7 @@ something if the procedure is fixed *before* the numbers are seen.
 | `sampling.json` | The seed **and the ordered id list**, committed *before the first label is written* | M1-11 (W4) |
 | `labels/dev-100.jsonl` | 100 dev steps — what prompt iteration tunes against | M1-11 → M2-1 |
 | `labels/heldout-50.jsonl` | 50 double-labeled steps carrying the **published headline κ**. Opened **once**, after the prompt bundle is frozen | M2-1 |
+| `annotator-2.md` | who the second annotator is, when they labeled, and confirmation they were **not** briefed | M2-1 |
 | `labels/HELDOUT_FREEZE` | The freeze commit sha. Absent until M2-1; once present, `scripts/check_heldout_freeze.sh` fails any PR that edits the held-out labels | M2-1 |
 | `seeded/` | Mutation definitions + expected flaw step ids | M2-6 |
 | `results/latest.json` | The published metrics, served by the calibration page | M2-8 |
@@ -27,3 +28,27 @@ the freeze.
 uniform random draw only. The enriched-60 draw needs the classifier's predictions and so
 cannot happen until Month 2 — and drawing early labels from it would bias the very κ the
 two-part frame exists to protect (C5.1).
+
+## The second annotator — confirmed, and why it was nearly lost
+
+A colleague is committed for **~2 hours in W6** to independently label the 50 held-out steps.
+Amit is the sole contributor to this PoC, so this was the one role he could not fill himself,
+and for a day it was the most fragile thing on the board.
+
+**Why no substitute works.** The headline claim is *two people, given only a written rulebook
+and no discussion, agreed this often*. It is what separates a measurement from one person
+asserting their own labels are correct. With one labeler it is not computable — not harder,
+not noisier: not computable.
+
+The considered alternative — the same person labeling twice, weeks apart, blind — measures
+something real, but only whether the rulebook is precise enough to give **one person** the
+same answer twice. It cannot detect a rulebook that is clear to its author and ambiguous to
+everyone else, which is the exact failure the number exists to catch.
+
+> **⚠️ If the colleague falls through, the fallback is self-consistency labeling — and the
+> published claim must be renamed.** Never publish a self-consistency number under the word
+> *agreement*.
+
+**Hand them the rulebook cold.** No walkthrough, no worked examples beyond what is written
+down, no discussion of hard cases beforehand. A briefed second annotator measures the
+briefing, not the rubric. Record in `annotator-2.md` that they were not briefed.
