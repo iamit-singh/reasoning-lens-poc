@@ -22,13 +22,14 @@ keep it honest, including when it is unflattering.
 | 2026-09-10 | W1 | M1-16 | 0.6 | **S6: PASS, 20/20** — 100% on all four scenarios incl. tool-choice and the false-positive check. Arm 3 is buildable; the `qwen3:14b` fallback is not needed |
 | 2026-09-10 | W1 | M1-1 | 0.5 | **G0 check 2 closed.** `tiktoken>=0.9` declared; `o200k_harmony` counting wired into `make spike-s1`. **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. `LOCAL_TOKENIZER` joined the pin tuple |
 | 2026-09-10 | W2 | M1-2 | 2.1 | **S2: complete.** Stock LangGraph agent, 15 spans, fixture committed. 6 C3.1 rows confirmed, 2 corrected, **1 absent**. **No `gen_ai.*` attribute arrives at all** — the live namespace is OpenInference `llm.*`, so five of nine rows were dead. **Reasoning text never reaches a span**; the control proves the runtime sends it and LangChain drops it. ADR-002 filed. **0.6 over the 1.5 h estimate** — see the W2 note
+| 2026-09-10 | W2 | M1-6 | 3.4 | **Runner arms 1–2 done.** `llm.py` provider abstraction, ADR-002 emission, 22 contract tests green under MOCK_LLM. **ADR-004: arm 1 cannot have thinking *off*** — `reasoning_effort: none` and native `think: false` are both **silently ignored** (2918 chars returned); `low` is honoured (131). Arm 1 becomes a *minimal*-reasoning baseline and B4 #7's claim narrows. Regime separation is verified from output, not the request. **+0.4 over the revised 3.0**
 
 ## Month-1 planned-vs-actual
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
-| W2 | 6.7 | 3.5 *(so far)* | | M1-15, M1-16, **M1-2 done** — 2.5 h planned, 3.5 h actual, **+1.0**. **3.2 h of W2 remains** (M1-6 at 2.5 + 0.5, M1-4 at 1.7 — see below) |
+| W2 | 6.7 | 6.9 *(so far)* | | M1-15, M1-16, M1-2, **M1-6 done** — 5.5 h planned *(M1-6 revised to 3.0)*, 6.9 h actual, **+1.4**. **Only M1-4 (1.7 h) remains in W2** |
 | W3 | 7.5 | | | |
 | W4 | 8.0 | | | |
 | **Total** | **25.5** *(was 25.0: −0.5 DNS, +1.0 new spikes)* | | | |
@@ -120,3 +121,65 @@ saving not yet bankable until the code is written).
 > prediction: **five** rows were dead, and the load-bearing attribute is not a fourth name
 > — it does not exist. Had M1-6 gone first, W3 would have opened with a rewrite of the
 > ingest layer *and* an unresolved I1 question. The 2.1 h bought that.
+
+---
+
+## W2 — M1-6 at 3.4 h, and the arm-1 finding that changes what the project can claim
+
+**M1-6 cost 3.4 h against the 3.0 h this ledger revised it to last entry (+0.4), and 2.5 h
+as originally planned (+0.9).** The revision held up: the ingest savings S2 bought were
+real, and the +0.5 emission estimate was close. The extra 0.4 is one thing.
+
+### The 0.4: arm 1 was not doing what the plan says it does
+
+C4.1 defines arm 1 as *thinking **off***. The first end-to-end run returned a direct arm
+with **467 reasoning tokens**. The system prompt had done its job — the visible answer was
+two tokens — and the model had reasoned anyway, invisibly and on the bill.
+
+Four ways of asking `gpt-oss:20b` to stop, all measured on one prompt:
+
+| Request | Reasoning returned |
+| --- | --- |
+| Omit `reasoning_effort` — *what "thinking off" plainly means* | 2918 chars *(the default, and near arm 2's)* |
+| `reasoning_effort: "none"` | **2918 chars — silently ignored** |
+| ollama native `"think": false` | **2918 chars — silently ignored** |
+| `reasoning_effort: "low"` | **131 chars — honoured** |
+
+**Two switches that claim to disable thinking do not error, do not warn, and hand back a
+full trace.** Had the runner sent `think: false` and trusted it, the project would have
+published a "no-thinking baseline" that thought 2918 characters, and every cost-of-thought
+ratio in the study would have been wrong with nothing visibly broken. ADR-004 records the
+decision: arm 1 requests `low`, is renamed a **minimal**-reasoning baseline everywhere, and
+the separation is checked **from the token counts, never from the request** — because the
+request demonstrably is not evidence. The probe now measures 144 vs 1453 tokens.
+
+**This is the third time in two weeks that the same failure shape has appeared**, and it is
+worth naming rather than logging three times. S1 refused to report "thinking text: present"
+and gated G0 on a ratio. S2's first probe reported tool attributes absent when they were
+merely never exercised. Now two provider flags accept a request and ignore it. In each case
+the *request* or the *presence of something* looked like evidence and was not. The standing
+lesson: **assert on the output, at a threshold, or do not claim the measurement.** It is
+cheap to build in and it has now caught three real errors.
+
+### A result on day one, and a new requirement it puts on M1-4
+
+At `low` effort arm 1 answers the probe **18694**; the correct answer is **18678**, which
+arm 2 gets. That is the study working — the prompt does not induce sloppiness, the reduced
+budget costs accuracy on a multi-step chain.
+
+But **if every bank item separates the arms this cleanly, the bank measures difficulty, not
+strategy.** The `easy` floor is what should show arm 1 matching arm 2 at a fraction of the
+cost, and that contrast is the finding. This is now a requirement on M1-4, not a nicety.
+
+### Where W2 stands
+
+**6.9 h spent against a 6.7 h plan, with M1-4 (1.7 h) still to go** — so W2 lands around
+**8.6 h, +1.9**. Month-1 total moves to **26.4 h** against 12 h of Lead capacity.
+
+**The contingency signal is now worth reading, three weeks early.** C10.1's bet was ~25 h
+of work against ~12 h of allocation, first read at end W4. Two weeks in, the trend is not
+that tasks are being estimated badly — the like-for-like execution has been close. It is
+that **every spike so far has found something the plan did not know**, and each finding has
+cost 0.4–0.6 h to write down properly. That is the spikes doing their job, and it is also
+the strongest argument yet that the L1/L2 cuts taken at kickoff were not enough. **G2 should
+expect to see the Option-2 contingency drawn on.**
