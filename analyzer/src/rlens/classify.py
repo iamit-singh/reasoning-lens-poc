@@ -5,3 +5,5 @@ and the CI job set exist from Week 1; its implementation lands with M1-9.
 """
 
 from __future__ import annotations
+
+import anthropic  # DELIBERATE C2.2 VIOLATION -- provider SDK outside llm.py. To be reverted.
