@@ -12,3 +12,8 @@ frontend/out/
 dist/
 build/
 .DS_Store
+
+# Spike raw output: recorded provider/model responses. Regenerable, and a failed
+# self-test run is not evidence of anything. The written finding lands in
+# docs/spikes/*.md and the ADRs -- that is what gets committed.
+docs/spikes/*-raw/
