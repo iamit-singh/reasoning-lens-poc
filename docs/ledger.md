@@ -20,12 +20,13 @@ keep it honest, including when it is unflattering.
 | 2026-09-10 | W1 | M1-15 | 0.8 | **W2-0 pulled forward** — M1-1/G0 was blocked on it. ollama 0.33.3 served natively; `gpt-oss:20b` pulled; full pin tuple recorded in `.env` **and** ADR-001. **0.3 over estimate**: two defects in `pin_local.sh` — it recorded ollama's truncated manifest id as the digest, and emitted `LOCAL_RUNTIME` unquoted so sourcing `.env` silently truncated it |
 | 2026-09-10 | W1 | M1-1 | 0.6 | **S1 local arm: PASS.** 2535 chars of raw reasoning in a `reasoning` field, not inline `<think>` tags. ADR-001's G0 table filled from the real run. **G0 check 2 closed off as NOT met** |
 | 2026-09-10 | W1 | M1-16 | 0.6 | **S6: PASS, 20/20** — 100% on all four scenarios incl. tool-choice and the false-positive check. Arm 3 is buildable; the `qwen3:14b` fallback is not needed |
+| 2026-09-10 | W1 | M1-1 | 0.5 | **G0 check 2 closed.** `tiktoken>=0.9` declared; `o200k_harmony` counting wired into `make spike-s1`. **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. `LOCAL_TOKENIZER` joined the pin tuple |
 
 ## Month-1 planned-vs-actual
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | -------- | ---- | ---- | ---- | --------- |
-| W1 | 3.3 | 6.2 | **+2.9** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work **and 1.4 h of W2 work pulled forward** (M1-15 + M1-16). See the like-for-like note below |
+| W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | *(1.4 delivered in W1)* | | M1-15 and M1-16 are **done** — 1.0 h planned, 1.4 h actual. 5.7 h of W2 remains |
 | W3 | 7.5 | | | |
 | W4 | 8.0 | | | |
@@ -44,8 +45,17 @@ keep it honest, including when it is unflattering.
 > **1.2 h is the amendment**, already reported last entry: work that existed only because
 > three constraints surfaced on day 2 rather than at kickoff.
 >
-> **Like-for-like, W1's own tasks came in at 3.6 h against 3.3 h planned — +0.3.** That is
-> the honest reading of W1 execution, and it is close to estimate.
+> **0.5 h is unbudgeted work the plan never scoped:** closing G0 check 2. The gate asks for
+> reasoning tokens counted *exactly*; the runtime reports none and bundles reasoning with
+> the answer, so the split needed a tokenizer dependency (`tiktoken`, `o200k_harmony`) that
+> Month 1 did not budget. The alternative was publishing cost-of-thought as an estimate all
+> the way to G2, so it was bought now rather than deferred. It returns a real number — 741
+> reasoning tokens, **73.4% of output** — and it reconciles against the runtime's own
+> billing to +10 structural tokens, which is what makes it evidence rather than a plausible
+> figure.
+>
+> **Like-for-like, W1's own tasks came in at 4.1 h against 3.3 h planned — +0.8**, and 0.5 of
+> that +0.8 is the tokenizer. W1 execution excluding unbudgeted scope was +0.3.
 >
 > **The unflattering half.** The 0.3 h overrun on M1-15 was two defects in a script written
 > the day before, both found only by running it for real: a truncated digest recorded as the
