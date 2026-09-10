@@ -1,0 +1,16 @@
+# S2 (M1-2) spike dependencies. DELIBERATELY NOT analyzer dependencies.
+#
+# I1 says the analyzer is a standalone package whose only input is a span tree. If
+# langgraph or the instrumentor appeared in analyzer/pyproject.toml, the analyzer would
+# depend on the very framework it is supposed to be able to ingest from without knowing
+# about -- and the S2 fixture would stop being third-party evidence. They are pinned here
+# so the capture is reproducible, and installed only into the dev venv.
+#
+# Versions are the ones the 10 Sep 2026 capture was taken with. A newer instrumentor may
+# emit different attribute names, which is exactly the kind of change that must show up as
+# a re-run and a delta, not as a silent drift.
+langgraph==1.2.11
+langchain-core==1.6.2
+langchain-openai==1.6.2
+openinference-instrumentation-langchain==0.1.76
+opentelemetry-sdk==1.44.0

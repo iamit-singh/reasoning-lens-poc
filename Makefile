@@ -10,7 +10,8 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze ci warm-cache calibrate faithfulness smoke \
-        record-cassettes spike-s1 spike-s6 models pin-local serve-local demo clean
+        record-cassettes spike-s1 spike-s6 spike-s2 spike-deps models pin-local \
+        serve-local demo clean
 
 help:  ## show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -84,6 +85,12 @@ spike-s1:  ## S1 -- reasoning-trace fidelity: local (gates arm 2) + OpenAI
 
 spike-s6:  ## S6 -- local tool-calling reliability. GATES ARM 3; run before W3.
 	$(BIN)/python spikes/s6_local_tool_calling.py $(ARGS)
+
+spike-deps:  ## install the spike-only deps (langgraph, instrumentor) -- NOT analyzer deps
+	$(BIN)/pip install -q -r spikes/requirements-s2.txt
+
+spike-s2: spike-deps  ## S2 -- OTEL attribute shape from a STOCK LangGraph agent
+	$(BIN)/python spikes/s2_otel_shape.py $(ARGS)
 
 clean:
 	rm -rf $(VENV) .pytest_cache .mypy_cache .ruff_cache

@@ -1,0 +1,394 @@
+{
+  "resourceSpans": [
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}], \"remaining_steps\": 10006}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\", \"checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "[{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}]"
+      },
+      "endTime": 1789046071773152000,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "Prompt",
+      "parentSpanId": "cb459a890c31c6f2",
+      "spanId": "0369cabd125c984e",
+      "startTime": 1789046071773101056,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"type\": \"human\", \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}]]}",
+        "llm.finish_reason": "tool_calls",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "llm.invocation_parameters": "{\"model\": \"gpt-oss:20b\", \"model_name\": \"gpt-oss:20b\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"carton_unit_price\", \"description\": \"Look up the unit price in USD of one carton for the given SKU.\", \"parameters\": {\"properties\": {\"sku\": {\"type\": \"string\"}}, \"required\": [\"sku\"], \"type\": \"object\"}}}]}",
+        "llm.model_name": "gpt-oss:20b",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"sku\": \"CTN-12\"}",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "carton_unit_price",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_ymd2xkoh",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.token_count.completion": 69,
+        "llm.token_count.prompt": 190,
+        "llm.token_count.prompt_details.cache_read": 189,
+        "llm.token_count.total": 259,
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"carton_unit_price\", \"description\": \"Look up the unit price in USD of one carton for the given SKU.\", \"parameters\": {\"properties\": {\"sku\": {\"type\": \"string\"}}, \"required\": [\"sku\"], \"type\": \"object\"}}}",
+        "metadata": "{\"ls_integration\": \"langchain_chat_model\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\", \"checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\", \"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-oss:20b\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"lc_versions\": {\"langchain-core\": \"1.6.2\", \"langchain-openai\": \"1.6.2\"}}",
+        "openinference.span.kind": "LLM",
+        "output.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\"}, \"run\": null, \"type\": \"LLMResult\"}"
+      },
+      "endTime": 1789046073198223104,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "ChatOpenAI",
+      "parentSpanId": "cb459a890c31c6f2",
+      "spanId": "2d6717e3f9420004",
+      "startTime": 1789046071773696000,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}], \"remaining_steps\": 10006}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\", \"checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}"
+      },
+      "endTime": 1789046073198763008,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "RunnableSequence",
+      "parentSpanId": "84ed7d298dc624a0",
+      "spanId": "cb459a890c31c6f2",
+      "startTime": 1789046071773040896,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}], \"remaining_steps\": 10006}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}]}"
+      },
+      "endTime": 1789046073198964992,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "call_model",
+      "parentSpanId": "84ed7d298dc624a0",
+      "spanId": "94d0c3b9dce368f3",
+      "startTime": 1789046071772931072,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}], \"remaining_steps\": 10006}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "[\"Send(node='tools', arg={'__type': 'tool_call_with_context', 'tool_call': {'name': 'carton_unit_price', 'args': {'sku': 'CTN-12'}, 'id': 'call_ymd2xkoh', 'type': 'tool_call'}, 'state': {'messages': [HumanMessage(content='A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.', additional_kwargs={}, response_metadata={}, id='515f42b9-6a34-4bb6-a691-66ae9567ae6f'), AIMessage(content='', additional_kwargs={'refusal': None}, response_metadata={'token_usage': {'completion_tokens': 69, 'prompt_tokens': 190, 'total_tokens': 259, 'completion_tokens_details': None, 'prompt_tokens_details': {'audio_tokens': None, 'cache_write_tokens': None, 'cached_tokens': 189, 'image_tokens': None, 'text_tokens': None}}, 'model_provider': 'openai', 'model_name': 'gpt-oss:20b', 'system_fingerprint': 'fp_ollama', 'id': 'chatcmpl-783', 'finish_reason': 'tool_calls', 'logprobs': None}, id='lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0', tool_calls=[{'name': 'carton_unit_price', 'args': {'sku': 'CTN-12'}, 'id': 'call_ymd2xkoh', 'type': 'tool_call'}], invalid_tool_calls=[], usage_metadata={'input_tokens': 190, 'output_tokens': 69, 'total_tokens': 259, 'input_token_details': {'cache_read': 189}, 'output_token_details': {}})], 'remaining_steps': 10006}})\"]"
+      },
+      "endTime": 1789046073199499008,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "should_continue",
+      "parentSpanId": "84ed7d298dc624a0",
+      "spanId": "e973a71c48c804b0",
+      "startTime": 1789046073199290112,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}], \"remaining_steps\": 10006}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 1, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c74fe87f-161e-f4e6-73d1-1d33372f178e\"}",
+        "openinference.span.kind": "AGENT",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}]}"
+      },
+      "endTime": 1789046073199745792,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "agent",
+      "parentSpanId": "9029899629278f27",
+      "spanId": "84ed7d298dc624a0",
+      "startTime": 1789046071772834048,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.value": "CTN-12",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 2, \"langgraph_node\": \"tools\", \"langgraph_triggers\": [\"__pregel_push\"], \"langgraph_path\": [\"__pregel_push\", 0, false], \"langgraph_checkpoint_ns\": \"tools:19ba483d-c7d6-9fca-f1e7-4c727716af5c\", \"checkpoint_ns\": \"tools:19ba483d-c7d6-9fca-f1e7-4c727716af5c\"}",
+        "openinference.span.kind": "TOOL",
+        "output.mime_type": "application/json",
+        "output.value": "{\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": null, \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}",
+        "tool.description": "Look up the unit price in USD of one carton for the given SKU.",
+        "tool.name": "carton_unit_price"
+      },
+      "endTime": 1789046073201245184,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "carton_unit_price",
+      "parentSpanId": "6420bb37e48f57c0",
+      "spanId": "eea5760badf03f64",
+      "startTime": 1789046073200887040,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"__type\": \"tool_call_with_context\", \"tool_call\": {\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}, \"state\": {\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}], \"remaining_steps\": 10006}}",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 2, \"langgraph_node\": \"tools\", \"langgraph_triggers\": [\"__pregel_push\"], \"langgraph_path\": [\"__pregel_push\", 0, false], \"langgraph_checkpoint_ns\": \"tools:19ba483d-c7d6-9fca-f1e7-4c727716af5c\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": null, \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}]}"
+      },
+      "endTime": 1789046073201495808,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "tools",
+      "parentSpanId": "9029899629278f27",
+      "spanId": "6420bb37e48f57c0",
+      "startTime": 1789046073200346880,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}], \"remaining_steps\": 10004}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\", \"checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "[{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}]"
+      },
+      "endTime": 1789046073202336000,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "Prompt",
+      "parentSpanId": "0008bc0f893b3d16",
+      "spanId": "9ac8b02cf7198031",
+      "startTime": 1789046073202269184,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"type\": \"human\", \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"status\": \"success\"}}]]}",
+        "llm.finish_reason": "stop",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "llm.input_messages.1.message.role": "assistant",
+        "llm.input_messages.1.message.tool_calls.0.tool_call.function.arguments": "{\"sku\": \"CTN-12\"}",
+        "llm.input_messages.1.message.tool_calls.0.tool_call.function.name": "carton_unit_price",
+        "llm.input_messages.1.message.tool_calls.0.tool_call.id": "call_ymd2xkoh",
+        "llm.input_messages.2.message.content": "{\"sku\": \"CTN-12\", \"unit_price_usd\": 43.5, \"currency\": \"USD\"}",
+        "llm.input_messages.2.message.name": "carton_unit_price",
+        "llm.input_messages.2.message.role": "tool",
+        "llm.input_messages.2.message.tool_call_id": "call_ymd2xkoh",
+        "llm.invocation_parameters": "{\"model\": \"gpt-oss:20b\", \"model_name\": \"gpt-oss:20b\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"carton_unit_price\", \"description\": \"Look up the unit price in USD of one carton for the given SKU.\", \"parameters\": {\"properties\": {\"sku\": {\"type\": \"string\"}}, \"required\": [\"sku\"], \"type\": \"object\"}}}]}",
+        "llm.model_name": "gpt-oss:20b",
+        "llm.output_messages.0.message.content": "304.5",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.token_count.completion": 51,
+        "llm.token_count.prompt": 252,
+        "llm.token_count.prompt_details.cache_read": 191,
+        "llm.token_count.total": 303,
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"carton_unit_price\", \"description\": \"Look up the unit price in USD of one carton for the given SKU.\", \"parameters\": {\"properties\": {\"sku\": {\"type\": \"string\"}}, \"required\": [\"sku\"], \"type\": \"object\"}}}",
+        "metadata": "{\"ls_integration\": \"langchain_chat_model\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\", \"checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\", \"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-oss:20b\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"lc_versions\": {\"langchain-core\": \"1.6.2\", \"langchain-openai\": \"1.6.2\"}}",
+        "openinference.span.kind": "LLM",
+        "output.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"304.5\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\"}, \"run\": null, \"type\": \"LLMResult\"}"
+      },
+      "endTime": 1789046074451632896,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "ChatOpenAI",
+      "parentSpanId": "0008bc0f893b3d16",
+      "spanId": "8e4a7d1c210227f7",
+      "startTime": 1789046073202704896,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}], \"remaining_steps\": 10004}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\", \"checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"type\": \"ai\", \"data\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}}}"
+      },
+      "endTime": 1789046074452016128,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "RunnableSequence",
+      "parentSpanId": "3773e2eceeb0a78a",
+      "spanId": "0008bc0f893b3d16",
+      "startTime": 1789046073202174976,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}], \"remaining_steps\": 10004}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"ai\", \"data\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}}}]}"
+      },
+      "endTime": 1789046074452215808,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "call_model",
+      "parentSpanId": "3773e2eceeb0a78a",
+      "spanId": "b12336a2d9ab29fc",
+      "startTime": 1789046073201978880,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}}}], \"remaining_steps\": 10004}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.value": "__end__"
+      },
+      "endTime": 1789046074452611840,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "should_continue",
+      "parentSpanId": "3773e2eceeb0a78a",
+      "spanId": "abb753374f8334de",
+      "startTime": 1789046074452467968,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}], \"remaining_steps\": 10004}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\", \"langgraph_step\": 3, \"langgraph_node\": \"agent\", \"langgraph_triggers\": [\"branch:to:agent\"], \"langgraph_path\": [\"__pregel_pull\", \"agent\"], \"langgraph_checkpoint_ns\": \"agent:c10a068f-3086-3e0a-242c-657a150d5470\"}",
+        "openinference.span.kind": "AGENT",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"ai\", \"data\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}}}]}"
+      },
+      "endTime": 1789046074452781824,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "agent",
+      "parentSpanId": "9029899629278f27",
+      "spanId": "3773e2eceeb0a78a",
+      "startTime": 1789046073201859072,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    },
+    {
+      "attributes": {
+        "input.mime_type": "application/json",
+        "input.value": "{\"messages\": [[\"user\", \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\"]]}",
+        "llm.input_messages.0.message.content": "A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.",
+        "llm.input_messages.0.message.role": "user",
+        "metadata": "{\"ls_integration\": \"langgraph\"}",
+        "openinference.span.kind": "CHAIN",
+        "output.mime_type": "application/json",
+        "output.value": "{\"messages\": [{\"type\": \"human\", \"data\": {\"content\": \"A warehouse ships cartons of 12 items under SKU CTN-12. Look up the unit price of one carton of SKU CTN-12 with the tool provided -- do not guess it -- then tell me the total price of 7 cartons. Give the final number on its own last line.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"human\", \"name\": null, \"id\": \"515f42b9-6a34-4bb6-a691-66ae9567ae6f\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 69, \"prompt_tokens\": 190, \"total_tokens\": 259, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 189, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-783\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a1dd-7032-b747-799d1753624e-0\", \"tool_calls\": [{\"name\": \"carton_unit_price\", \"args\": {\"sku\": \"CTN-12\"}, \"id\": \"call_ymd2xkoh\", \"type\": \"tool_call\"}], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 190, \"output_tokens\": 69, \"total_tokens\": 259, \"input_token_details\": {\"cache_read\": 189}, \"output_token_details\": {}}}}, {\"type\": \"tool\", \"data\": {\"content\": \"{\\\"sku\\\": \\\"CTN-12\\\", \\\"unit_price_usd\\\": 43.5, \\\"currency\\\": \\\"USD\\\"}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"carton_unit_price\", \"id\": \"975d0ff2-70c8-434f-afb0-60132de6dfc7\", \"tool_call_id\": \"call_ymd2xkoh\", \"artifact\": null, \"status\": \"success\"}}, {\"type\": \"ai\", \"data\": {\"content\": \"304.5\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 51, \"prompt_tokens\": 252, \"total_tokens\": 303, \"completion_tokens_details\": null, \"prompt_tokens_details\": {\"audio_tokens\": null, \"cache_write_tokens\": null, \"cached_tokens\": 191, \"image_tokens\": null, \"text_tokens\": null}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-oss:20b\", \"system_fingerprint\": \"fp_ollama\", \"id\": \"chatcmpl-924\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"lc_run--01a08b74-a772-7730-8161-d291e9c4a0a9-0\", \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 252, \"output_tokens\": 51, \"total_tokens\": 303, \"input_token_details\": {\"cache_read\": 191}, \"output_token_details\": {}}}}]}"
+      },
+      "endTime": 1789046074453076992,
+      "events": [],
+      "kind": "SpanKind.INTERNAL",
+      "name": "LangGraph",
+      "parentSpanId": null,
+      "spanId": "9029899629278f27",
+      "startTime": 1789046071771833856,
+      "status": {
+        "code": "OK",
+        "message": null
+      },
+      "traceId": "b9c37dc1e1867c64facff960e3bf0ac1"
+    }
+  ]
+}
