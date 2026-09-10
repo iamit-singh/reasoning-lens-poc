@@ -4,6 +4,12 @@ One line per work session (C10.5). Reviewed at month end; **the cumulative figur
 releases the Option-2 contingency at G2.** This file is the C10.1 contingency trigger —
 keep it honest, including when it is unflattering.
 
+> **The live tracker is the shared view of this same data:**
+> [Reasoning Lens Month 1](https://claude.ai/code/artifact/d80de125-0d48-4546-a7b4-d1642af07ede)
+> — task status, hours, the G0/G1 checklists and the Appendix D decisions. It is backed by
+> a database, so it is what other people read. **Update both, or update the tracker and
+> regenerate this file** — two ledgers that disagree are worse than one.
+
 | Date | Week | Task | Hrs | Note |
 |------------|------|-------|-----|--------------------------------------------------|
 | 2026-09-10 | W1 | §11 | 0.3 | Day-1 unblock: four Appendix D asks drafted. **None sent** — each needs a human. D#1 default taken and recorded (Option 2, L1+L2 applied now) |
