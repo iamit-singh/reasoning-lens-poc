@@ -73,6 +73,13 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e "./analyzer[dev]"
+      # **This job is the G1 freeze.** The four report fixtures are re-validated against
+      # the committed schema on every PR; a fixture that stops validating is a schema
+      # change, and after G1 a schema change is a plan amendment (C3.3).
+      - name: replay span trees (the step_id uniqueness contract reads them)
+        run: make spans
+        env:
+          MOCK_LLM: "1"
       - working-directory: analyzer
         run: pytest -q -m contract
 
@@ -84,10 +91,34 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e "./analyzer[dev]"
+      # `out/spans` is gitignored -- it is derived, and committing derived data is how the
+      # derivation quietly stops being run. Replayed here from the committed cassettes,
+      # which is also a second assertion: if the generation cassettes no longer produce
+      # valid span trees, this fails before the pipeline tests do.
+      - name: replay span trees from cassettes
+        run: make spans
+        env:
+          MOCK_LLM: "1"
       # No network: the point of MOCK_LLM=1 is that CI is deterministic and cost-free.
+      # MODEL_ANALYZE is set even here, and it is not ceremony: a cassette records a
+      # (model, prompt) pair and replay verifies both, so that a replayed report's
+      # `judge_triage_pin` is true rather than decorative. It is a public model id.
       - run: ./scripts/run_marker.sh integration_mock
         env:
           MOCK_LLM: "1"
+          MODEL_ANALYZE: "gpt-5-mini-2025-08-07"
+          ANALYZER_BACKEND: "hybrid"
+
+  rubric-drift:
+    name: rubric/prompt taxonomy drift (C5.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The cheapest defence named in the plan. If the taxonomy the annotator reads and
+      # the taxonomy the classifier is given drift apart, Cohen's kappa measures the
+      # difference in WORDING and reports it as classifier quality -- invisibly, because
+      # both files still read sensibly and the number just comes out lower.
+      - run: ./scripts/check_rubric_drift.sh
 
   boundaries:
     name: import-linter boundary contract (I1 / C2.2)
