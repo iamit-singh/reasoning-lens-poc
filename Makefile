@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
+        boundaries schema-freeze rubric-drift calibration-page label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -55,7 +55,10 @@ schema-freeze:  ## C5.4 held-out set protection
 rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt and rubric
 	./scripts/check_rubric_drift.sh
 
-ci: lint typecheck unit contract integration-mock boundaries schema-freeze rubric-drift  ## everything a PR runs
+calibration-page:  ## E9 -- the calibration page hard-codes no numbers
+	./scripts/check_calibration_page.sh
+
+ci: lint typecheck unit contract integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3

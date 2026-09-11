@@ -19,6 +19,11 @@ export default function RootLayout({ children }) {
               Three strategy arms over one problem bank, segmented into steps, each step
               classified and judged — with the agreement numbers published beside every claim.
             </p>
+            <p style={{ marginTop: 8 }}>
+              <a href="/calibration/" style={{ fontSize: 13 }}>
+                Calibration &amp; limitations →
+              </a>
+            </p>
           </div>
         </header>
         <main className="wrap">{children}</main>

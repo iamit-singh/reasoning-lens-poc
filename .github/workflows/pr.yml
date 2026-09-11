@@ -109,6 +109,16 @@ jobs:
           MODEL_ANALYZE: "gpt-5-mini-2025-08-07"
           ANALYZER_BACKEND: "hybrid"
 
+  calibration-page:
+    name: calibration page hard-codes no numbers (E9)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # B0 Condition #5 says the calibration page ships with whatever numbers we get. One
+      # literal that crept in during a layout tweak would not look wrong to a reader, would
+      # not fail a test, and would quietly turn the page from a measurement into a brochure.
+      - run: ./scripts/check_calibration_page.sh
+
   rubric-drift:
     name: rubric/prompt taxonomy drift (C5.3)
     runs-on: ubuntu-latest

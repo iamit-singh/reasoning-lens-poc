@@ -45,6 +45,7 @@ export default [
     files: [
       "app/lib/reports.js",
       "app/lib/taxonomy.js",
+      "app/lib/calibration.js",
       "*.config.mjs",
       "app/**/page.jsx",
       "app/**/layout.jsx",
