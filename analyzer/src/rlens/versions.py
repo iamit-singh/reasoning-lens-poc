@@ -121,6 +121,35 @@ def analyzer_pin() -> str:
     return pin
 
 
+def escalator_pin() -> str:
+    """The exact dated id doing the ESCALATED judging (C4.4, M2-5).
+
+    Separate from `analyzer_pin` because the whole point of the tier is that it is a
+    different, stronger model: one id for both would keep the mechanism's name in the
+    report while deleting the mechanism, which ADR-001 already refuses for generation and
+    refuses here for the same reason.
+    """
+    pin = os.environ.get("MODEL_ESCALATE", "")
+    if not pin:
+        raise RuntimeError(
+            "MODEL_ESCALATE is unset. The escalation tier only means something if the "
+            "escalated verdict comes from a BETTER model than the first pass -- see "
+            "docs/decisions/ADR-001-provider.md."
+        )
+    if _is_alias(pin):
+        raise RuntimeError(
+            f"MODEL_ESCALATE={pin!r} looks like a floating alias. A number pinned to an "
+            "alias expires silently; use the exact dated id."
+        )
+    if pin == os.environ.get("MODEL_ANALYZE", ""):
+        raise RuntimeError(
+            f"MODEL_ESCALATE and MODEL_ANALYZE are both {pin!r}. An escalation tier that "
+            "re-asks the same model is a second opinion from the first opinion; the report "
+            "would carry `escalated: true` for a verdict nothing stronger produced."
+        )
+    return pin
+
+
 def _is_alias(model: str) -> bool:
     """A floating alias resolves to different weights over time."""
     return "latest" in model or model.endswith(("-preview", "-turbo"))

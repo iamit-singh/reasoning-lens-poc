@@ -34,8 +34,8 @@ import pathlib
 from typing import Any
 
 from rlens.checkers import CheckerError, check
-from rlens.classify import ClassificationResult, StepRow, classify
-from rlens.contracts import NormalizedTrace
+from rlens.classify import ClassificationResult, classify
+from rlens.contracts import NormalizedTrace, StepRow
 from rlens.ingest import otel
 from rlens.llm import ProviderError
 from rlens.segment import segment

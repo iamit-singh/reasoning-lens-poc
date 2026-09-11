@@ -567,6 +567,7 @@ def analyze(
     cassette: str | None = None,
     timeout: int | None = None,
     cap: int | None = None,
+    tier: str = "triage",
 ) -> AnalysisResult:
     """One analysis call. Classification, triage, consistency and escalation all use it.
 
@@ -584,12 +585,18 @@ def analyze(
     truncation or a bad-JSON response: the first is hopeless and the second is the
     caller's repair retry to spend, once, with the validation error attached (C4.3).
     """
+    if tier not in ("triage", "escalate"):
+        raise ProviderError(f"tier must be 'triage' or 'escalate', not {tier!r}")
+
     backend = _analysis_backend()
     if backend == "hybrid":
-        from rlens.versions import analyzer_pin
+        from rlens.versions import analyzer_pin, escalator_pin
 
         try:
-            model = analyzer_pin()
+            # **The tier picks the pin, and the caller cannot pass a model.** C4.4's whole
+            # claim is that an escalated verdict came from a stronger model; a `model=`
+            # parameter would make that claim checkable only by reading every call site.
+            model = escalator_pin() if tier == "escalate" else analyzer_pin()
         except RuntimeError as exc:
             # **Replay needs the pin too, and that is deliberate.** A cassette records a
             # (model, prompt) pair. Replaying it while the environment declares a

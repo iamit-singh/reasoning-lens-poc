@@ -23,7 +23,7 @@ from typing import Any
 
 import pytest
 from rlens import classify as C
-from rlens.contracts import NormalizedTrace, Step
+from rlens.contracts import PRECEDENCE, RATIONALE_MAX, NormalizedTrace, Step
 from rlens.llm import AnalysisResult
 
 
@@ -318,7 +318,7 @@ def test_an_overlong_rationale_is_capped_not_rejected(scripted) -> None:
     res = C.classify(trace, item_prompt="p")
 
     assert res.ok
-    assert len(res.rows[0].rationale) == C.RATIONALE_MAX
+    assert len(res.rows[0].rationale) == RATIONALE_MAX
     # ...and the cap is *counted*, so a prompt that systematically overruns is visible.
     assert res.truncated_rationales == 1
 
@@ -366,10 +366,10 @@ def test_a_truncation_is_not_swallowed_as_a_parse_failure(scripted) -> None:
 def test_the_precedence_constant_matches_the_prompt_verbatim() -> None:
     """If these drift, kappa measures rubric drift rather than classifier quality."""
     text = C._PROMPT.read_text()
-    assert " > ".join(C.PRECEDENCE) in text
+    assert " > ".join(PRECEDENCE) in text
 
 
 def test_every_taxonomy_label_appears_in_the_prompt() -> None:
     text = C._PROMPT.read_text()
-    for label in C.PRECEDENCE:
+    for label in PRECEDENCE:
         assert label in text

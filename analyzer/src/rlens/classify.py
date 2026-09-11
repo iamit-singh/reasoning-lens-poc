@@ -45,35 +45,12 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError, model_validator
+from pydantic import BaseModel, ValidationError
 
-from rlens.contracts import NormalizedTrace, Step
+from rlens.contracts import RATIONALE_MAX, NormalizedTrace, Step, StepRow
 from rlens.llm import AnalysisResult, analyze
-
-#: C4.3's taxonomy. Single-label with a stated precedence, because multi-label would make
-#: Cohen's kappa inapplicable -- and the precedence rule is what makes single-labelling
-#: reproducible between two annotators who never speak to each other.
-Behavior = Literal["verification", "backtracking", "subgoal_setting", "backward_chaining", "linear"]
-
-Verdict = Literal["sound", "unsound", "unverifiable"]
-
-ErrorType = Literal["arithmetic", "logical", "factual", "constraint_violation", "unsupported_leap"]
-
-#: C4.3's precedence, highest first. Not used to *pick* a label -- the model does that --
-#: but it is the rubric's rule and the rubric and the prompt must not drift, so the one
-#: machine-readable copy lives next to the prompt that states it.
-PRECEDENCE: tuple[Behavior, ...] = (
-    "backtracking",
-    "verification",
-    "backward_chaining",
-    "subgoal_setting",
-    "linear",
-)
-
-#: Display text, capped rather than validated -- see `_truncate_rationale`.
-RATIONALE_MAX = 200
 
 _PROMPT = Path(__file__).parent / "prompts" / "classify_and_triage.md"
 
@@ -84,46 +61,6 @@ class ClassifierParseFailure(RuntimeError):
     Carries the reason text so the `degraded` block can name it. The caller does not catch
     this to retry; it catches it to render the trace unannotated.
     """
-
-
-class StepRow(BaseModel):
-    """One returned row, validated at the boundary.
-
-    Strict about everything that becomes a measurement and forgiving about nothing else.
-    `extra` keys are ignored rather than rejected: a model that adds a `notes` field has
-    not failed to answer the question, and rejecting the whole chunk over it would trade
-    25 real rows for a tidiness rule.
-    """
-
-    step_id: str
-    behavior: Behavior
-    behavior_confidence: float = Field(ge=0.0, le=1.0)
-    verdict: Verdict
-    validity_confidence: float = Field(ge=0.0, le=1.0)
-    error_type: ErrorType | None = None
-    rationale: str = ""
-
-    @model_validator(mode="after")
-    def _error_type_agrees_with_verdict(self) -> StepRow:
-        """`error_type` names the defect in an `unsound` step, and means nothing otherwise.
-
-        Checked rather than silently normalised. A row saying `sound` with
-        `error_type: "arithmetic"` is a model that has not answered coherently, and the
-        repair retry -- which is handed this exact message -- is the cheap place to find
-        out whether it can. Quietly nulling the field would hide a confused classifier
-        behind clean-looking data, and C4.6's flagged-step count reads these.
-        """
-        if self.verdict == "unsound" and self.error_type is None:
-            raise ValueError(
-                f"step {self.step_id}: verdict is 'unsound' but error_type is null. "
-                f"An unsound step must name its defect."
-            )
-        if self.verdict != "unsound" and self.error_type is not None:
-            raise ValueError(
-                f"step {self.step_id}: verdict is {self.verdict!r} but error_type is "
-                f"{self.error_type!r}. error_type must be null unless the verdict is 'unsound'."
-            )
-        return self
 
 
 class _Response(BaseModel):
