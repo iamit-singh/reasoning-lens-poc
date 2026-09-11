@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift label draw-sample ci warm-cache calibrate faithfulness smoke \
+        boundaries schema-freeze rubric-drift label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -115,6 +115,21 @@ classify-reliability:  ## M1-9's DoD -- parse-failure rate over N full passes. C
 
 report:  ## the end-to-end pipeline: span trees -> ReasoningReport (MOCK_LLM=1 for offline)
 	@set -a; [ -f .env ] && . ./.env; set +a; cd $(ANALYZER) && ../$(BIN)/python -m rlens --spans ../out/spans --out ../out/reports $(ARGS)
+
+# ---------------------------------------------------------------- frontend (C4.10)
+FRONTEND := frontend
+
+fe-install:  ## install the frontend toolchain
+	cd $(FRONTEND) && npm install --no-audit --no-fund
+
+fe-build:  ## FE-1+ -- static export against the COMMITTED FIXTURES. No backend, no network
+	cd $(FRONTEND) && npm run build
+
+fe-build-measured:  ## static export against out/reports -- what the demo ships (M3)
+	cd $(FRONTEND) && npm run build:measured
+
+fe-dev:  ## the frontend dev server, fixtures-first
+	cd $(FRONTEND) && npm run dev
 
 # ---------------------------------------------------------------- local runtime (ADR-001)
 models:  ## pull the local generation model

@@ -2,12 +2,21 @@
   "name": "reasoning-lens-frontend",
   "private": true,
   "version": "0.1.0",
-  "description": "Next.js static export. Starts W5, after the G1 ReasoningReport freeze.",
+  "description": "Next.js static export. Fixtures-first (C4.10): every component is built against analyzer/tests/fixtures/reports/*.json.",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "npx serve out",
     "lint": "eslint .",
-    "build": "echo 'frontend not yet implemented (owner: FE-1..FE-8, W5+)' && exit 2"
+    "build:measured": "NEXT_PUBLIC_USE_FIXTURES=0 next build"
   },
   "devDependencies": {
-    "eslint": "^9.11.0"
+    "eslint": "^9.11.0",
+    "eslint-plugin-react": "^7.37.5"
+  },
+  "dependencies": {
+    "next": "^15.5.25",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   }
 }

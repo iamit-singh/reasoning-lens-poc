@@ -1,0 +1,128 @@
+/* FE-1's shell. Deliberately small: C11.3 budgets 250 KB for the whole bundle, and the
+   accessibility floor in C4.10 (text labels beside every colour) is cheaper to hold in
+   plain CSS than behind a framework. */
+
+:root {
+  color-scheme: light dark;
+  --ground: #eceff0; --surface: #fbfcfc; --sunk: #e3e8e9;
+  --ink: #131a1c; --ink-2: #3c4a4d; --muted: #67767a; --faint: #8d9b9e;
+  --rule: #d2dadb; --rule-2: #c0cacc;
+  --accent: #1f4e6b; --accent-soft: #dce8ef;
+  --ok: #2c6a4b; --ok-soft: #dbeae0;
+  --warn: #8a5710; --warn-soft: #f4e8d5;
+  --stop: #982f24; --stop-soft: #f6ddd9;
+  --loop: #63497c; --loop-soft: #e8e0f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #12181a; --surface: #1a2124; --sunk: #0d1214;
+    --ink: #e8eeef; --ink-2: #c3cfd1; --muted: #93a2a5; --faint: #6d7c80;
+    --rule: #2c3639; --rule-2: #3b4649;
+    --accent: #7ab6d8; --accent-soft: #1c2f3b;
+    --ok: #7cc39a; --ok-soft: #17281f;
+    --warn: #d9a860; --warn-soft: #2a2015;
+    --stop: #e08c80; --stop-soft: #2d1a17;
+    --loop: #b79ad4; --loop-soft: #231b2c;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+a { color: var(--accent); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 64px; }
+
+/* ---------- masthead ---------- */
+.masthead { background: var(--surface); border-bottom: 1px solid var(--rule-2); }
+.masthead .wrap { padding-top: 18px; padding-bottom: 18px; }
+.masthead h1 { margin: 0; font-size: 21px; letter-spacing: -0.01em; }
+.masthead p { margin: 4px 0 0; color: var(--muted); font-size: 13px; max-width: 68ch; }
+.masthead a { text-decoration: none; color: inherit; }
+
+/* ---------- provenance banner ---------- */
+.provenance {
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+  padding: 9px 14px; border-radius: 3px; font-size: 12.5px; margin: 18px 0;
+  background: var(--warn-soft); color: var(--warn); border: 1px solid transparent;
+}
+.provenance.measured { background: var(--sunk); color: var(--ink-2); }
+.provenance b { font-weight: 600; }
+
+/* ---------- featured ---------- */
+.featured { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; margin-top: 20px; }
+.featured header { padding: 14px 18px 12px; border-bottom: 1px solid var(--rule); }
+.eyebrow {
+  font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--faint); font-weight: 700; margin: 0 0 5px;
+}
+.featured h2 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+.featured .verdict { margin: 7px 0 0; color: var(--ink-2); font-size: 13.5px; max-width: 76ch; }
+.featured .prompt { margin: 9px 0 0; color: var(--muted); font-size: 13px; max-width: 76ch; }
+
+/* ---------- arm panes ---------- */
+.panes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0; }
+.pane { padding: 14px 18px; border-left: 1px solid var(--rule); min-width: 0; }
+.pane:first-child { border-left: 0; }
+.pane h3 { margin: 0 0 3px; font-size: 13.5px; }
+.pane .answer { font-size: 22px; letter-spacing: -0.02em; margin: 6px 0 2px; }
+.pane dl { margin: 10px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12.5px; }
+.pane dt { color: var(--muted); }
+.pane dd { margin: 0; text-align: right; }
+
+/* Verdict chips carry a WORD, not only a colour (C4.10's accessibility floor). A
+   colour-blind reviewer on a stage screen is a realistic failure mode for a demo whose
+   entire premise is legibility. */
+.chip {
+  display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 2px;
+  background: var(--sunk); color: var(--muted);
+}
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.bad { background: var(--stop-soft); color: var(--stop); }
+.chip.unknown { background: var(--warn-soft); color: var(--warn); }
+.chip.degraded { background: var(--loop-soft); color: var(--loop); }
+
+/* ---------- picker ---------- */
+.picker { margin-top: 34px; }
+.picker h2 { font-size: 15px; margin: 0 0 4px; }
+.picker .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+.tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+.tag {
+  font-size: 12px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rule-2); background: var(--surface); color: var(--ink-2);
+}
+.tag[aria-pressed="true"] { background: var(--accent); border-color: transparent; color: var(--surface); }
+.tag .n { color: inherit; opacity: 0.62; margin-left: 5px; }
+
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.item {
+  display: block; text-decoration: none; color: inherit; background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 4px; padding: 13px 15px;
+}
+.item:hover { border-color: var(--accent); }
+.item .id { font-size: 11px; color: var(--accent); font-weight: 600; }
+.item .q { font-size: 13.5px; margin: 4px 0 8px; line-height: 1.4; }
+.item .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* ---------- mobile: panes become tabs (C4.10, < 768px) ---------- */
+.tabbar { display: none; gap: 6px; padding: 12px 18px 0; }
+@media (max-width: 767px) {
+  .tabbar { display: flex; }
+  .panes { display: block; }
+  .pane { border-left: 0; border-top: 1px solid var(--rule); }
+  .pane[data-tabbed="hidden"] { display: none; }
+}
+.tab {
+  flex: 1; font-size: 12px; padding: 6px 8px; border-radius: 3px; cursor: pointer;
+  border: 1px solid var(--rule-2); background: var(--surface); color: var(--ink-2);
+}
+.tab[aria-selected="true"] { background: var(--accent); border-color: transparent; color: var(--surface); }
+
+/* ---------- misc ---------- */
+.backlink { display: inline-block; margin: 18px 0 0; font-size: 13px; text-decoration: none; }
+.notice { padding: 12px 14px; border-radius: 3px; background: var(--sunk); color: var(--ink-2); font-size: 13px; }
+footer { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--faint); font-size: 11.5px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
