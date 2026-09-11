@@ -1,0 +1,17 @@
+{
+  "id": "tc-02",
+  "prompt": "A coat priced at $180 is reduced by 30%, and the reduced price is then reduced by a further 20%. What is the final price, in dollars?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "100.80",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "trap_answers": [
+    "90"
+  ],
+  "trap_note": "Successive discounts compound: 180 x 0.7 x 0.8 = 100.80. Adding the percentages gives a 50% discount and 180 x 0.5 = 90 -- arithmetically clean, and the error is a single false assumption rather than a slip.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11) after all four declared traps reproduced 0/5"
+}

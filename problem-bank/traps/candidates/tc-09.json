@@ -1,0 +1,17 @@
+{
+  "id": "tc-09",
+  "prompt": "$1,000 is invested at 12% per annum, compounded quarterly. What is the value of the investment after one year, in dollars?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "1125.51",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "trap_answers": [
+    "1120"
+  ],
+  "trap_note": "Quarterly compounding divides the rate and raises the power: 1000 x (1 + 0.12/4)^4 = 1125.51. Applying the annual rate once gives 1000 x 1.12 = 1120, which ignores the compounding the question names explicitly while still producing a defensible-looking figure.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

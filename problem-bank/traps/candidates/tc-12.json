@@ -1,0 +1,16 @@
+{
+  "id": "tc-12",
+  "prompt": "The mean of ten numbers is 42. One of the numbers, which is 15, is removed. What is the mean of the nine numbers that remain?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "45",
+  "checker": "exact",
+  "trap_answers": [
+    "40.5"
+  ],
+  "trap_note": "The ten numbers total 420; removing 15 leaves 405 across nine numbers, so the mean rises to 45. Dividing the reduced total by the original count gives 405/10 = 40.5 -- and because removing a below-average value should RAISE the mean, the trap answer moves in the wrong direction while looking arithmetically sound.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

@@ -17,6 +17,7 @@ wrong answers right. The rules below are deliberately small, listed, and testabl
 
 from __future__ import annotations
 
+import math
 import re
 
 CHECKERS = ("exact", "numeric_tol", "set_match")
@@ -40,8 +41,12 @@ def normalise(text: str) -> str:
     return out.strip().rstrip(_TRAILING_PUNCT).strip()
 
 
-def _as_float(text: str) -> float | None:
-    """The first number in the text, or None.
+def sole_number(text: str) -> float | None:
+    """The one number in the text, or None if there is not exactly one.
+
+    Public because callers outside grading need the same question answered: M1-5's
+    harness uses it to tell an answer it could not READ from an answer that was WRONG,
+    and counting the first as the second understates accuracy for free.
 
     Tolerant of a model that answers `3237.50 dollars` rather than a bare numeral --
     but NOT of one that answers with a sentence containing several numbers, where
@@ -52,6 +57,22 @@ def _as_float(text: str) -> float | None:
     if len(found) != 1:
         return None
     return float(found[0])
+
+
+#: Words that invert an answer while leaving its number intact. Kept as a short, listed
+#: rule rather than a general "is this a real assertion" heuristic, because negation is
+#: the one transformation that makes `not 68` and `68` the same string to a number
+#: extractor and opposite claims to a reader. Waffle around a number does not change
+#: what was answered; a negation does.
+_NEGATIONS = (" not ", " no ", "n't ", " neither ", " cannot ", " isn't ", " none ")
+
+
+def _negated(text: str) -> bool:
+    """Does this answer deny its own number?
+
+    Padded on both sides so `not` matches the word and never the inside of `another`.
+    """
+    return any(word in f" {normalise(text)} " for word in _NEGATIONS)
 
 
 def _as_set(value: str | list[str]) -> set[str]:
@@ -72,7 +93,30 @@ def check(
     if checker == "exact":
         if isinstance(known_answer, list):
             raise CheckerError("checker 'exact' needs a string answer, not a list")
-        return normalise(known_answer) == normalise(actual)
+        if normalise(known_answer) == normalise(actual):
+            return True
+        # **A numeric answer is a number, not a string.** M1-5 found this on live runs:
+        # asked for "the final answer on its own last line", the model answers
+        # `7 minutes`, and a string compare against the declared `7` calls that WRONG.
+        # Nothing downstream would have noticed -- it deflates accuracy for every
+        # `exact` item for the rest of the project and surfaces only as "the model is
+        # worse than expected", which is precisely the failure `test_bank_answers.py`
+        # exists to prevent and could not catch, because its own test feeds the declared
+        # answer back in and a string trivially equals itself.
+        #
+        # This is not `numeric_tol` by the back door. `numeric_tol` grants MEASUREMENT
+        # slack, which is an item-level claim and must be declared per item; the epsilon
+        # below is float-REPRESENTATION slack, so that `315` and `315.0` are the same
+        # number rather than two spellings. And it stays strict where it matters:
+        # `sole_number` refuses text containing more than one number, so `7 or 21` scores
+        # wrong instead of silently resolving to the first thing that looks like a hit.
+        want = sole_number(known_answer)
+        if want is None:
+            return False
+        got = sole_number(actual)
+        if got is None or _negated(actual):
+            return False
+        return math.isclose(want, got, rel_tol=1e-9, abs_tol=1e-12)
 
     if checker == "numeric_tol":
         if tolerance is None or tolerance <= 0:
@@ -84,7 +128,7 @@ def check(
             )
         if isinstance(known_answer, list):
             raise CheckerError("checker 'numeric_tol' needs a string answer, not a list")
-        want, got = _as_float(known_answer), _as_float(actual)
+        want, got = sole_number(known_answer), sole_number(actual)
         if want is None or got is None:
             return False
         return abs(want - got) <= tolerance

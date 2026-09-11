@@ -16,6 +16,26 @@ from rlens.runner.arms import ARMS, ArmSpec, messages_for
 from rlens.runner.emit import arm_span_attributes, llm_span_attributes
 from rlens.versions import GenerationPin, generation_pin
 
+#: Lines that close or decorate a block without carrying an answer. A closed list, not a
+#: pattern: anything broader starts discarding short answers. `315` is a legitimate final
+#: line and must never look like decoration, which rules out "skip lines with no letters".
+#: C4.2 already requires the segmenter to know about LaTeX blocks and code fences for
+#: exactly the same reason -- these are the delimiters that show up in practice.
+_DECORATION = frozenset(
+    {
+        "\\]",
+        "\\[",
+        "\\)",
+        "\\(",
+        "$$",
+        "```",
+        "---",
+        "***",
+        "___",
+        "**",
+    }
+)
+
 
 @dataclass
 class ArmResult:
@@ -39,11 +59,27 @@ class ArmResult:
 
     @property
     def final_answer(self) -> str:
-        """The last non-empty line. C4.1's arms both ask for the answer on its own line."""
+        """The last line carrying content. C4.1's arms both ask for the answer on its own
+        last line -- and the model does not always oblige.
+
+        **M1-5 found the naive form of this returning `\\]`.** Asked for the garden area,
+        the thinking arm closed with a LaTeX display block, so "the last non-empty line"
+        was the closing delimiter: a correct answer scored as unreadable. Trailing
+        decoration is therefore skipped, by the same listed-rules approach `checkers.py`
+        takes -- see `_DECORATION`.
+
+        What this deliberately does NOT do is hunt for a number inside the chain. The
+        line above that `\\]` holds four numbers, and a grader willing to pick the right
+        one out of a worked line would pick the right one out of a WRONG worked line just
+        as happily. An answer we cannot read is reported as unreadable, not guessed at.
+        """
         if not self.completion:
             return ""
-        lines = [ln.strip() for ln in self.completion.text.strip().splitlines() if ln.strip()]
-        return lines[-1] if lines else ""
+        for line in reversed(self.completion.text.strip().splitlines()):
+            stripped = line.strip()
+            if stripped and stripped not in _DECORATION:
+                return stripped
+        return ""
 
 
 async def run_arm(

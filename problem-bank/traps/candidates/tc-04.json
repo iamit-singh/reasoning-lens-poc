@@ -1,0 +1,16 @@
+{
+  "id": "tc-04",
+  "prompt": "A shop's monthly revenue was $80,000. It rose by 25% in October and then fell by 25% in November. What was the November revenue, in dollars?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "75000",
+  "checker": "exact",
+  "trap_answers": [
+    "80000"
+  ],
+  "trap_note": "The two 25% changes apply to different bases: 80000 x 1.25 x 0.75 = 75000. Reading them as cancelling returns the starting figure, 80000 -- a wrong answer that requires no arithmetic at all and therefore costs a short chain nothing.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11) after all four declared traps reproduced 0/5"
+}

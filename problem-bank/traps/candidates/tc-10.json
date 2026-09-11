@@ -1,0 +1,16 @@
+{
+  "id": "tc-10",
+  "prompt": "A can complete a job alone in 6 days and B can complete the same job alone in 12 days. They start working together, but A leaves after 2 days and B finishes the job alone. How many days does the job take in total?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "8",
+  "checker": "exact",
+  "trap_answers": [
+    "4"
+  ],
+  "trap_note": "Together they work at 1/6 + 1/12 = 1/4 per day, so 2 days completes half. B alone finishes the remaining half at 1/12 per day, taking 6 more days: 8 in total. Applying the COMBINED rate to the remainder gives 2 more days and a total of 4 -- the departure is the step the chain drops.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "tc-01",
+  "prompt": "Class A has 12 students with a mean score of 78. Class B has 28 students with a mean score of 88. What is the mean score of all 40 students?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "85",
+  "checker": "exact",
+  "trap_answers": [
+    "83"
+  ],
+  "trap_note": "The means must be weighted by class size: (12x78 + 28x88)/40 = 3400/40 = 85. Averaging the two means directly gives (78+88)/2 = 83 -- one omitted step, a clean integer, and a chain that looks fully worked. No cognitive-reflection archetype behind it.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11) after all four declared traps reproduced 0/5"
+}

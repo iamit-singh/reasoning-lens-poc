@@ -1,0 +1,16 @@
+{
+  "id": "tc-03",
+  "prompt": "A plank 84 cm long is to be divided into pieces each 7 cm long. How many cuts are needed?",
+  "tags": [
+    "arithmetic",
+    "logic"
+  ],
+  "known_answer": "11",
+  "checker": "exact",
+  "trap_answers": [
+    "12"
+  ],
+  "trap_note": "84/7 = 12 gives the number of PIECES; the last piece needs no cut, so 11 cuts are needed. The trap answer is the quotient itself, which is the number the arithmetic hands you before the question is actually answered.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11) after all four declared traps reproduced 0/5"
+}

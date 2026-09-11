@@ -33,7 +33,7 @@ L1_ITEM_COUNT = 14
 FLOORS = {"tool_required": 5, "traps": 3, "easy": 3, "multi_step": 3}
 
 REQUIRED_FIELDS = {"id", "prompt", "tags", "known_answer", "checker", "is_trap", "source"}
-OPTIONAL_FIELDS = {"tolerance", "trap_note"}
+OPTIONAL_FIELDS = {"tolerance", "trap_note", "trap_answers"}
 
 
 def _load() -> list[dict[str, Any]]:
@@ -49,6 +49,14 @@ def items() -> list[dict[str, Any]]:
 
 def _ids() -> list[str]:
     return [p.stem for p in sorted(BANK.glob("*.json"))]
+
+
+def _a_different_number(answer: str) -> str:
+    """A wrong answer of the same shape: a number, not the right one."""
+    try:
+        return f"{float(answer) + 1:g}"
+    except ValueError:
+        return f"{answer} and also something else entirely"
 
 
 # ------------------------------------------------------------------ the DoD
@@ -115,15 +123,29 @@ def test_the_checkers_actually_reject_a_wrong_answer(items: list[dict[str, Any]]
     """
     for item in items:
         answer, checker = item["known_answer"], item["checker"]
-        if checker == "set_match":
-            wrong = ", ".join([*list(answer)[:-1], "chartreuse"])
+        if item["is_trap"]:
+            # For a trap the plausible wrong answer is not hypothetical -- it is the one
+            # the item was BUILT to induce, and it is declared. Synthesising a wrong
+            # answer here instead would test the checker against a strawman while the
+            # answer that actually threatens it went unchecked.
+            wrongs = list(item["trap_answers"])
+        elif checker == "set_match":
+            wrongs = [", ".join([*list(answer)[:-1], "chartreuse"])]
         elif checker == "numeric_tol":
-            wrong = str(float(answer) + 10 * item["tolerance"])
+            wrongs = [str(float(answer) + 10 * item["tolerance"])]
         else:
-            wrong = f"{answer} and also something else entirely"
-        assert not check(answer, wrong, checker, item.get("tolerance")), (
-            f"{item['id']}: checker {checker!r} accepted {wrong!r}"
-        )
+            # A plausible wrong answer to a numeric item is a DIFFERENT NUMBER. The
+            # earlier form here appended waffle to the right answer -- which M1-5's
+            # numeric-aware `exact` correctly accepts, because a model that writes
+            # "68 and also something else entirely" has answered 68. That string tested
+            # string-containment looseness, which stopped being the risk when `exact`
+            # stopped being a string compare; a different number is the risk now.
+            # `test_checkers.py` covers the pushover cases this no longer reaches.
+            wrongs = [_a_different_number(answer), f"not {answer}"]
+        for wrong in wrongs:
+            assert not check(answer, wrong, checker, item.get("tolerance")), (
+                f"{item['id']}: checker {checker!r} accepted {wrong!r}"
+            )
 
 
 # ------------------------------------------------------------------ L1 floors
@@ -165,8 +187,18 @@ def test_every_trap_names_the_wrong_chain_it_is_meant_to_induce(
             note = item.get("trap_note", "")
             assert note.strip(), f"{item['id']}: is_trap with no trap_note"
             assert len(note) > 60, f"{item['id']}: trap_note too thin to validate against"
+            # The prose says which chain the trap induces; `trap_answers` is the same
+            # claim in a form M1-5 can COUNT. Prose alone leaves "reproduces" to the
+            # judgement of whoever reads the run, which is not a measurement.
+            answers = item.get("trap_answers")
+            assert isinstance(answers, list) and answers, (
+                f"{item['id']}: is_trap with no trap_answers. M1-5 counts reproductions "
+                f"by checking the model's answer against these."
+            )
+            assert all(isinstance(a, str) and a.strip() for a in answers), item["id"]
         else:
             assert "trap_note" not in item, f"{item['id']}: trap_note on a non-trap"
+            assert "trap_answers" not in item, f"{item['id']}: trap_answers on a non-trap"
 
 
 @pytest.mark.contract

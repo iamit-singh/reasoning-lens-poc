@@ -1,0 +1,16 @@
+{
+  "id": "tc-07",
+  "prompt": "In a survey of 100 people, 60 like tea, 50 like coffee and 40 like juice. 30 like both tea and coffee, 20 like both coffee and juice, and 15 like both tea and juice. 5 like all three. How many of the 100 like none of the three drinks?",
+  "tags": [
+    "multi_step",
+    "logic"
+  ],
+  "known_answer": "10",
+  "checker": "exact",
+  "trap_answers": [
+    "15"
+  ],
+  "trap_note": "Inclusion-exclusion over three sets: 60+50+40-30-20-15+5 = 90 like at least one, so 10 like none. Omitting the final +5 -- the triple overlap subtracted three times and added back none -- gives 85 and an answer of 15. The omission is invisible in the working, which is what makes the wrong chain look complete.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

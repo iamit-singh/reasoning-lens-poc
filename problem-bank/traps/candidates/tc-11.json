@@ -1,0 +1,16 @@
+{
+  "id": "tc-11",
+  "prompt": "What is the sum of all two-digit whole numbers that are divisible by 7?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "728",
+  "checker": "exact",
+  "trap_answers": [
+    "735"
+  ],
+  "trap_note": "The two-digit multiples of 7 run from 14 to 98, that is 7x2 through 7x14, summing to 7 x 104 = 728. Starting the series at 7 itself adds a one-digit number and gives 7 x 105 = 735 -- an off-by-one at the boundary rather than in the arithmetic, so every step of the working checks out.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

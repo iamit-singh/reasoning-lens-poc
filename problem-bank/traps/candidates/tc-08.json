@@ -1,0 +1,16 @@
+{
+  "id": "tc-08",
+  "prompt": "How many four-digit whole numbers have digits that are strictly increasing from left to right?",
+  "tags": [
+    "multi_step",
+    "logic"
+  ],
+  "known_answer": "126",
+  "checker": "exact",
+  "trap_answers": [
+    "210"
+  ],
+  "trap_note": "Strictly increasing digits can never include 0, since 0 would have to lead, so the digits are a 4-subset of 1-9: C(9,4) = 126. Counting subsets of 0-9 instead gives C(10,4) = 210 -- a single wrong pool, one clean binomial, and no arithmetic slip to notice.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11), round 2. Round 1's six arithmetic mis-step candidates reproduced 0/36 on arm 1, so this round targets combinatorics, inclusion-exclusion and compounding instead of word-problem arithmetic"
+}

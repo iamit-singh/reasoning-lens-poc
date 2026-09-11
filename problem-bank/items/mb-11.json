@@ -9,5 +9,8 @@
   "checker": "exact",
   "is_trap": true,
   "trap_note": "The path is subtracted from BOTH sides of each dimension. Subtracting 1.5 once per dimension gives 16.5 x 22.5 = 371.25, which is arithmetically clean and wrong -- the wrong chain looks fully worked.",
+  "trap_answers": [
+    "371.25"
+  ],
   "source": "authored for this bank, M1-4 (2026-09-11)"
 }

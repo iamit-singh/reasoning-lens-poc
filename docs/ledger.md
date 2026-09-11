@@ -24,6 +24,9 @@ keep it honest, including when it is unflattering.
 | 2026-09-10 | W2 | M1-2 | 2.1 | **S2: complete.** Stock LangGraph agent, 15 spans, fixture committed. 6 C3.1 rows confirmed, 2 corrected, **1 absent**. **No `gen_ai.*` attribute arrives at all** — the live namespace is OpenInference `llm.*`, so five of nine rows were dead. **Reasoning text never reaches a span**; the control proves the runtime sends it and LangChain drops it. ADR-002 filed. **0.6 over the 1.5 h estimate** — see the W2 note
 | 2026-09-10 | W2 | M1-6 | 3.4 | **Runner arms 1–2 done.** `llm.py` provider abstraction, ADR-002 emission, 22 contract tests green under MOCK_LLM. **ADR-004: arm 1 cannot have thinking *off*** — `reasoning_effort: none` and native `think: false` are both **silently ignored** (2918 chars returned); `low` is honoured (131). Arm 1 becomes a *minimal*-reasoning baseline and B4 #7's claim narrows. Regime separation is verified from output, not the request. **+0.4 over the revised 3.0**
 | 2026-09-11 | W2 | M1-4 | 2.0 | **Bank done, W2 closed.** 14 items under L1; floors met at 5 `tool_required` / **4** traps / **4** `easy` / 6 `multi_step`. Checkers in `rlens.checkers` so the bank is validated by the code that will grade the runs. **ADR-004's control group verified on real runs: mb-01 correct on BOTH arms at 5 vs 21 reasoning tokens.** +0.3 over estimate
+| 2026-09-11 | W3 | M1-5 | 2.6 | **Trap reproduction measured. DoD NOT met: 0 of 16 candidates earned the tag over 120 runs**, 117 correct, 1 trap hit. Threshold held, not lowered: 12 further candidates authored in two rounds (round 2 abandoning word-problem arithmetic for inclusion–exclusion, combinatorics, compounding). **ADR-005 filed as *Proposed*** — there is no shallow regime on this model to trap, so the arm contrast is difficulty, not misdirection. **+1.1 over the 1.5 estimate**: the DoD asks for "3 of 5 runs" and the committed pin is greedy-decoded, so the two-regime design (pinned + sampled) had to be worked out and justified before a single run was worth making |
+| 2026-09-11 | W3 | M1-5 | 1.2 | **Two grading defects, neither about traps, both found only because M1-5 is the first task that grades real model output.** (1) `exact` was a string compare, so `7 minutes` scored **wrong** against a declared `7` — **18 of the first 48 runs, 37.5%**. It is now numeric-aware, refusing negation and multi-number ambiguity; `test_checkers.py` (27 tests) grades the shapes a model actually writes. (2) The answer extractor returned `\]` from a LaTeX display block, and the line above it carries four numbers — so `unparsed` is now a first-class outcome, separate from wrong. **Fully unbudgeted.** Would have surfaced in M3 as "the model is worse than expected" |
+| 2026-09-11 | W3 | M1-5 | 1.2 | ADR-005 (four options, recommendation, consequences) · `test_trap_reproduction.py` — M1-5's DoD as a **strict `xfail`** so the shortfall cannot be lost and cannot drift in either direction, plus 8 contract tests over the committed evidence · bank README rewritten so `is_trap` reads as a declaration · `make lint` widened to the repo, which `ruff.toml` already claimed to cover while only `analyzer/` was checked |
 
 ## Month-1 planned-vs-actual
 
@@ -31,9 +34,9 @@ keep it honest, including when it is unflattering.
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
-| W3 | 7.5 | | | M1-5 and M1-7 both start with a written hazard from W2 — see below |
+| W3 | 7.5 | **5.0 to date** | | M1-5 done at **5.0 against 1.5**. M1-7 and M1-8 not started. The W2 hazard fired exactly as written — and then survived the fix |
 | W4 | 8.0 | | | |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **14.2 to date** | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **19.2 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -257,3 +260,108 @@ heaviest week on the plan (7.5 h) and holds M1-5, M1-7 and the segmenter freeze 
 tasks that inherit the hazards above, plus the one task where a mistake invalidates every
 label written after it. **G2 should expect the Option-2 contingency to be drawn on**, and
 the honest read at W4 will be a month around 27 h against 12 h allocated.
+
+## W3 — M1-5 at 5.0 h against 1.5, and a trap floor the model will not cooperate with
+
+### The hazard M1-4 wrote down fired, and then the fix for it failed too
+
+M1-4 predicted this: `mb-12`/`mb-13`/`mb-14` are famous cognitive-reflection archetypes
+and a 20B model has very likely memorised them; `mb-11` was the archetype-free hedge. All
+four reproduced **0 of 5**.
+
+The plan's stop rule is unambiguous — *"this is a content problem, not a code problem —
+author more candidates. It is not a reason to lower the threshold"* — so twelve more were
+authored. Round 1 took the single-omission arithmetic mis-step: weighted mean, compounding
+discounts, cuts-vs-pieces, percentage base change, two-phase fill rate, harmonic mean.
+**36 runs, 36 correct.** Round 2 abandoned word-problem arithmetic entirely for the places
+a 20B actually slips: three-set inclusion–exclusion, constrained combinatorics, quarterly
+compounding, work-rate with a departure, a boundary off-by-one, mean after removal.
+**36 runs, 35 correct, 0 traps.**
+
+**120 runs, 16 candidates, one trap hit** — and that one did not fire in the pinned regime,
+so even at 3/5 it would not have been demo-safe.
+
+### The finding is ADR-004's second consequence, and it is the expensive one
+
+ADR-004 established that thinking cannot be switched off on this model: `reasoning_effort:
+"none"` and native `think: false` are both silently ignored, and `low` is the floor. The
+trap premise assumed arm 1 would reason shallowly enough to take an attractive wrong turn.
+**At `low` it still produces a real chain, and that chain solves every misdirection we
+could construct.** There is no shallow regime here to trap.
+
+What the arms *can* be separated by is **difficulty** — already verified on real runs in
+W2: arm 1 wrong at 144 reasoning tokens where arm 2 is right at 1453, and `mb-01` correct
+on both at 5 vs 21. Which is precisely the collapse ADR-004's note on the `easy` items
+warned about: *"if every item separates the arms that cleanly, the bank measures
+DIFFICULTY, not strategy."*
+
+The **cost-of-thought** half of B4 #7 is untouched — it is a token-count claim and both
+separations hold. It is the *accuracy* half that has lost its most photogenic instrument,
+and **B6.3's wow moment now rests on M2-9 (cue injection) alone.** That makes S4 (M1-13,
+W4) less slippable than C1.2's "safe to slip" list implies, and it is worth saying so four
+weeks before anyone would otherwise notice.
+
+### "Three of five runs" is not purchasable at the committed pin
+
+The DoD asks for a hit count out of five. The pin is `GEN_TEMPERATURE=0` with a fixed
+`GEN_SEED`, and `llm.generate` sends both for **both** arms — two thinking-arm runs of
+`mb-13` came back byte-identical, 259 reasoning tokens each. Five runs there are one run
+five times, and the count can only be 0 or 5.
+
+So the measurement carries two regimes, and they answer different questions: **pinned**
+(the demo's own greedy-decoded configuration — will it fire on stage?) and **sampled**
+(temperature 1.0, five declared seeds — how fragile is that binary?). A tag is earned only
+by clearing both on the same arm. **This is where the +1.1 h went**, and it was worth it:
+a 3/5 measured at the wrong temperature would have been a number with no variance in it,
+published as if it meant something.
+
+### Two grading defects, and the same shape as the last three findings
+
+Neither is about traps. Both were found only because M1-5 is the first task that grades
+real model output against declared answers.
+
+1. **`exact` scored 37.5% of correct answers wrong.** The arms ask for "the final answer
+   on its own last line"; the model answers `7 minutes`, and a string compare against `7`
+   calls that wrong. **18 of the first 48 runs.** `test_bank_answers.py` is structurally
+   blind to it — it feeds each declared answer back into its own checker, and a string
+   trivially equals itself, so the answers a model actually writes never appear in it.
+2. **The answer extractor returned `\]`.** `mb-11`'s thinking arm closed with a LaTeX
+   display block, so "the last non-empty line" was the closing delimiter. Skipping
+   trailing decoration reaches the line above — which carries four numbers, so the honest
+   outcome is **`unparsed`**, not wrong. A grader willing to pick the right number out of
+   a worked line would pick the right one out of a *wrong* worked line just as happily.
+
+> **This is the fourth time in three weeks that the DETECTOR rather than the code under
+> test was the defect** — after S2's probe reporting unexercised tool rows as absent, the
+> I1 import check flagging prose, and arm 1's un-disableable thinking. The pattern is now
+> worth naming as a practice: **every measuring instrument in this project gets a test
+> that feeds it something it should reject.** `test_checkers.py` is that test for the
+> grader, and it is the reason the bank's own contract test is no longer the only thing
+> standing between a wrong number and a published report.
+
+Left unfixed, defect 1 alone would have understated accuracy by roughly 37 points on
+`exact` items for the rest of the project, surfacing in M3 as "the model is worse than
+expected" — the exact failure `test_bank_answers.py`'s docstring predicts and could not
+catch.
+
+### Capacity, at the three-week mark
+
+**19.2 h spent of a 26.4 h month, against 12 h of Lead allocation.** M1-5 ran **5.0
+against 1.5**, the largest single overrun of the project so far.
+
+The like-for-like read still holds and is worth separating out: the trap measurement
+proper — harness, 120 runs, log — was **2.6 h against 1.5**, and the over there is the
+two-regime design the DoD's own wording forced. The other **2.4 h is two grading defects
+and an ADR**, none of which is trap work and none of which is rework.
+
+**The C10.1 bet is now clearly lost, not arguably.** W3 still holds M1-7 (3.0) and M1-8
+(2.0) plus S3 (1.0), so W3 alone will land near 11 h against a nominal 3. **G2 should
+expect the Option-2 contingency to be drawn on**, and the honest W4 projection is now a
+month around **28 h against 12 h allocated**.
+
+M1-8 is next and is the one to protect: the breakdown says so explicitly (*"protect M1-8
+over M1-5, because M1-8 blocks G1 and M1-5 does not"*), and it is the task where a mistake
+invalidates every label written after it. **M1-8 should read ADR-005's closing note before
+freezing** — C4.2 already requires the segmenter to treat `\[ … \]` as one sentence and
+never split inside a fence, and `_DECORATION` in `rlens/runner/run.py` is now the list of
+delimiters actually observed in practice.

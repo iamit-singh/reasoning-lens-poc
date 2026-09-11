@@ -1,0 +1,17 @@
+{
+  "id": "tc-05",
+  "prompt": "A tank holding 240 litres is filled by a tap delivering 8 litres per minute. A drain removes 3 litres per minute. Both run for the first 20 minutes, after which the drain is closed. How many minutes does it take in total to fill the tank?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "37.5",
+  "checker": "numeric_tol",
+  "tolerance": 0.1,
+  "trap_answers": [
+    "48"
+  ],
+  "trap_note": "Two phases: 20 minutes at a net 5 l/min fills 100 litres, and the remaining 140 litres take 140/8 = 17.5 minutes, so 37.5 in total. Treating the net rate as lasting the whole fill gives 240/5 = 48 -- the phase change is the step a short chain drops.",
+  "is_trap": true,
+  "source": "authored for M1-5 (2026-09-11) after all four declared traps reproduced 0/5"
+}

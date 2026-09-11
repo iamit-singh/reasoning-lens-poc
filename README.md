@@ -5,7 +5,7 @@ visible: three strategy arms over the same problem bank, span-tree ingest, deter
 segmentation, behavior classification, and a calibration page that publishes the agreement
 numbers whatever they turn out to be.
 
-**Status: Month 1, Week 1.** See [`docs/ledger.md`](docs/ledger.md) for actuals and
+**Status: Month 1, Week 3.** See [`docs/ledger.md`](docs/ledger.md) for actuals and
 [`../month-1-task-breakdown.md`](../month-1-task-breakdown.md) for the plan this repo
 executes — as amended by [plan amendment 001](../plan-amendment-001-local-hybrid.md).
 
@@ -29,6 +29,7 @@ make models              # pull the local generation model (~13 GB)
 make pin-local           # record the pin tuple; paste into .env
 make spike-s1            # does the local model hand back raw reasoning?
 make spike-s6            # can it call tools? GATES ARM 3 -- run before W3
+make traps               # M1-5: which declared traps actually reproduce?
 ```
 
 ## What exists today
@@ -44,11 +45,20 @@ make spike-s6            # can it call tools? GATES ARM 3 -- run before W3
 | S1 reasoning-fidelity harness (local + OpenAI) | ✅ written · ⏳ needs the model pulled | M1-1 |
 | S6 local tool-calling harness — **gates arm 3** | ✅ written · ⏳ needs the model pulled | new, W2 |
 | ~~S5 DNS delegation~~ | ❌ **cancelled** — nothing is deployed | ADR-003 |
-| Runner arms, segmenter, classifier, `ReasoningReport` | ⬜ W2–W4 | M1-6 … M1-10 |
+| Runner arms 1-2, provider abstraction, OTEL emission | ✅ | M1-6 |
+| Problem bank, 14 items under L1, checkers + their contract | ✅ | M1-4 |
+| Trap reproduction — **measured, DoD NOT met (0/16 over 120 runs)** | ⚠️ [ADR-005](docs/decisions/ADR-005-traps-do-not-reproduce.md) | M1-5 |
+| Runner arm 3 (ReAct), segmenter, classifier, `ReasoningReport` | ⬜ W3–W4 | M1-7 … M1-10 |
 | Backend, frontend | ⬜ W5+ (frontend starts after the G1 freeze) | M2/M3 |
 
-One Week-1 item is still open: **pull the local model** (`make models`), which unblocks both
-spikes and the Week-1 gate. Everything else in Week 1 is done or cancelled.
+Weeks 1 and 2 are closed. **G0 is 5 of 6** — the open check is the analysis tier, blocked
+on an OpenAI key (`MODEL_ANALYZE` unset), which is not the implementer's to unblock.
+
+**One open decision is on the critical path for the demo, not for G1:**
+[ADR-005](docs/decisions/ADR-005-traps-do-not-reproduce.md) is *Proposed* and asks whether
+to withdraw the trap floor and re-point FE-1's featured comparison at the verified
+difficulty contrast. M1-5's DoD is recorded as a strict `xfail` so the shortfall cannot be
+lost and cannot quietly drift — see `analyzer/tests/test_trap_reproduction.py`.
 
 ## The invariants (C0.2)
 
