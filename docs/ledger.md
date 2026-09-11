@@ -23,16 +23,17 @@ keep it honest, including when it is unflattering.
 | 2026-09-10 | W1 | M1-1 | 0.5 | **G0 check 2 closed.** `tiktoken>=0.9` declared; `o200k_harmony` counting wired into `make spike-s1`. **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. `LOCAL_TOKENIZER` joined the pin tuple |
 | 2026-09-10 | W2 | M1-2 | 2.1 | **S2: complete.** Stock LangGraph agent, 15 spans, fixture committed. 6 C3.1 rows confirmed, 2 corrected, **1 absent**. **No `gen_ai.*` attribute arrives at all** — the live namespace is OpenInference `llm.*`, so five of nine rows were dead. **Reasoning text never reaches a span**; the control proves the runtime sends it and LangChain drops it. ADR-002 filed. **0.6 over the 1.5 h estimate** — see the W2 note
 | 2026-09-10 | W2 | M1-6 | 3.4 | **Runner arms 1–2 done.** `llm.py` provider abstraction, ADR-002 emission, 22 contract tests green under MOCK_LLM. **ADR-004: arm 1 cannot have thinking *off*** — `reasoning_effort: none` and native `think: false` are both **silently ignored** (2918 chars returned); `low` is honoured (131). Arm 1 becomes a *minimal*-reasoning baseline and B4 #7's claim narrows. Regime separation is verified from output, not the request. **+0.4 over the revised 3.0**
+| 2026-09-11 | W2 | M1-4 | 2.0 | **Bank done, W2 closed.** 14 items under L1; floors met at 5 `tool_required` / **4** traps / **4** `easy` / 6 `multi_step`. Checkers in `rlens.checkers` so the bank is validated by the code that will grade the runs. **ADR-004's control group verified on real runs: mb-01 correct on BOTH arms at 5 vs 21 reasoning tokens.** +0.3 over estimate
 
 ## Month-1 planned-vs-actual
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
-| W2 | 6.7 | 6.9 *(so far)* | | M1-15, M1-16, M1-2, **M1-6 done** — 5.5 h planned *(M1-6 revised to 3.0)*, 6.9 h actual, **+1.4**. **Only M1-4 (1.7 h) remains in W2** |
-| W3 | 7.5 | | | |
+| W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
+| W3 | 7.5 | | | M1-5 and M1-7 both start with a written hazard from W2 — see below |
 | W4 | 8.0 | | | |
-| **Total** | **25.5** *(was 25.0: −0.5 DNS, +1.0 new spikes)* | | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **14.2 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -183,3 +184,76 @@ that **every spike so far has found something the plan did not know**, and each 
 cost 0.4–0.6 h to write down properly. That is the spikes doing their job, and it is also
 the strongest argument yet that the L1/L2 cuts taken at kickoff were not enough. **G2 should
 expect to see the Option-2 contingency drawn on.**
+
+---
+
+## W2 closed — 8.9 h against 6.7, and the bank now spans both shapes of result
+
+**M1-4 cost 2.0 h against 1.7 planned (+0.3).** 0.15 of that is a boundary-test rewrite
+that was not M1-4's work at all (below); the rest is the checker module, which the
+estimate did not anticipate needing.
+
+**Checkers went into `rlens.checkers`, not into the test.** A bank whose answers are
+validated by one implementation and graded by another is validated against nothing, and
+`metrics.py` will need exactly these functions for accuracy. The test then asserts the
+DoD's *mirror image*, which is the half that actually bites: every checker must **reject**
+a plausible wrong answer. "Every checker accepts its own answer" is satisfied by a checker
+that accepts everything.
+
+### ADR-004's control group is real, and it was worth checking on day one
+
+The `easy` items existed on paper as a hedge. Run for real:
+
+| Item | Arm 1 (`low`) | Arm 2 (`medium`) | |
+| --- | --- | --- | --- |
+| `mb-01` (easy) | **K — correct**, 5 reasoning tokens | **K — correct**, 21 tokens | same answer, **4× cheaper** |
+| multi-step probe | 18694 — **wrong**, 144 tokens | 18678 — correct, 1453 tokens | thinking buys the answer |
+
+**That contrast is the product.** One row where deliberation is wasted spend and one where
+it is the difference between right and wrong is exactly the claim B4 #7 wants to make, and
+until this run the bank could only have produced the second row. A bank of nothing but
+hard items would have measured difficulty and called it strategy.
+
+### Two hazards written down now, because W3 is where they would cost
+
+1. **The CRT traps may be memorised.** `mb-12/13/14` are cognitive-reflection archetypes
+   with rewritten surfaces (notebook/pen, printers/posters, algae/pond). A 20B model has
+   very likely seen all three, and a model that answers them correctly *from memory* is not
+   a trap that failed to fire — it is a trap that was never tested. **Four traps are
+   declared against a floor of three**, and `mb-11` is deliberately archetype-free as the
+   hedge. If the CRT three miss M1-5's 3/5, the fix is more `mb-11`-shaped candidates, not
+   a lower threshold.
+2. **The lookup items use invented place names on purpose.** A lookup item about a real
+   city measures whether the model already knows the answer; the tool never gets called and
+   `tool_required` becomes a label for something that did not happen. `test_bank_answers.py`
+   cannot detect that — only M1-7's arm-3 runs can — so the four required facts are
+   specified in the bank README rather than left for M1-7 to infer.
+
+### The boundary test was wrong, and the way it was wrong matters
+
+The I1 import check grepped source text for `import problem_bank`. It flagged
+`checkers.py`, whose docstring *discusses* that import precisely because it is forbidden.
+It now parses the AST, and has its own test proving it still catches a real import and no
+longer catches prose.
+
+Worth the 0.15 h: **a false positive in a boundary test is not harmless.** I1 is the
+invariant the architecture rests on, and a check that cries wolf is a check that someone
+eventually relaxes. This is the second time in two weeks that a *detector* rather than the
+code under test turned out to be the defect — the first was S2's probe reporting
+unexercised tool rows as absent.
+
+### Capacity, at the two-week mark
+
+**14.2 h spent of a 26.4 h month, against 12 h of Lead allocation.** W2 ran +2.2 over.
+
+The pattern is now stable enough to name: **like-for-like execution is close to estimate,
+and every overrun has been a finding that needed writing down** — the tokenizer (0.5), S2's
+namespace and reasoning-loss deltas with ADR-002 (0.6), arm 1's un-disableable thinking with
+ADR-004 (0.4), the bank's checker module and the boundary fix (0.3). That is 1.8 h of the
+2.9 h total overrun, and none of it is rework.
+
+**This is the spikes working as designed, and it is also the C10.1 bet losing.** W3 is the
+heaviest week on the plan (7.5 h) and holds M1-5, M1-7 and the segmenter freeze — the two
+tasks that inherit the hazards above, plus the one task where a mistake invalidates every
+label written after it. **G2 should expect the Option-2 contingency to be drawn on**, and
+the honest read at W4 will be a month around 27 h against 12 h allocated.
