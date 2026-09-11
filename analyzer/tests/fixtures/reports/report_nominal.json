@@ -1,0 +1,349 @@
+{
+  "schema_version": "1.0",
+  "item": {
+    "id": "fx-03",
+    "prompt": "A courier charges a $6 call-out fee plus $1.40 per kilometre. A second courier charges no call-out fee but $2.15 per kilometre. Above what whole number of kilometres is the first courier cheaper? Give the final answer on its own last line.",
+    "tags": ["multi_step", "algebra", "fixture"],
+    "known_answer": "8",
+    "checker": "exact",
+    "tolerance": null,
+    "is_trap": false,
+    "trap_note": null,
+    "source": "hand-authored for M1-10 / G1 — see fixtures/reports/README.md and ADR-009"
+  },
+  "generated_at": "2026-10-06T09:10:00Z",
+  "versions": {
+    "runner": "0.1.0",
+    "analyzer": "0.1.0",
+    "prompts": "fixture-frozen",
+    "model_pin": "fixture000000000",
+    "model_pin_fields": {
+      "model": "gpt-oss:20b",
+      "digest": "sha256:fixture",
+      "quantization": "MXFP4",
+      "runtime": "ollama 0.33.3",
+      "temperature": 0,
+      "top_p": 1.0,
+      "seed": 20260910,
+      "reasoning_effort": "medium"
+    },
+    "judge_triage_pin": "gpt-5-mini-2025-08-07",
+    "judge_escalate_pin": "gpt-5-2025-08-07",
+    "analyzer_backend": "hybrid"
+  },
+  "arms": [
+    {
+      "strategy": "direct",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "8",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "direct:fx03d:0",
+          "kind": "thought",
+          "text": "Set 6 + 1.40k < 2.15k, so 6 < 0.75k and k > 8.",
+          "char_range": [0, 45],
+          "behavior": { "label": "linear", "confidence": 0.92 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.93,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "The inequality and its rearrangement are both correct."
+          }
+        },
+        {
+          "step_id": "direct:fx03d:1",
+          "kind": "answer",
+          "text": "8",
+          "char_range": [0, 1],
+          "behavior": { "label": "linear", "confidence": 0.89 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.88,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "States the threshold derived above."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "entails",
+        "flagged": false,
+        "cited_step_ids": [],
+        "rationale": "The single derivation supports the stated answer."
+      },
+      "metrics": {
+        "output_tokens": 58,
+        "reasoning_tokens": 24,
+        "answer_tokens": 1,
+        "input_tokens": 104,
+        "est_cost_usd": null,
+        "latency_ms": 2400,
+        "turns": 1,
+        "pattern_profile": {
+          "verification": 0.0,
+          "backtracking": 0.0,
+          "subgoal_setting": 0.0,
+          "backward_chaining": 0.0,
+          "linear": 1.0
+        },
+        "soundness_score": 1.0,
+        "flagged_step_count": 0,
+        "classifier_calls": 1,
+        "classifier_repairs": 0
+      },
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    },
+    {
+      "strategy": "thinking",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "8",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "thinking:fx03t:0",
+          "kind": "thought",
+          "text": "First I need an expression for each courier's total cost as a function of distance; once I have both, the comparison is a single inequality.",
+          "char_range": [0, 140],
+          "behavior": { "label": "subgoal_setting", "confidence": 0.9 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.94,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Names a well-formed intermediate objective before attempting the comparison."
+          }
+        },
+        {
+          "step_id": "thinking:fx03t:1",
+          "kind": "thought",
+          "text": "For the answer to be a whole number of kilometres, what I ultimately need is the crossover distance where the two totals are equal; the answer is the first whole number above it.",
+          "char_range": [141, 317],
+          "behavior": { "label": "backward_chaining", "confidence": 0.83 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.86,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Reasons from the required form of the answer back to the quantity that must be computed."
+          }
+        },
+        {
+          "step_id": "thinking:fx03t:2",
+          "kind": "thought",
+          "text": "Courier A costs 6 + 1.40k and courier B costs 2.15k. Setting them equal: 6 + 1.40k = 2.15k, so 6 = 0.75k and k = 8.",
+          "char_range": [318, 434],
+          "behavior": { "label": "linear", "confidence": 0.95 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.96,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "2.15 - 1.40 = 0.75 and 6 / 0.75 = 8; both steps are correct."
+          }
+        },
+        {
+          "step_id": "thinking:fx03t:3",
+          "kind": "thought",
+          "text": "So the answer is 8 kilometres — wait, that is the distance where they cost the same, not where A is cheaper. At exactly 8 km both charge $17.20, so A is not yet cheaper there.",
+          "char_range": [435, 610],
+          "behavior": { "label": "backtracking", "confidence": 0.87 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.91,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Abandons the conclusion it had just reached and gives a correct reason for abandoning it."
+          }
+        },
+        {
+          "step_id": "thinking:fx03t:4",
+          "kind": "thought",
+          "text": "Let me check the boundary both ways: at 8 km, A costs 6 + 11.20 = 17.20 and B costs 17.20, equal. At 9 km, A costs 6 + 12.60 = 18.60 and B costs 19.35, so A is cheaper. The question asks above what whole number A is cheaper, and that is 8.",
+          "char_range": [611, 848],
+          "behavior": { "label": "verification", "confidence": 0.92 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.95,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Recomputes both totals at two distances and confirms the threshold from the arithmetic."
+          }
+        },
+        {
+          "step_id": "thinking:fx03t:5",
+          "kind": "answer",
+          "text": "8",
+          "char_range": [0, 1],
+          "behavior": { "label": "linear", "confidence": 0.9 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.93,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "States the verified threshold."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "entails",
+        "flagged": false,
+        "cited_step_ids": [],
+        "rationale": "The steps derive the crossover distance and check it at both boundaries; the answer follows."
+      },
+      "metrics": {
+        "output_tokens": 520,
+        "reasoning_tokens": 468,
+        "answer_tokens": 1,
+        "input_tokens": 104,
+        "est_cost_usd": null,
+        "latency_ms": 21700,
+        "turns": 1,
+        "pattern_profile": {
+          "verification": 0.1667,
+          "backtracking": 0.1667,
+          "subgoal_setting": 0.1667,
+          "backward_chaining": 0.1667,
+          "linear": 0.3332
+        },
+        "soundness_score": 1.0,
+        "flagged_step_count": 0,
+        "classifier_calls": 1,
+        "classifier_repairs": 0
+      },
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    },
+    {
+      "strategy": "react",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "8",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "react:fx03r:0",
+          "kind": "thought",
+          "text": "The two costs are equal when 6 + 1.40k = 2.15k. I will solve for k with the calculator rather than doing the division in my head.",
+          "char_range": [0, 130],
+          "behavior": { "label": "subgoal_setting", "confidence": 0.81 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.89,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Sets up the correct equation and names the sub-computation it will delegate."
+          }
+        },
+        {
+          "step_id": "react:fx03r:1",
+          "kind": "tool_call",
+          "text": "calculator(expr=\"6 / (2.15 - 1.40)\")",
+          "char_range": [0, 35],
+          "behavior": { "label": "linear", "confidence": 0.85 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.92,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "The expression matches the rearrangement in the preceding step."
+          }
+        },
+        {
+          "step_id": "react:fx03r:2",
+          "kind": "observation",
+          "text": "8.0",
+          "char_range": [0, 3],
+          "behavior": { "label": "linear", "confidence": 0.77 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.9,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Tool output; consistent with the expression sent."
+          }
+        },
+        {
+          "step_id": "react:fx03r:3",
+          "kind": "thought",
+          "text": "That is the crossover, so A is cheaper above 8 km.",
+          "char_range": [131, 180],
+          "behavior": { "label": "linear", "confidence": 0.88 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.87,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Reads the threshold correctly off the tool result."
+          }
+        },
+        {
+          "step_id": "react:fx03r:4",
+          "kind": "answer",
+          "text": "8",
+          "char_range": [0, 1],
+          "behavior": { "label": "linear", "confidence": 0.91 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.9,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "States the threshold the tool produced."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "entails",
+        "flagged": false,
+        "cited_step_ids": [],
+        "rationale": "The tool result and the two surrounding steps support the answer."
+      },
+      "metrics": {
+        "output_tokens": 168,
+        "reasoning_tokens": 96,
+        "answer_tokens": 1,
+        "input_tokens": 341,
+        "est_cost_usd": null,
+        "latency_ms": 8100,
+        "turns": 2,
+        "pattern_profile": {
+          "verification": 0.0,
+          "backtracking": 0.0,
+          "subgoal_setting": 0.2,
+          "backward_chaining": 0.0,
+          "linear": 0.8
+        },
+        "soundness_score": 1.0,
+        "flagged_step_count": 0,
+        "classifier_calls": 1,
+        "classifier_repairs": 0
+      },
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    }
+  ],
+  "scoreboard": {
+    "verdict_line": "Extended thinking spent 19.5x the reasoning tokens of Direct and reached the same answer — but it was the only arm that caught the boundary case, having first stated the wrong one.",
+    "cost_of_thought_ratio": 19.5,
+    "accuracy_delta_pp": 0.0
+  },
+  "measurement_context": {
+    "classifier_kappa_heldout": null,
+    "classifier_kappa_dev": null,
+    "majority_class_baseline": null,
+    "per_class_f1": null,
+    "judge_precision": null,
+    "judge_recall": null,
+    "consistency_fp_rate": null,
+    "n_heldout": null,
+    "n_dev": null,
+    "calibration_run_id": null
+  }
+}

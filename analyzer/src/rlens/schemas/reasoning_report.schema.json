@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reasoning-lens.local/schemas/reasoning_report-1.0.json",
+  "title": "ReasoningReport",
+  "description": "C3.3. The one object that is the frontend's props, the download artifact, the cached blob and the golden-test subject. FROZEN AT G1 (end of W4). After the freeze: additive changes only -- a new field must be optional. A breaking change requires bumping `schema_version`, regenerating the three fixtures, and a note to the frontend owner in the same PR. `additionalProperties: false` is set at every level on purpose: it is what makes the freeze mechanical rather than a promise, because adding a field then requires editing this file, which is visible in review.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "item", "generated_at", "versions", "arms"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Bumped only by a breaking change. A reader that understands 1.0 may assume every required field below is present."
+    },
+    "item": { "$ref": "#/$defs/item" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "versions": { "$ref": "#/$defs/versions" },
+    "arms": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "#/$defs/arm" },
+      "description": "One entry per strategy attempted. A failed arm is PRESENT with status `failed`, never omitted -- an absent arm is indistinguishable from an arm that was never run, and B6.5 requires the other arms to render while saying plainly that this one did not."
+    },
+    "scoreboard": { "$ref": "#/$defs/scoreboard" },
+    "measurement_context": { "$ref": "#/$defs/measurement_context" }
+  },
+  "$defs": {
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "prompt", "tags"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z]+-[0-9]+$" },
+        "prompt": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "known_answer": { "type": ["string", "null"] },
+        "checker": {
+          "type": ["string", "null"],
+          "enum": ["exact", "numeric_tol", "set_match", null]
+        },
+        "tolerance": { "type": ["number", "null"] },
+        "is_trap": {
+          "type": "boolean",
+          "default": false,
+          "description": "ADR-005 withdrew the trap floor: 0 of 16 candidates reproduced over 120 runs, and every bank item now carries `false`. The field stays because it is a real property of an item and M2 may yet earn one -- but it is a DECLARATION until a reproduction log backs it."
+        },
+        "trap_note": { "type": ["string", "null"] },
+        "source": { "type": ["string", "null"] }
+      }
+    },
+
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runner", "analyzer", "prompts", "model_pin"],
+      "description": "Everything needed to reproduce this report, and the cache key's inputs. C2.3/I3: a published number is reproducible or it is not published.",
+      "properties": {
+        "runner": { "type": "string" },
+        "analyzer": { "type": "string" },
+        "prompts": {
+          "type": "string",
+          "description": "PROMPT_BUNDLE_VERSION -- a content hash over prompts/*.md, so it cannot drift from the prompts it names."
+        },
+        "model_pin": {
+          "type": "string",
+          "description": "The GENERATION pin's fingerprint. ADR-001 redefined this from a dated id to a tuple (model, file digest, quantization, runtime, temperature, top_p, seed, reasoning effort) because an id does not reproduce a local number."
+        },
+        "model_pin_fields": {
+          "type": ["object", "null"],
+          "description": "The pin tuple spelled out, so a report is self-describing without the reader holding ADR-001 open. Optional: the fingerprint is the identity; this is the courtesy.",
+          "additionalProperties": { "type": ["string", "number", "null"] }
+        },
+        "judge_triage_pin": {
+          "type": ["string", "null"],
+          "description": "MODEL_ANALYZE -- the exact dated id that produced the behavior and validity rows."
+        },
+        "judge_escalate_pin": {
+          "type": ["string", "null"],
+          "description": "MODEL_ESCALATE. Null until M2-5 builds the escalation tier; a report with escalated steps and a null pin here is not publishable."
+        },
+        "analyzer_backend": {
+          "type": ["string", "null"],
+          "enum": ["hybrid", "local", null],
+          "description": "ADR-001 makes local-only a measured configuration, not a fallback. Which one produced these labels is part of the provenance, because the calibration harness scores both and they do not have to agree."
+        }
+      }
+    },
+
+    "arm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "status", "trace_quality", "final_answer", "steps"],
+      "properties": {
+        "strategy": { "type": "string", "enum": ["direct", "thinking", "react"] },
+        "status": {
+          "type": "string",
+          "enum": ["ok", "failed"],
+          "description": "`failed` means the provider call did not return after its retry (C4.1). DISTINCT from `degraded`, which means the arm ran and one downstream stage did not: a failed arm has no trace to show, a degraded one has a trace it cannot fully annotate."
+        },
+        "trace_quality": {
+          "type": "string",
+          "enum": ["full", "partial", "provider_summarised"],
+          "description": "C3.1. `provider_summarised` is not a flavour of `partial`: the text is real but second-hand, and a reader must be told which. `partial` also covers a trace with reasoning and NO visible answer -- M1-8 found one (mb-08.thinking looped 126 times and never answered), and calling that `full` makes the downstream `correct: false` assert the model answered and was wrong."
+        },
+        "final_answer": { "type": "string" },
+        "correct": {
+          "type": ["boolean", "null"],
+          "description": "Null when the answer could not be parsed, which is a THIRD outcome and not a quiet `false`. M1-5 paid for this distinction: `unparsed` means we could not read it, `false` means the model was wrong, and collapsing them slanders the model."
+        },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
+        "consistency": { "$ref": "#/$defs/consistency" },
+        "metrics": { "$ref": "#/$defs/metrics" },
+        "degraded": { "$ref": "#/$defs/degraded" },
+        "escalation_capped": {
+          "type": "boolean",
+          "default": false,
+          "description": "C4.4: ESCALATION_MAX_STEPS bound, so some flagged steps carry only the cheap verdict. The cap is auditable precisely because this is in the report rather than in a log."
+        },
+        "budget_bound": {
+          "type": "boolean",
+          "default": false,
+          "description": "C4.1. Locally this is a MEASUREMENT that the trace reached the nominated budget rather than evidence the provider truncated it -- ollama exposes reasoning effort, not a token cap. A bound budget silently caps the very metric B4 #7 measures, which is why it renders."
+        }
+      }
+    },
+
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step_id", "kind", "text"],
+      "properties": {
+        "step_id": {
+          "type": "string",
+          "pattern": "^(direct|thinking|react):[^:]+:[0-9]+$",
+          "description": "C3.2's `{strategy}:{span_id}:{ordinal}`. THE JOIN KEY FOR EVERY LABEL EVER WRITTEN. The ordinal comes from the segmenter, frozen as `segmenter-frozen-v1`; changing the segmenter renumbers these and silently detaches every human label from its text (Hazard 1)."
+        },
+        "kind": { "type": "string", "enum": ["thought", "tool_call", "observation", "answer"] },
+        "text": { "type": "string" },
+        "char_range": {
+          "type": ["array", "null"],
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "behavior": { "$ref": "#/$defs/behavior" },
+        "validity": { "$ref": "#/$defs/validity" }
+      }
+    },
+
+    "behavior": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["label", "confidence"],
+      "description": "Null on a degraded arm -- an unannotated step, which is the honest rendering when the classifier could not produce a conforming row. NEVER a default label: the whole point of C4.3's parse-failure rule is that a fabricated `linear` is worse than a blank.",
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": ["verification", "backtracking", "subgoal_setting", "backward_chaining", "linear"],
+          "description": "Gandhi et al. (arXiv:2503.01307 A3). Single-label with the precedence backtracking > verification > backward_chaining > subgoal_setting > linear, stated verbatim in both the prompt and calibration/rubric.md."
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "validity": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["verdict", "confidence", "escalated"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["sound", "unsound", "unverifiable"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "error_type": {
+          "type": ["string", "null"],
+          "enum": ["arithmetic", "logical", "factual", "constraint_violation", "unsupported_leap", null],
+          "description": "Names the defect in an `unsound` step, and is null otherwise. Per-type recall is the reportable thing (Appendix B): a judge that catches arithmetic and misses dropped constraints is a specific, useful finding that an aggregate hides."
+        },
+        "escalated": {
+          "type": "boolean",
+          "description": "The frontier tier re-judged this step and its verdict REPLACED the triage verdict (C4.4). Always false in Month 1; M2-5 builds the tier. It renders, so a reviewer can see which flags were double-checked."
+        },
+        "rationale": { "type": ["string", "null"], "maxLength": 200 }
+      }
+    },
+
+    "consistency": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["verdict", "flagged"],
+      "description": "C4.5. Asks ONLY: given these numbered steps, does the final answer follow? Not whether the answer is right in the world -- that is `correct`, and conflating them would let a right answer with broken reasoning pass. Null until M2-8 builds the checker.",
+      "properties": {
+        "verdict": { "type": "string", "enum": ["entails", "contradicts", "underdetermined"] },
+        "flagged": { "type": "boolean" },
+        "cited_step_ids": { "type": "array", "items": { "type": "string" } },
+        "rationale": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "verdict": { "const": "contradicts" } }, "required": ["verdict"] },
+          "then": {
+            "properties": { "cited_step_ids": { "minItems": 1 } },
+            "required": ["cited_step_ids"],
+            "description": "A4.3's rule, enforced here rather than trusted: a `contradicts` verdict that cites nothing is an accusation with no evidence, and it is the shape a hallucinating judge produces."
+          }
+        }
+      ]
+    },
+
+    "metrics": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "output_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "reasoning_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Counted locally with the model's own encoding, not reported by the runtime (S1, G0 check 2). Null when the encoding for that model is unknown -- a guessed count is plausible and wrong, and every cost figure downstream would inherit it."
+        },
+        "answer_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "input_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "est_cost_usd": { "type": ["number", "null"], "minimum": 0 },
+        "latency_ms": { "type": ["integer", "null"], "minimum": 0 },
+        "turns": { "type": ["integer", "null"], "minimum": 0 },
+        "pattern_profile": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "description": "Share of classified steps per behavior class. Sums to ~1 over an arm with labels; absent on a degraded arm rather than all-zeros, because zeros would read as 'we looked and found none'.",
+          "properties": {
+            "verification": { "type": "number", "minimum": 0, "maximum": 1 },
+            "backtracking": { "type": "number", "minimum": 0, "maximum": 1 },
+            "subgoal_setting": { "type": "number", "minimum": 0, "maximum": 1 },
+            "backward_chaining": { "type": "number", "minimum": 0, "maximum": 1 },
+            "linear": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "soundness_score": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "flagged_step_count": { "type": ["integer", "null"], "minimum": 0 },
+        "classifier_calls": { "type": ["integer", "null"], "minimum": 0 },
+        "classifier_repairs": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Chunks that needed C4.3's repair retry and then succeeded. In the report rather than a log because a rising repair rate is the leading indicator of the parse-failure rate M1-9's DoD caps."
+        }
+      }
+    },
+
+    "degraded": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["reason"],
+      "description": "The arm ran; a downstream stage did not complete. Null is the normal case. Every reason here is a state FE-8 must be able to render in mock mode -- a state reachable in production but not in a fixture becomes a Month-3 conversation in the month with no slack for them.",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "classifier_parse_failure",
+            "escalation_skipped_deadline",
+            "escalation_skipped_budget",
+            "consistency_skipped_deadline",
+            "provider_summarised_trace",
+            "analysis_unavailable"
+          ]
+        },
+        "affects": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["behavior", "validity", "consistency", "metrics"] }
+        },
+        "detail": { "type": ["string", "null"] }
+      }
+    },
+
+    "scoreboard": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "B4 #7's headline, per item. ADR-006 narrowed what this may claim: the arms do NOT separate on accuracy on this bank (0 of 16 items), so the defensible contrasts are COST (1.2-13.3x for the same answer) and TOOLS (arm 3 turned 3 wrongs into rights). `accuracy_delta_pp` stays in the schema and is usually 0 -- a measured zero is a finding, and deleting the field would hide it.",
+      "properties": {
+        "verdict_line": { "type": ["string", "null"] },
+        "cost_of_thought_ratio": { "type": ["number", "null"], "minimum": 0 },
+        "accuracy_delta_pp": { "type": ["number", "null"] }
+      }
+    },
+
+    "measurement_context": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "I3: every score renders next to its own error bars. Month 1 cannot populate any of this -- the calibration run is M2-17 -- so every field is nullable, and a null renders as 'not yet measured' rather than as a good number. A UI that silently omits this block when null defeats the invariant.",
+      "properties": {
+        "classifier_kappa_heldout": { "type": ["number", "null"] },
+        "classifier_kappa_dev": { "type": ["number", "null"] },
+        "majority_class_baseline": {
+          "type": ["number", "null"],
+          "description": "C5.5. A kappa reported without this is unreadable: `linear` is the dominant class, so a high raw agreement can mean the rubric is easy rather than the classifier good."
+        },
+        "per_class_f1": {
+          "type": ["object", "null"],
+          "additionalProperties": { "type": ["number", "null"] }
+        },
+        "judge_precision": { "type": ["number", "null"] },
+        "judge_recall": { "type": ["number", "null"] },
+        "consistency_fp_rate": { "type": ["number", "null"] },
+        "n_heldout": { "type": ["integer", "null"] },
+        "n_dev": { "type": ["integer", "null"] },
+        "calibration_run_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

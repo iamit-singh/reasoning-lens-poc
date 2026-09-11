@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "item": {
+    "id": "fx-02",
+    "prompt": "A depot dispatches 6 vans on Monday and 11 vans on Tuesday. Each van carries 24 crates. How many crates were dispatched in total? Give the final answer on its own last line.",
+    "tags": ["multi_step", "arithmetic", "fixture"],
+    "known_answer": "408",
+    "checker": "exact",
+    "tolerance": null,
+    "is_trap": false,
+    "trap_note": null,
+    "source": "hand-authored for M1-10 / G1"
+  },
+  "generated_at": "2026-10-06T09:05:00Z",
+  "versions": {
+    "runner": "0.1.0",
+    "analyzer": "0.1.0",
+    "prompts": "fixture-frozen",
+    "model_pin": "fixture000000000",
+    "model_pin_fields": {
+      "model": "gpt-oss:20b",
+      "digest": "sha256:fixture",
+      "quantization": "MXFP4",
+      "runtime": "ollama 0.33.3",
+      "temperature": 0,
+      "top_p": 1.0,
+      "seed": 20260910,
+      "reasoning_effort": "medium"
+    },
+    "judge_triage_pin": "gpt-5-mini-2025-08-07",
+    "judge_escalate_pin": "gpt-5-2025-08-07",
+    "analyzer_backend": "hybrid"
+  },
+  "arms": [
+    {
+      "strategy": "direct",
+      "status": "failed",
+      "trace_quality": "partial",
+      "final_answer": "",
+      "correct": null,
+      "steps": [],
+      "consistency": null,
+      "metrics": null,
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    },
+    {
+      "strategy": "thinking",
+      "status": "ok",
+      "trace_quality": "provider_summarised",
+      "final_answer": "408",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "thinking:fx02t:0",
+          "kind": "thought",
+          "text": "Considered the two dispatch days separately, then combined the van counts before multiplying by the crate capacity.",
+          "char_range": [0, 115],
+          "behavior": { "label": "subgoal_setting", "confidence": 0.64 },
+          "validity": {
+            "verdict": "unverifiable",
+            "confidence": 0.41,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Summarised text: the arithmetic it describes is not shown, so it cannot be checked from the step."
+          }
+        },
+        {
+          "step_id": "thinking:fx02t:1",
+          "kind": "thought",
+          "text": "Verified the product against the total van count and found it consistent.",
+          "char_range": [116, 189],
+          "behavior": { "label": "verification", "confidence": 0.58 },
+          "validity": {
+            "verdict": "unverifiable",
+            "confidence": 0.38,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Reports that a check happened without showing it. Second-hand text cannot be judged sound."
+          }
+        },
+        {
+          "step_id": "thinking:fx02t:2",
+          "kind": "answer",
+          "text": "408",
+          "char_range": [0, 3],
+          "behavior": { "label": "linear", "confidence": 0.81 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.72,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "17 vans at 24 crates is 408, which matches the stated answer."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "underdetermined",
+        "flagged": true,
+        "cited_step_ids": [],
+        "rationale": "The steps describe a derivation rather than performing one, so they neither support nor contradict the answer."
+      },
+      "metrics": {
+        "output_tokens": 240,
+        "reasoning_tokens": 8000,
+        "answer_tokens": 3,
+        "input_tokens": 88,
+        "est_cost_usd": null,
+        "latency_ms": 96000,
+        "turns": 1,
+        "pattern_profile": {
+          "verification": 0.3333,
+          "backtracking": 0.0,
+          "subgoal_setting": 0.3333,
+          "backward_chaining": 0.0,
+          "linear": 0.3333
+        },
+        "soundness_score": 0.3333,
+        "flagged_step_count": 2,
+        "classifier_calls": 1,
+        "classifier_repairs": 1
+      },
+      "degraded": null,
+      "escalation_capped": true,
+      "budget_bound": true
+    },
+    {
+      "strategy": "react",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "408",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "react:fx02r:0",
+          "kind": "thought",
+          "text": "I should add the two van counts and multiply by the crates per van. I will use the calculator rather than doing it in my head.",
+          "char_range": [0, 126],
+          "behavior": null,
+          "validity": null
+        },
+        {
+          "step_id": "react:fx02r:1",
+          "kind": "tool_call",
+          "text": "calculator(expr=\"(6 + 11) * 24\")",
+          "char_range": [0, 31],
+          "behavior": null,
+          "validity": null
+        },
+        {
+          "step_id": "react:fx02r:2",
+          "kind": "observation",
+          "text": "408",
+          "char_range": [0, 3],
+          "behavior": null,
+          "validity": null
+        },
+        {
+          "step_id": "react:fx02r:3",
+          "kind": "answer",
+          "text": "408",
+          "char_range": [0, 3],
+          "behavior": null,
+          "validity": null
+        }
+      ],
+      "consistency": null,
+      "metrics": {
+        "output_tokens": 112,
+        "reasoning_tokens": 74,
+        "answer_tokens": 3,
+        "input_tokens": 310,
+        "est_cost_usd": null,
+        "latency_ms": 7300,
+        "turns": 2,
+        "pattern_profile": null,
+        "soundness_score": null,
+        "flagged_step_count": null,
+        "classifier_calls": 2,
+        "classifier_repairs": 1
+      },
+      "degraded": {
+        "reason": "classifier_parse_failure",
+        "affects": ["behavior", "validity"],
+        "detail": "chunk 1/1: after repair retry: step_id mismatch: 3 rows for 4 steps. Missing ['react:fx02r:2']; extra []."
+      },
+      "escalation_capped": false,
+      "budget_bound": false
+    }
+  ],
+  "scoreboard": {
+    "verdict_line": null,
+    "cost_of_thought_ratio": null,
+    "accuracy_delta_pp": null
+  },
+  "measurement_context": {
+    "classifier_kappa_heldout": null,
+    "classifier_kappa_dev": null,
+    "majority_class_baseline": null,
+    "per_class_f1": null,
+    "judge_precision": null,
+    "judge_recall": null,
+    "consistency_fp_rate": null,
+    "n_heldout": null,
+    "n_dev": null,
+    "calibration_run_id": null
+  }
+}

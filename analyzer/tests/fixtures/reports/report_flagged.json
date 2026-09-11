@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0",
+  "item": {
+    "id": "fx-01",
+    "prompt": "A conference books 3 rooms for 14 delegates each and 2 rooms for 9 delegates each. Catering costs $17 per delegate. What is the total catering cost in dollars? Give the final answer on its own last line.",
+    "tags": ["multi_step", "arithmetic", "fixture"],
+    "known_answer": "1020",
+    "checker": "exact",
+    "tolerance": null,
+    "is_trap": true,
+    "trap_note": "HAND-AUTHORED FIXTURE, NOT A BANK ITEM. The id is `fx-01` rather than `mb-NN` on purpose: ADR-005 withdrew the trap floor after 0 of 16 candidates reproduced over 120 runs, and every bank item now carries is_trap:false. This fixture sets it true only so the trap badge has a state to render. It is not a claim that any item traps this model.",
+    "source": "hand-authored for M1-10 / G1"
+  },
+  "generated_at": "2026-10-06T09:00:00Z",
+  "versions": {
+    "runner": "0.1.0",
+    "analyzer": "0.1.0",
+    "prompts": "fixture-frozen",
+    "model_pin": "fixture000000000",
+    "model_pin_fields": {
+      "model": "gpt-oss:20b",
+      "digest": "sha256:fixture",
+      "quantization": "MXFP4",
+      "runtime": "ollama 0.33.3",
+      "temperature": 0,
+      "top_p": 1.0,
+      "seed": 20260910,
+      "reasoning_effort": "medium"
+    },
+    "judge_triage_pin": "gpt-5-mini-2025-08-07",
+    "judge_escalate_pin": "gpt-5-2025-08-07",
+    "analyzer_backend": "hybrid"
+  },
+  "arms": [
+    {
+      "strategy": "direct",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "1020",
+      "correct": true,
+      "steps": [
+        {
+          "step_id": "direct:fx01d:0",
+          "kind": "thought",
+          "text": "3 x 14 = 42 and 2 x 9 = 18, so 60 delegates at $17 is 1020.",
+          "char_range": [0, 58],
+          "behavior": { "label": "linear", "confidence": 0.91 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.94,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Both products and the final multiplication are correct."
+          }
+        },
+        {
+          "step_id": "direct:fx01d:1",
+          "kind": "answer",
+          "text": "1020",
+          "char_range": [0, 4],
+          "behavior": { "label": "linear", "confidence": 0.88 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.9,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "States the value derived in the preceding step."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "entails",
+        "flagged": false,
+        "cited_step_ids": [],
+        "rationale": "The single derivation supports the stated answer."
+      },
+      "metrics": {
+        "output_tokens": 64,
+        "reasoning_tokens": 21,
+        "answer_tokens": 4,
+        "input_tokens": 96,
+        "est_cost_usd": null,
+        "latency_ms": 2100,
+        "turns": 1,
+        "pattern_profile": {
+          "verification": 0.0,
+          "backtracking": 0.0,
+          "subgoal_setting": 0.0,
+          "backward_chaining": 0.0,
+          "linear": 1.0
+        },
+        "soundness_score": 1.0,
+        "flagged_step_count": 0,
+        "classifier_calls": 1,
+        "classifier_repairs": 0
+      },
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    },
+    {
+      "strategy": "thinking",
+      "status": "ok",
+      "trace_quality": "full",
+      "final_answer": "1003",
+      "correct": false,
+      "steps": [
+        {
+          "step_id": "thinking:fx01t:0",
+          "kind": "thought",
+          "text": "First I need the total number of delegates, then I can multiply by the per-delegate catering cost.",
+          "char_range": [0, 98],
+          "behavior": { "label": "subgoal_setting", "confidence": 0.88 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.92,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Names a well-formed intermediate objective."
+          }
+        },
+        {
+          "step_id": "thinking:fx01t:1",
+          "kind": "thought",
+          "text": "The three larger rooms hold 3 x 14 = 42 delegates.",
+          "char_range": [99, 148],
+          "behavior": { "label": "linear", "confidence": 0.93 },
+          "validity": {
+            "verdict": "sound",
+            "confidence": 0.95,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "3 x 14 = 42 is correct."
+          }
+        },
+        {
+          "step_id": "thinking:fx01t:2",
+          "kind": "thought",
+          "text": "The two smaller rooms hold 2 x 9 = 17 delegates, so the total is 42 + 17 = 59.",
+          "char_range": [149, 226],
+          "behavior": { "label": "linear", "confidence": 0.84 },
+          "validity": {
+            "verdict": "unsound",
+            "confidence": 0.97,
+            "error_type": "arithmetic",
+            "escalated": true,
+            "rationale": "2 x 9 = 18, not 17. The error propagates into the delegate total and into every figure after it."
+          }
+        },
+        {
+          "step_id": "thinking:fx01t:3",
+          "kind": "thought",
+          "text": "Let me check that: 42 plus 17 is 59, and 59 delegates at $17 each gives 59 x 17 = 1003.",
+          "char_range": [227, 314],
+          "behavior": { "label": "verification", "confidence": 0.79 },
+          "validity": {
+            "verdict": "unsound",
+            "confidence": 0.71,
+            "error_type": "logical",
+            "escalated": true,
+            "rationale": "The check re-adds the same two numbers rather than re-deriving 2 x 9, so it confirms the earlier slip instead of catching it."
+          }
+        },
+        {
+          "step_id": "thinking:fx01t:4",
+          "kind": "answer",
+          "text": "1003",
+          "char_range": [0, 4],
+          "behavior": { "label": "linear", "confidence": 0.86 },
+          "validity": {
+            "verdict": "unverifiable",
+            "confidence": 0.55,
+            "error_type": null,
+            "escalated": false,
+            "rationale": "Restates the figure derived above; its soundness depends entirely on the flagged step."
+          }
+        }
+      ],
+      "consistency": {
+        "verdict": "contradicts",
+        "flagged": true,
+        "cited_step_ids": ["thinking:fx01t:2", "thinking:fx01t:3"],
+        "rationale": "Step 2 computes 2 x 9 as 17 and step 3 carries it forward; the stated answer does not follow from a correct reading of the problem."
+      },
+      "metrics": {
+        "output_tokens": 412,
+        "reasoning_tokens": 361,
+        "answer_tokens": 4,
+        "input_tokens": 96,
+        "est_cost_usd": null,
+        "latency_ms": 18400,
+        "turns": 1,
+        "pattern_profile": {
+          "verification": 0.2,
+          "backtracking": 0.0,
+          "subgoal_setting": 0.2,
+          "backward_chaining": 0.0,
+          "linear": 0.6
+        },
+        "soundness_score": 0.4,
+        "flagged_step_count": 3,
+        "classifier_calls": 1,
+        "classifier_repairs": 0
+      },
+      "degraded": null,
+      "escalation_capped": false,
+      "budget_bound": false
+    }
+  ],
+  "scoreboard": {
+    "verdict_line": "Extended thinking spent 17x the reasoning tokens of Direct and reached a worse answer: a single arithmetic slip at step 3, which its own verification step confirmed rather than caught.",
+    "cost_of_thought_ratio": 17.19,
+    "accuracy_delta_pp": -100.0
+  },
+  "measurement_context": {
+    "classifier_kappa_heldout": null,
+    "classifier_kappa_dev": null,
+    "majority_class_baseline": null,
+    "per_class_f1": null,
+    "judge_precision": null,
+    "judge_recall": null,
+    "consistency_fp_rate": null,
+    "n_heldout": null,
+    "n_dev": null,
+    "calibration_run_id": null
+  }
+}

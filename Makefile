@@ -9,8 +9,8 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze ci warm-cache calibrate faithfulness smoke \
-        record-cassettes spans traps arm-contrast spike-s1 spike-s3 spike-s6 spike-s2 spike-deps models pin-local \
+        boundaries schema-freeze rubric-drift label draw-sample ci warm-cache calibrate faithfulness smoke \
+        record-cassettes classify-reliability report spans traps arm-contrast spike-s1 spike-s3 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
 help:  ## show this help
@@ -52,7 +52,10 @@ boundaries:  ## C2.2 boundary contract: import-linter + provider-symbol grep
 schema-freeze:  ## C5.4 held-out set protection
 	./scripts/check_heldout_freeze.sh
 
-ci: lint typecheck unit contract integration-mock boundaries schema-freeze  ## everything a PR runs
+rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt and rubric
+	./scripts/check_rubric_drift.sh
+
+ci: lint typecheck unit contract integration-mock boundaries schema-freeze rubric-drift  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
@@ -85,14 +88,27 @@ spans:  ## regenerate out/spans from the committed cassettes -- no GPU, no netwo
 	done
 	@echo "out/spans: $$(ls out/spans | wc -l | tr -d ' ') span trees replayed from cassettes"
 
+# ---------------------------------------------------------------- calibration (M1-11)
+draw-sample:  ## M1-11 -- draw the random-90. Runs ONCE, before the first label (Hazard 2)
+	$(BIN)/python scripts/draw_sample.py $(ARGS)
+
+label:  ## M1-11 -- the BLIND labelling tool. Two labels per step, one pass (C5.2)
+	$(BIN)/python scripts/label.py $(ARGS)
+
 traps:  ## M1-5 -- measure which declared traps reproduce. Needs the served model.
 	$(BIN)/python spikes/m1_5_trap_reproduction.py $(ARGS)
 
 arm-contrast:  ## ADR-004's control group: which items separate the arms? Needs the model.
 	$(BIN)/python spikes/m1_5_arm_contrast.py $(ARGS)
 
-record-cassettes:  ## STUB (M1-14) -- record provider responses once per prompt-bundle version
-	@echo "record-cassettes: not implemented (owner M1-14, W4). This is the frontend's W5 unblock (E11)"; exit 2
+record-cassettes:  ## M1-14 -- record provider responses once per prompt-bundle version
+	@set -a; [ -f .env ] && . ./.env; set +a; MOCK_LLM=0 $(BIN)/python scripts/record_cassettes.py $(ARGS)
+
+classify-reliability:  ## M1-9's DoD -- parse-failure rate over N full passes. COSTS SPEND.
+	@set -a; [ -f .env ] && . ./.env; set +a; MOCK_LLM=0 $(BIN)/python spikes/m1_9_parse_reliability.py $(ARGS)
+
+report:  ## the end-to-end pipeline: span trees -> ReasoningReport (MOCK_LLM=1 for offline)
+	@set -a; [ -f .env ] && . ./.env; set +a; cd $(ANALYZER) && ../$(BIN)/python -m rlens --spans ../out/spans --out ../out/reports $(ARGS)
 
 # ---------------------------------------------------------------- local runtime (ADR-001)
 models:  ## pull the local generation model
