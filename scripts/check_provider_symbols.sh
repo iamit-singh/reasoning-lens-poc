@@ -6,7 +6,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 TARGETS="analyzer/src/rlens/segment.py analyzer/src/rlens/classify.py analyzer/src/rlens/judge.py analyzer/src/rlens/consistency.py"
-PATTERN='anthropic|Anthropic|openai|OpenAI|google\.generativeai|mistralai|cohere|ollama|thinking_blocks|redacted_thinking|reasoning_content'
+# Word-bounded. M1-9 found the unanchored version failing on the English word
+# "coherently", which contains `cohere` -- a check that fires on prose is a check people
+# start working around, and the next thing worked around is a real hit. The boundaries
+# cost nothing: every symbol here is a whole identifier wherever it actually appears.
+PATTERN='\b(anthropic|Anthropic|openai|OpenAI|google\.generativeai|mistralai|cohere|ollama|thinking_blocks|redacted_thinking|reasoning_content)\b'
 
 status=0
 for f in $TARGETS; do

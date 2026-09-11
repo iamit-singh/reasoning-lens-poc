@@ -14,8 +14,19 @@ Two notes on what is deliberately *not* here
   (ADR-001), and what we need of it is one POST. ``urllib`` keeps the analyzer installable
   without the ``[providers]`` extra and keeps the shape visible in this file rather than
   behind a client object. The extra stays declared for the analysis tier.
-* **No analysis calls.** This module generates. Classification and judging get their own
-  entry points; mixing them here would make the C2.2 grep a weaker guarantee.
+* **Analysis calls live here too, and that reverses a note M1-6 left.** M1-6 wrote that
+  classification would get its own entry point because "mixing them here would make the
+  C2.2 grep a weaker guarantee". M1-9 found that backwards. The grep's guarantee comes
+  from ``classify.py``/``judge.py``/``consistency.py`` being clean of provider shapes --
+  and a *third* provider-aware module would weaken C2.2's claim, which is a single
+  sentence naming exactly two files. So ``generate`` and ``analyze`` sit side by side,
+  the sentence stays literally true, and the two are kept apart by being different
+  functions rather than different modules.
+
+  They share nothing but the file, deliberately: different tier, different provider,
+  different pin, different failure rules. ``generate`` wants long raw reasoning;
+  ``analyze`` wants short structured rows and as little reasoning as the model will
+  accept (S3, ADR-001).
 """
 
 from __future__ import annotations
@@ -311,3 +322,308 @@ def generate(
         invocation_parameters={k: v for k, v in payload.items() if k not in ("messages", "tools")},
         tool_calls=tuple(tool_calls),
     )
+
+
+# ------------------------------------------------------- the analysis tier (C4.3, M1-9)
+#: Backends the analysis tier can run on. Both are measured configurations, not a primary
+#: and a hack: ADR-001 makes local-only a supported answer to "can this run on a laptop
+#: with no API access?", and the calibration harness scores both against the same human
+#: labels. Neither is allowed to be the silent default of the other.
+ANALYSIS_BACKENDS = ("hybrid", "local")
+
+
+class AnalysisTruncated(ProviderError):
+    """The output cap bound: the response is cut off mid-JSON.
+
+    **A hard error, deliberately not a parse failure.** S3 measured this as
+    `finish_reason: length` at a content length of exactly 4,095 characters across three
+    identical runs -- a cap, not a competence limit. The repair retry exists for a model
+    that produced malformed JSON and can do better when told so; a truncated response will
+    truncate again at the same place, so retrying it burns a call to reach the same
+    outcome and then reports `classifier_parse_failure`, which names the wrong cause.
+
+    The right response is to raise, loudly, naming the cap. See S3 consequence 1.
+    """
+
+
+@dataclass(frozen=True)
+class AnalysisResult:
+    """One analysis call's result. The mirror of `Completion` for the other tier.
+
+    Much smaller than `Completion`, and the asymmetry is the point: for generation the
+    reasoning text *is* the artifact and every token of it is measured. For analysis the
+    reasoning is a cost to be minimised and the only thing that matters is whether the
+    rows came back whole.
+    """
+
+    text: str
+    model: str
+    finish_reason: str
+    backend: str
+    prompt_tokens: int
+    completion_tokens: int
+    #: Billed reasoning tokens where the provider reports them. Unlike the generation
+    #: tier, this is NOT counted locally and cannot be: the text is never returned (S1,
+    #: 11 Sep -- 384 tokens billed, 0 chars back). None on backends that report nothing.
+    reasoning_tokens: int | None
+    attempts: int
+    latency_ms: int
+    replayed: bool = False
+
+
+def _analysis_backend() -> str:
+    backend = os.environ.get("ANALYZER_BACKEND", "hybrid").strip() or "hybrid"
+    if backend not in ANALYSIS_BACKENDS:
+        raise ProviderError(
+            f"ANALYZER_BACKEND={backend!r} is not one of {ANALYSIS_BACKENDS}. "
+            "A typo here would otherwise silently select the default and publish a number "
+            "attributed to the wrong tier."
+        )
+    return backend
+
+
+def request_digest(prompt: str, *, backend: str, model: str) -> str:
+    """What an analysis cassette is keyed by (M1-14).
+
+    The prompt bundle version is folded in by the caller through the prompt text itself --
+    the prompt IS the rendered bundle -- so a bundle edit changes this digest, which is
+    what "once per prompt-bundle version" means in practice.
+    """
+    import hashlib
+
+    return hashlib.sha256(f"{backend}\x1f{model}\x1f{prompt}".encode()).hexdigest()[:16]
+
+
+def _replay_analysis(name: str, expected_digest: str) -> AnalysisResult:
+    path = _cassette_path(name)
+    if not path.exists():
+        raise ProviderError(
+            f"MOCK_LLM=1 but no analysis cassette at {path}. Record one with "
+            f"`make record-cassettes` (M1-14)."
+        )
+    data = json.loads(path.read_text())
+    recorded = data.pop("request_digest", None)
+    # **The check that makes a named cassette as strong as a hash-keyed one.** M1-14's spec
+    # says cassettes are keyed by a hash of the request. Keying the FILENAME by a hash
+    # would make the directory unreadable and would have orphaned the 49 generation
+    # cassettes; recording the digest INSIDE and refusing a mismatch gives the same
+    # guarantee -- you cannot replay a response recorded for a different request -- while
+    # the filename still says which item and arm it belongs to.
+    if recorded is not None and recorded != expected_digest:
+        raise ProviderError(
+            f"cassette {path.name} was recorded for a different request "
+            f"({recorded} != {expected_digest}). The prompt bundle or the model changed; "
+            f"re-record with `make record-cassettes`."
+        )
+    return AnalysisResult(**{**data, "replayed": True})
+
+
+def record_analysis_cassette(
+    name: str, result: AnalysisResult, *, request_digest: str
+) -> pathlib.Path:
+    """Write an analysis cassette. M1-14's recorder."""
+    from dataclasses import asdict
+
+    path = _cassette_path(name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {k: v for k, v in asdict(result).items() if k != "replayed"}
+    payload["request_digest"] = request_digest
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    return path
+
+
+def _post_json(
+    url: str, payload: dict[str, Any], headers: dict[str, str], timeout: int
+) -> dict[str, Any]:
+    req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        result: dict[str, Any] = json.load(resp)
+        return result
+
+
+def _analyze_hosted(
+    prompt: str, model: str, cap: int, effort: str, timeout: int
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    key = os.environ.get("OPENAI_API_KEY", "")
+    if not key:
+        raise ProviderError(
+            "ANALYZER_BACKEND=hybrid but OPENAI_API_KEY is unset. Set it, or run the "
+            "measured local-only configuration with ANALYZER_BACKEND=local (ADR-001)."
+        )
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        # Asking for a JSON object is the cheap half of the contract; the schema check in
+        # `classify.py` is the half that matters. JSON mode guarantees parseable, not
+        # correct: it will happily return `{}`.
+        "response_format": {"type": "json_object"},
+        "max_completion_tokens": cap,
+        "reasoning_effort": effort,
+    }
+    data = _post_json(
+        "https://api.openai.com/v1/chat/completions",
+        payload,
+        {"Content-Type": "application/json", "Authorization": f"Bearer {key}"},
+        timeout,
+    )
+    choice = (data.get("choices") or [{}])[0]
+    usage = data.get("usage") or {}
+    details = usage.get("completion_tokens_details") or {}
+    return {
+        "text": (choice.get("message") or {}).get("content") or "",
+        "model": data.get("model") or model,
+        "finish_reason": choice.get("finish_reason") or "",
+        "prompt_tokens": int(usage.get("prompt_tokens") or 0),
+        "completion_tokens": int(usage.get("completion_tokens") or 0),
+        "reasoning_tokens": details.get("reasoning_tokens"),
+    }, payload
+
+
+def _analyze_local(
+    prompt: str, model: str, cap: int, effort: str, timeout: int
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The local analyzer tier, on the **native** endpoint.
+
+    Not the OpenAI-compatible one. S3 measured `max_tokens` there being accepted and
+    silently ignored -- 16,000 still returned `finish_reason: length` at ~1,854 tokens,
+    three runs byte-identical. `options.num_predict` is the only cap this runtime honours,
+    and it is only available here.
+    """
+    base = (os.environ.get("LOCAL_BASE_URL", "http://localhost:11434/v1")).rstrip("/")
+    url = base.removesuffix("/v1") + "/api/chat"
+    payload: dict[str, Any] = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "stream": False,
+        "format": "json",
+        "think": effort,
+        "options": {
+            "temperature": 0,
+            "top_p": 1.0,
+            "seed": int(os.environ.get("GEN_SEED", "0")),
+            "num_predict": cap,
+            "num_ctx": int(os.environ.get("ANALYZE_NUM_CTX", "16384")),
+        },
+    }
+    data = _post_json(url, payload, {"Content-Type": "application/json"}, timeout)
+    # `done_reason` is this runtime's `finish_reason`; normalising it here is exactly the
+    # kind of provider-shape knowledge C2.2 confines to this file.
+    done = data.get("done_reason") or ""
+    return {
+        "text": (data.get("message") or {}).get("content") or "",
+        "model": data.get("model") or model,
+        "finish_reason": "length" if done == "length" else done,
+        "prompt_tokens": int(data.get("prompt_eval_count") or 0),
+        "completion_tokens": int(data.get("eval_count") or 0),
+        "reasoning_tokens": None,
+    }, payload
+
+
+def analyze(
+    prompt: str,
+    *,
+    cassette: str | None = None,
+    timeout: int | None = None,
+    cap: int | None = None,
+) -> AnalysisResult:
+    """One analysis call. Classification, triage, consistency and escalation all use it.
+
+    Three things S3 paid for, enforced here rather than remembered by each caller:
+
+    1. **The output cap is explicit**, and set through the parameter the backend actually
+       honours -- which differs between them, and where the local runtime accepts and
+       ignores the obvious one.
+    2. **Reasoning effort is low.** An analysis call at default effort spent its entire
+       output budget in the reasoning channel and returned empty content while billing
+       2,293 tokens. Classification is a labelling task.
+    3. **A bound cap raises.** See `AnalysisTruncated`.
+
+    Retries once on a transport error, matching `generate`. It does **not** retry a
+    truncation or a bad-JSON response: the first is hopeless and the second is the
+    caller's repair retry to spend, once, with the validation error attached (C4.3).
+    """
+    backend = _analysis_backend()
+    if backend == "hybrid":
+        from rlens.versions import analyzer_pin
+
+        try:
+            model = analyzer_pin()
+        except RuntimeError as exc:
+            # **Replay needs the pin too, and that is deliberate.** A cassette records a
+            # (model, prompt) pair. Replaying it while the environment declares a
+            # different model would produce a report whose `judge_triage_pin` names one
+            # model and whose labels came from another -- a provenance lie, and this
+            # project's whole claim is that a published number is reproducible.
+            #
+            # `versions.analyzer_pin` raises about publishing numbers, which is the wrong
+            # explanation when what you were doing was running the offline test suite.
+            if os.environ.get("MOCK_LLM") == "1":
+                raise ProviderError(
+                    "MOCK_LLM=1 still needs MODEL_ANALYZE: a cassette records a (model, "
+                    "prompt) pair and replay verifies both, so that a replayed report's "
+                    "judge_triage_pin is true. It is a public model id, not a secret -- "
+                    "set it in CI and in .env."
+                ) from exc
+            raise
+    else:
+        model = os.environ.get("LOCAL_MODEL", "")
+        if not model:
+            raise ProviderError("ANALYZER_BACKEND=local but LOCAL_MODEL is unset.")
+
+    effort = os.environ.get("ANALYZE_REASONING_EFFORT", "low")
+    cap = cap if cap is not None else int(os.environ.get("ANALYZE_MAX_OUTPUT_TOKENS", "16000"))
+    timeout = timeout if timeout is not None else int(os.environ.get("ANALYSIS_DEADLINE_S", "110"))
+    digest = request_digest(prompt, backend=backend, model=model)
+
+    if os.environ.get("MOCK_LLM") == "1":
+        if not cassette:
+            raise ProviderError("MOCK_LLM=1 requires a cassette name")
+        return _replay_analysis(cassette, digest)
+
+    call = _analyze_hosted if backend == "hybrid" else _analyze_local
+    started = time.time()
+    for attempt in (1, 2):
+        try:
+            fields, _payload = call(prompt, model, cap, effort, timeout)
+            break
+        except urllib.error.HTTPError as exc:
+            # An HTTP error is the server answering. Retrying a 400 re-sends the same bad
+            # request; the body is the only thing that says why, so it is surfaced rather
+            # than swallowed into a generic transport retry.
+            raise ProviderError(f"{model}: HTTP {exc.code}: {exc.read()[:400].decode()}") from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            if attempt == 2:
+                raise ProviderError(f"{model}: {type(exc).__name__}: {exc}") from exc
+            time.sleep(0.5 + random.random())
+    else:  # pragma: no cover -- the loop always breaks or raises
+        raise ProviderError("unreachable")
+
+    result = AnalysisResult(
+        backend=backend,
+        attempts=attempt,
+        latency_ms=int((time.time() - started) * 1000),
+        **fields,
+    )
+    if result.finish_reason == "length":
+        raise AnalysisTruncated(
+            f"{model}: the {cap}-token output cap bound (finish_reason=length) after "
+            f"{result.completion_tokens} completion tokens. Raise ANALYZE_MAX_OUTPUT_TOKENS "
+            f"or lower CLASSIFY_CHUNK_SIZE -- retrying reproduces this exactly (S3)."
+        )
+    if not result.text.strip():
+        # S3 failure mode 1, kept distinct from a parse failure because the fix is
+        # different: empty content with tokens billed means the model deliberated instead
+        # of answering, and the lever is reasoning effort, not a smaller batch.
+        raise ProviderError(
+            f"{model}: empty content with {result.completion_tokens} completion tokens "
+            f"billed at effort={effort!r}. The model spent its budget in the reasoning "
+            f"channel (S3 failure mode 1). Lower ANALYZE_REASONING_EFFORT."
+        )
+    # M1-14. Recording happens HERE rather than in a separate harness that re-issues the
+    # calls, because a cassette recorded by a different code path is a recording of that
+    # path. `make record-cassettes` sets the flag and runs the ordinary pipeline, so what
+    # is captured is exactly what production sends -- including the repair retry, which a
+    # re-issuing recorder would never produce.
+    if cassette and os.environ.get("RECORD_CASSETTES") == "1":
+        record_analysis_cassette(cassette, result, request_digest=digest)
+    return result
