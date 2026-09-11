@@ -12,7 +12,9 @@ cd "$(dirname "$0")/.."
 # `.venv` locally, the environment's own pytest in CI (where `pip install -e` puts it on
 # PATH and no .venv exists). The hard-coded venv path made this script fail with 127 in
 # every CI run, which exit 5 was never going to rescue.
-PYTEST="./.venv/bin/pytest"
+# ABSOLUTE, because this script cds into analyzer/ two lines below and a relative venv
+# path stops resolving the moment it does.
+PYTEST="$PWD/.venv/bin/pytest"
 [ -x "$PYTEST" ] || PYTEST="pytest"
 
 MARKER="$1"; shift || true
@@ -34,12 +36,22 @@ if [ "$code" -eq 5 ]; then
 fi
 [ "$code" -eq 0 ] || exit "$code"
 
-# Collected AND green, but possibly all skipped. The cassette-dependent tests skip when
+# Collected AND green, but possibly skipped. The cassette-dependent tests skip when
 # `out/spans` or the analysis cassettes are absent, which is exactly the state a CI job
 # forgetting `make spans` would be in -- and it would report success.
-if printf '%s' "$out" | grep -qE '^[0-9]+ skipped' ; then
-  echo "run-marker: FAIL -- every '$MARKER' test skipped. Run 'make spans' and"
-  echo "run-marker: 'make record-cassettes' so the job asserts something."
-  exit 1
+#
+# Matched anywhere in the summary rather than anchored: pytest writes
+# "2 passed, 5 skipped, 330 deselected", and an anchored pattern silently never fires --
+# which is the same class of bug as the job it is here to catch.
+skipped=$(printf '%s' "$out" | grep -oE '[0-9]+ skipped' | head -1 | cut -d' ' -f1)
+if [ -n "${skipped:-}" ] && [ "$skipped" -gt 0 ]; then
+  case "$MARKER" in
+    integration_mock)
+      echo "run-marker: FAIL -- $skipped '$MARKER' test(s) skipped. This job's whole claim"
+      echo "run-marker: is that the pipeline replays offline; a skip means it did not run."
+      echo "run-marker: Run 'make spans' and 'make record-cassettes' (M1-14)."
+      exit 1 ;;
+    *) echo "run-marker: note -- $skipped '$MARKER' test(s) skipped." ;;
+  esac
 fi
 exit 0
