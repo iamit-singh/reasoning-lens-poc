@@ -31,6 +31,7 @@ Two notes on what is deliberately *not* here
 
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import os
 import pathlib
@@ -435,10 +436,51 @@ def record_analysis_cassette(
 def _post_json(
     url: str, payload: dict[str, Any], headers: dict[str, str], timeout: int
 ) -> dict[str, Any]:
+    """A plain POST. **The deadline is NOT enforced here** -- see `_with_deadline`.
+
+    It was, briefly, and a test showed why that was the wrong altitude: a budget wrapped
+    around the HTTP helper bounds the transport and nothing else, so any other way a
+    backend can block goes unbounded and the guarantee reads stronger than it is.
+    """
     req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        result: dict[str, Any] = json.load(resp)
-        return result
+        body: dict[str, Any] = json.load(resp)
+        return body
+
+
+def _with_deadline(fn: Any, timeout: int) -> Any:
+    """Run `fn()` under a **wall-clock** budget and give up on it if it overruns.
+
+    `urlopen(timeout=...)` bounds each socket *operation*, and that turned out not to bound
+    the request. M1-9's first full pass measured a single-chunk call taking **969 seconds
+    against a 110-second `ANALYSIS_DEADLINE_S`** -- so the deadline was decorative in the
+    one place C11 budgets 18 seconds for.
+
+    The budget is enforced from **outside** the call, because the block was inside it: a
+    deadline checked between reads would never have run, there being no reads to check
+    between. The worker is a daemon thread, so if the socket really is wedged it stays
+    wedged and the caller is released on time. **Abandoning one socket is the cheaper
+    failure** -- the alternative is a demo that hangs.
+
+    **The generation tier is deliberately not wrapped.** `ARM_TIMEOUT_S` bounds arms whose
+    legitimate traces run to minutes, so enforcing a hard budget there changes the
+    behaviour of the thing under study, and it belongs with the task that owns C4.1's
+    partial-trace path rather than being smuggled in beside a classifier fix.
+    """
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        future = pool.submit(fn)
+        try:
+            return future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError as exc:
+            raise TimeoutError(
+                f"the call exceeded its {timeout}s budget. Raise ANALYSIS_DEADLINE_S if "
+                f"this workload legitimately needs longer; C11 budgets 18s for it."
+            ) from exc
+    finally:
+        # `wait=False` is the point: shutting down with wait=True would re-block for
+        # exactly as long as the hang this exists to escape.
+        pool.shutdown(wait=False, cancel_futures=True)
 
 
 def _analyze_hosted(
@@ -584,7 +626,9 @@ def analyze(
     started = time.time()
     for attempt in (1, 2):
         try:
-            fields, _payload = call(prompt, model, cap, effort, timeout)
+            fields, _payload = _with_deadline(
+                lambda: call(prompt, model, cap, effort, timeout), timeout
+            )
             break
         except urllib.error.HTTPError as exc:
             # An HTTP error is the server answering. Retrying a 400 re-sends the same bad
