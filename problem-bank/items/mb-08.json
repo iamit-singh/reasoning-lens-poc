@@ -1,0 +1,13 @@
+{
+  "id": "mb-08",
+  "prompt": "Look up the population of Fairhaven and the population of Brightwater. How many more people live in Fairhaven than in Brightwater?",
+  "tags": [
+    "multi_step",
+    "factual",
+    "tool_required"
+  ],
+  "known_answer": "31650",
+  "checker": "exact",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

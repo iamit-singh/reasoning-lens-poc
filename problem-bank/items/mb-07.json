@@ -1,0 +1,14 @@
+{
+  "id": "mb-07",
+  "prompt": "A loan of $12,500 accrues simple interest at 7.4% per year for 3 years and 6 months. What is the total interest, in dollars?",
+  "tags": [
+    "multi_step",
+    "arithmetic",
+    "tool_required"
+  ],
+  "known_answer": "3237.50",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

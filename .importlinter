@@ -45,4 +45,5 @@ layers =
     rlens.ingest.otel
     rlens.llm
     rlens.contracts
+    rlens.checkers
     rlens.versions

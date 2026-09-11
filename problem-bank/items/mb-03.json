@@ -1,0 +1,16 @@
+{
+  "id": "mb-03",
+  "prompt": "Name the three primary additive (RGB) colours of light.",
+  "tags": [
+    "easy",
+    "factual"
+  ],
+  "known_answer": [
+    "red",
+    "green",
+    "blue"
+  ],
+  "checker": "set_match",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

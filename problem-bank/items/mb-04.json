@@ -1,0 +1,13 @@
+{
+  "id": "mb-04",
+  "prompt": "A shirt costs $40 and is discounted by 15%. What is the sale price, in dollars?",
+  "tags": [
+    "easy",
+    "arithmetic"
+  ],
+  "known_answer": "34.00",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

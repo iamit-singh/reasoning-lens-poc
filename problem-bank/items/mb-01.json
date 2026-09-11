@@ -1,0 +1,12 @@
+{
+  "id": "mb-01",
+  "prompt": "What is the chemical symbol for potassium?",
+  "tags": [
+    "easy",
+    "factual"
+  ],
+  "known_answer": "K",
+  "checker": "exact",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

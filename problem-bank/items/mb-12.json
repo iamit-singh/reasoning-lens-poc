@@ -1,0 +1,13 @@
+{
+  "id": "mb-12",
+  "prompt": "A notebook and a pen cost $2.60 in total. The notebook costs $2.00 more than the pen. How much does the pen cost, in dollars?",
+  "tags": [
+    "arithmetic"
+  ],
+  "known_answer": "0.30",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "is_trap": true,
+  "trap_note": "The intuitive split is $2.00 and $0.60: it sums to $2.60, so it survives the obvious check, but the difference is $1.40 rather than $2.00. The wrong answer passes a partial verification, which is what makes it worth measuring.",
+  "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "mb-05",
+  "prompt": "A library has 3 floors. Each floor has 14 shelving units, and each unit holds 32 books. 118 books are currently checked out and missing from the shelves. How many books are on the shelves?",
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "known_answer": "1226",
+  "checker": "exact",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

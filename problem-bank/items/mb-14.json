@@ -1,0 +1,12 @@
+{
+  "id": "mb-14",
+  "prompt": "A patch of algae in a pond doubles in area every day. It covers the whole pond on day 48. On which day did it cover a quarter of the pond?",
+  "tags": [
+    "logic"
+  ],
+  "known_answer": "46",
+  "checker": "exact",
+  "is_trap": true,
+  "trap_note": "Exponential growth read as linear. The trap answer is 12 (48/4); a partially corrected chain gives 24. Working backwards -- half on 47, a quarter on 46 -- is the sound chain.",
+  "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten"
+}

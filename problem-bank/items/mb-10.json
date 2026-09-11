@@ -1,0 +1,16 @@
+{
+  "id": "mb-10",
+  "prompt": "Look up the three departments of the Meridian Institute and list them.",
+  "tags": [
+    "factual",
+    "tool_required"
+  ],
+  "known_answer": [
+    "metallurgy",
+    "hydrology",
+    "cartography"
+  ],
+  "checker": "set_match",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}

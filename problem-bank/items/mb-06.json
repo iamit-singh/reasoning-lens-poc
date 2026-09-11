@@ -1,0 +1,13 @@
+{
+  "id": "mb-06",
+  "prompt": "A data centre has 47 racks. Each rack holds 21 servers, and each server draws 385 watts. What is the total draw in kilowatts, rounded down to the nearest whole kilowatt?",
+  "tags": [
+    "multi_step",
+    "arithmetic",
+    "tool_required"
+  ],
+  "known_answer": "379",
+  "checker": "exact",
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11)"
+}
