@@ -1,0 +1,19 @@
+{
+  "_README": "The sampling draw for calibration labelling, and the segmenter freeze it is valid against. M1-8 records the freeze; M1-11 (W4) records the seed and the draw. The two belong in one file because a label is only meaningful as (step_id, segmenter version) -- step_id embeds the segmenter's ordinal, so a draw taken against a different freeze is a draw against different text.",
+  "segmenter_freeze": {
+    "tag": "segmenter-frozen-v1",
+    "commit": "53140ad305285de2244663e1f91be5e2e39ac9a5",
+    "frozen_utc": "2026-09-11T09:14:33Z",
+    "token_unit": "word",
+    "merge_under_words": 10,
+    "split_over_words": 138,
+    "adr": "docs/decisions/ADR-008-segmenter-token-unit.md",
+    "goldens": "analyzer/tests/fixtures/segmenter/",
+    "note": "Breaking this freeze re-runs the draw below and re-labels every affected step (Hazard 1). analyzer/tests/test_segmenter.py::test_golden_steps_are_unchanged is what makes that a conscious act rather than a surprise."
+  },
+  "draw": {
+    "owner": "M1-11 (W4)",
+    "seed": null,
+    "note": "UNSET on purpose. The plan requires the seed committed BEFORE the first label is written, and the first 40 labels come from the random-90 part in seeded order. M1-11 sets it; a non-null value here with no labels behind it would be a claim that the draw had happened."
+  }
+}
