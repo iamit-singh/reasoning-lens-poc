@@ -32,6 +32,11 @@ keep it honest, including when it is unflattering.
 | 2026-09-11 | W3 | M1-7 | 0.6 | **ADR-006's open row closed on corpus evidence: arm 3 turns 3 wrongs into rights** (`mb-08`/`mb-09`/`mb-10`) **and is 24-50x cheaper doing it.** On `mb-08` arm 2 spent **3,966 reasoning tokens failing to recall a fact that does not exist** -- every place name is invented, on purpose -- while arm 3 spent 80 and looked it up. That pair is the product in one frame and is a better demo row than the difficulty contrast the plan expected. Also: **2 of 5 `tool_required` items had arm 3 call NO tool** (`mb-06`, `mb-07`), so the tag is a claim like `is_trap` was; the measured share is in `arm-contrast.md`. Contrast harness extended to 3 arms; 42 runs |
 | 2026-09-11 | W3 | M1-7 | 0.5 | **A cwd-relative data path that would have failed silently.** `problem-bank/corpus/facts.json` resolved relative to the working directory, so it only worked from the repo root -- and a missing corpus raises inside a tool call, which the loop is DESIGNED to swallow into an observation. From anywhere else arm 3 would have run, called `lookup`, received `no fact corpus at ...` as a well-formed observation, and answered wrong on a green run with a plausible chain explaining why. `runner/paths.py` resolves env -> cwd -> checkout and names every place it looked; `load_item` had the same latent bug and is fixed with it. Found by the first test that ran from `analyzer/` |
 | 2026-09-11 | W3 | M1-7 | 0.8 | 52 tests across `test_tools.py` (35 -- the calculator whitelist tested as the security boundary it is: `__import__`, `open`, lambdas, huge exponents), `test_react_loop.py` (17 -- the loop driven by a SCRIPTED provider, because a cassette cannot be made to produce a six-turn runaway or a tool-name typo on demand) and 6 arm-3 contract tests replaying real cassettes with the tools NOT mocked. **One test earned its keep immediately**: it caught arm 3 emitting `input.mime_type`, which the stock LangGraph capture does not -- dropped, since "plausibly in the spec" is not the standard, "observed in a real trace" is. 49 cassettes recorded (224 KB), so MOCK_LLM CI now covers the whole bank x arms matrix |
+| 2026-09-11 | W3 | M1-8 | 2.4 | **Segmenter done. DoD MET, and `segmenter-frozen-v1` TAGGED.** C4.2 in full: ReAct structural path, discourse + list markers, the merge, the split cap, `step_id` and `char_range`. 12 goldens covering every row of §5.3's table, each 3x byte-identical. Everything works on `(start, end)` index pairs into one normalised string, so offsets are exact by construction and `char_range` indexes something the trace actually carries. **M1-6 left `contracts.py` and `ingest/otel.py` as skeletons and M1-8 inherited both** — a segmenter cannot be byte-stable over an input that does not exist. +0.4 over the 2.0 on the segmenter itself |
+| 2026-09-11 | W3 | M1-8 | 0.9 | **ADR-008: the token unit is a WORD, and C4.2 does not name a tokenizer.** `tiktoken.get_encoding` **fetches a remote BPE file** — a segmenter whose 15/200 thresholds depend on whether that download succeeded is not byte-stable, and the failure is SILENT: it does not error, it segments differently, and every `step_id` shifts. A scheduled instance of Hazard 1, fired by a cleared `/tmp`. Thresholds converted rather than reinterpreted, at a ratio measured over this project's own traces (**7,531 words / 10,890 harmony tokens = 1.446**): merge 10 words, split 138. `138` kept rather than rounded because it is derived. A test parses `segment.py`'s imports and fails on anything outside `{__future__, itertools, re, rlens}` |
+| 2026-09-11 | W3 | M1-8 | 1.3 | **Two defects found by segmenting the corpus, not by reading the code.** (1) A trace with reasoning but **no visible answer** reported `trace_quality: "full"`. `mb-08.thinking` produced 141 reasoning steps and EMPTY content — the model looped 126 times on a fact that does not exist and never answered. Downstream that becomes `correct: false`, asserting the model answered and was wrong when it never answered: **M1-5's `unparsed`-vs-`wrong` distinction one layer up**. Now `partial`, in the runner AND in ingest's fallback, by the same rule. (2) An **unterminated code fence** was unprotected, so a 70-word trace truncated mid-fence split into four steps, three of them lines of code. C4.2 says never split inside a fenced block, not "inside a fence that closes" — and S3 measured `finish_reason: length`, so truncation is observed. Unterminated maths deliberately NOT protected: over-protection has a cost too |
+| 2026-09-11 | W3 | M1-12 | 1.9 | **S3 done, and it ran BEFORE the tag as §5.3 requires.** Its verdict lands on M1-9, not the segmenter. **The split cap fires on 0 of 261 thought steps** (longest 130 words, median 21); five traces exceed it and the marker splits had already broken each below it, so no segmentation that exists today depends on the cap and a later change cannot renumber anything — **that is the condition the freeze needed.** And **"25 is too many" is FALSE**: the compat endpoint's `max_tokens` is **silently ignored** (16000 still returned `finish_reason: length` at ~1,854 tokens, three runs byte-identical), and against the native endpoint with `options.num_predict` batches of 10, **25 AND 50** all return a row per step with exact `step_id` match. **Fifth parameter accepted and ignored.** Analysis calls also need `think: low` — at the default effort a 25-step batch spent its whole budget in the reasoning channel and returned empty content while billing 2,293 tokens. +0.9 over the 1.0 |
+| 2026-09-11 | W3 | M1-8 | 0.4 | Answer extraction moved to `rlens.checkers` so the runner, the segmenter and both measurement harnesses share ONE implementation — `rlens.runner` sits ABOVE `rlens.segment` in the layer contract, so the segmenter could not have reached it where it was, and duplicating it is the mistake M1-5 already paid for. `make spans` replays all 42 trees from cassettes (no GPU, no network); `out/` gitignored. The `rlens` CLI was still claiming it was waiting on M1-6, which shipped two tasks ago |
 
 ## Month-1 planned-vs-actual
 
@@ -39,9 +44,9 @@ keep it honest, including when it is unflattering.
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
-| W3 | 7.5 | **11.7 to date** | | M1-5 closed at **6.4 against 1.5**; M1-7 at **5.3 against 3.0**. M1-8 and S3 not started. Already 4.2 over the whole week's budget with two tasks left |
+| W3 | 7.5 | **18.7** | **+11.2** | **COMPLETE.** M1-5 6.4/1.5 · M1-7 5.3/3.0 · M1-8 5.0/2.0 · S3 1.9/1.0. `segmenter-frozen-v1` tagged. The heaviest week on the plan ran 2.5x its budget |
 | W4 | 8.0 | | | |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **25.9 to date** | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **32.9 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -517,3 +522,113 @@ mistake invalidates every label written after it. Two things now waiting for it:
   by span id would work until turn 10 sorted before turn 2. The ReAct path is structural
   only (one `tool_call` + one `observation` per TOOL span), so the segmenter has TOOL spans
   in `rlens.seq` order and the `reasoning` text on each LLM span to make thought steps from.
+
+## W3 closed — 18.7 h against 7.5, and the segmenter is frozen
+
+### The freeze went in with its precondition measured, not assumed
+
+Breakdown §5.3 routes S3's two possible verdicts to two different places: too many steps
+per call is a batch-size change in M1-9, steps too *long* is a **segmenter cap change that
+must precede the tag**. So S3 ran first, and the number that mattered was not the parse
+rate:
+
+**The split cap fires on 0 of 261 thought steps.** Longest 130 words against a 138 cap,
+median 21. Five traces have reasoning longer than the cap and C4.2's discourse-marker
+splits had already broken every one of them below it before the cap was consulted. So *no
+segmentation that exists today depends on `SPLIT_OVER_WORDS`*, and a later decision to
+change it cannot retroactively renumber anything. That is the condition the freeze needed,
+and it is a measurement rather than a hope.
+
+### "25 is too many" was false, and the first measurement was measuring the wrong thing
+
+S3's first pass looked conclusive: batch 10 clean 3/3, batch 25 failing 2/3, batch 50
+failing 3/3. The obvious read is that C4.3's ~25-step assumption is wrong.
+
+It is not. Three failure modes were hiding behind one symptom:
+
+| | What it looked like | What it was |
+| --- | --- | --- |
+| `content` empty, 1,853–2,293 tokens billed | the model refusing | the whole output budget spent in the **reasoning** channel |
+| `Unterminated string at char 3745` | malformed JSON | truncation, `finish_reason: length` at exactly 4,095 chars, three runs identical |
+| 8 rows returned for 50 steps | a short answer | a silent give-up that C4.3's step_id rule catches |
+
+All three are one cause: **an output cap of roughly 2,000 tokens, and
+`max_tokens` is silently ignored on the OpenAI-compatible endpoint.** `max_tokens: 16000`
+still returned `finish_reason: length` at 1,854 tokens, byte-identical across three runs.
+Against the **native** endpoint with `options.num_predict`, batches of 10, **25 and 50**
+all return a row per step with an exact `step_id` match.
+
+> **This is the fifth parameter in this project accepted and ignored**, after
+> `reasoning_effort: "none"`, native `think: false`, and the two in ADR-004. The rule the
+> project keeps re-learning at its own expense: **verify a parameter from the OUTPUT, never
+> from the fact that the request was accepted.** Here the cheap version is a
+> `finish_reason` check, and M1-9 should treat `length` as a hard error rather than a parse
+> failure worth retrying — retrying a truncated call just truncates again.
+
+Analysis calls also want `think: low`. Classification is a labelling task, not a
+deliberation task, and at the default effort a 25-step batch spent its entire budget
+thinking and returned nothing. It is *also* faster: 17s against 48s at batch 10.
+
+### Two defects the corpus found that the code review did not
+
+Both came from running the segmenter over all 42 trees, which is worth noting as a method:
+**the corpus is a better reviewer than reading is.**
+
+1. **A trace with no visible answer was reported `full`.** `mb-08.thinking` produced 141
+   reasoning steps and an empty `content`. Reasoning was present, so the quality rule —
+   which only asked "did we get reasoning?" — called it full. There is no answer in that
+   trace. Downstream it becomes `correct: false`, which asserts the model answered and was
+   wrong, when it never answered. **This is M1-5's `unparsed`-vs-`wrong` distinction one
+   layer up**, and the third time this project has had to separate "we could not read it"
+   from "it was wrong".
+2. **An unterminated code fence was unprotected.** A 70-word trace truncated mid-fence
+   split into four steps, three of them lines of code. C4.2 says never split inside a
+   fenced block — not "inside a fence that closes" — and S3 had just measured
+   `finish_reason: length` on this runtime, so truncation is an observed shape. Fixed
+   before the tag. Unterminated *maths* is deliberately left unprotected: a stray `\[` in
+   prose would otherwise collapse everything after it into one unsplittable step, and
+   over-protection has a cost too.
+
+### What the 141-step trace actually shows, and why it is the best artifact of the month
+
+126 of those 141 steps open with `Let's` and repeat the same sentence about a town that
+does not exist. The segmenter is not over-splitting — each is a genuine marker-initial
+sentence, and the model really did say one thing 126 times.
+
+> **That is the product working.** *The thinking arm spent 3,966 reasoning tokens saying
+> one thing 126 times, and never answered* is a claim nobody could make by reading a
+> transcript, and it is exactly what B4 means by reasoning made measurable. It also argues
+> for a near-duplicate-step signal in M1-9 or M2 — a "stuck loop" flag is one comparison
+> away once steps are segmented, and it would be the cheapest genuinely novel metric in the
+> plan.
+
+### Capacity — the C10.1 bet, settled
+
+**32.9 h spent against a 26.4 h month and a 12 h Lead allocation.** W3 alone ran **18.7
+against 7.5**, 2.5x its budget, and it was already flagged in the plan as the heaviest week
+with the least slack.
+
+The like-for-like read still holds and is still the useful one. Of W3's 18.7 hours, the
+**estimated work came in at 11.3** (M1-5's measurement 2.6/1.5, M1-7's loop 3.4/3.0, M1-8's
+segmenter 2.4/2.0, S3 1.9/1.0, plus the ADRs those tasks require). The other **7.4 h is six
+defects and three ADRs**, none of it rework and every one of it a thing that would have
+surfaced later and cost more:
+
+| Found in W3 | Would have surfaced as |
+| --- | --- |
+| `exact` scoring 37.5% of correct answers wrong | "the model is worse than expected", in M3 |
+| the answer extractor returning `\]` | an unreadable answer counted as wrong |
+| arms 1 and 2 never separating on accuracy | FE-1 built in W5 around a row that does not exist |
+| a cwd-relative corpus path | arm 3 answering wrong on a *green* run with a plausible chain |
+| a no-answer trace reported `full` | `correct: false` against a model that never answered |
+| `max_tokens` silently ignored | M1-9 concluding its batch size must be 10 |
+
+**The C10.1 bet is lost, and it is no longer a projection.** The month will land near **36 h
+against 12 allocated** once M1-9, M1-10, M1-11, M1-13 and M1-14 are in. **G2 should draw the
+Option-2 contingency**, and the W4 reading will be the fourth consecutive week saying so.
+
+**Next is W4 and G1.** M1-9 (classifier) inherits three things from this week, all written
+down rather than remembered: chunk with an explicit output cap and assert it took effect;
+run analysis at `think: low`; treat `finish_reason: length` as a hard error. Then M1-10
+freezes `ReasoningReport` at G1 — the one structural decision that makes 12 frontend hours
+cover eight surfaces, and the deadline that E9 and E11 exist to protect.
