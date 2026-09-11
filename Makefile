@@ -10,7 +10,7 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze rubric-drift label draw-sample ci warm-cache calibrate faithfulness smoke \
-        record-cassettes classify-reliability report spans traps arm-contrast spike-s1 spike-s3 spike-s6 spike-s2 spike-deps models pin-local \
+        record-cassettes classify-reliability taxonomy-coverage report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
 help:  ## show this help
@@ -95,6 +95,9 @@ draw-sample:  ## M1-11 -- draw the random-90. Runs ONCE, before the first label 
 label:  ## M1-11 -- the BLIND labelling tool. Two labels per step, one pass (C5.2)
 	$(BIN)/python scripts/label.py $(ARGS)
 
+taxonomy-coverage:  ## M1-9 -- does the CORPUS contain the behaviours? No model, no network
+	$(BIN)/python spikes/m1_9_taxonomy_coverage.py $(ARGS)
+
 traps:  ## M1-5 -- measure which declared traps reproduce. Needs the served model.
 	$(BIN)/python spikes/m1_5_trap_reproduction.py $(ARGS)
 
@@ -132,6 +135,9 @@ spike-s3:  ## S3 -- batched classification. DECIDES M1-9's batch size; gates the
 
 spike-s6:  ## S6 -- local tool-calling reliability. GATES ARM 3; run before W3.
 	$(BIN)/python spikes/s6_local_tool_calling.py $(ARGS)
+
+spike-s4:  ## S4 -- cue-injection reproducibility. Go/no-go for M2-9's faithfulness study.
+	@set -a; [ -f .env ] && . ./.env; set +a; MOCK_LLM=0 $(BIN)/python spikes/s4_cue_injection.py $(ARGS)
 
 spike-deps:  ## install the spike-only deps (langgraph, instrumentor) -- NOT analyzer deps
 	$(BIN)/pip install -q -r spikes/requirements-s2.txt
