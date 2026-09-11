@@ -27,6 +27,7 @@ keep it honest, including when it is unflattering.
 | 2026-09-11 | W3 | M1-5 | 2.6 | **Trap reproduction measured. DoD NOT met: 0 of 16 candidates earned the tag over 120 runs**, 117 correct, 1 trap hit. Threshold held, not lowered: 12 further candidates authored in two rounds (round 2 abandoning word-problem arithmetic for inclusion–exclusion, combinatorics, compounding). **ADR-005 filed as *Proposed*** — there is no shallow regime on this model to trap, so the arm contrast is difficulty, not misdirection. **+1.1 over the 1.5 estimate**: the DoD asks for "3 of 5 runs" and the committed pin is greedy-decoded, so the two-regime design (pinned + sampled) had to be worked out and justified before a single run was worth making |
 | 2026-09-11 | W3 | M1-5 | 1.2 | **Two grading defects, neither about traps, both found only because M1-5 is the first task that grades real model output.** (1) `exact` was a string compare, so `7 minutes` scored **wrong** against a declared `7` — **18 of the first 48 runs, 37.5%**. It is now numeric-aware, refusing negation and multi-number ambiguity; `test_checkers.py` (27 tests) grades the shapes a model actually writes. (2) The answer extractor returned `\]` from a LaTeX display block, and the line above it carries four numbers — so `unparsed` is now a first-class outcome, separate from wrong. **Fully unbudgeted.** Would have surfaced in M3 as "the model is worse than expected" |
 | 2026-09-11 | W3 | M1-5 | 1.2 | ADR-005 (four options, recommendation, consequences) · `test_trap_reproduction.py` — M1-5's DoD as a **strict `xfail`** so the shortfall cannot be lost and cannot drift in either direction, plus 8 contract tests over the committed evidence · bank README rewritten so `is_trap` reads as a declaration · `make lint` widened to the repo, which `ruff.toml` already claimed to cover while only `analyzer/` was checked |
+| 2026-09-11 | W3 | M1-5 | 1.4 | **ADR-005 accepted (option B) — and implementing it found its second half false.** B said "re-point FE-1 at the verified difficulty contrast"; that rested on an **ad-hoc probe**, so the contrast was measured across the corpus first. **0 of 16 items separate the arms** (14 bank + 5 harder candidates; 11 agreed, 3 are `tool_required` run without tools). Cause: **arm 1's `low` effort is ADAPTIVE** — 3 reasoning tokens on `mb-03`, **407 on `hm-02` against arm 2's 423**. Harder items close the cost gap without opening an accuracy gap, so there is no difficulty band where arm 1 fails and arm 2 does not. **ADR-006 filed as *Proposed***. Trap floor withdrawn and the four declarations retired into `traps/candidates/` with `retired_from`, so the log still renders them. What FE-1 can feature: the **cost** contrast (1.2–13.3× for the same answer, 11 of 11) plus the **tool** contrast, unverified until M1-7 |
 
 ## Month-1 planned-vs-actual
 
@@ -34,9 +35,9 @@ keep it honest, including when it is unflattering.
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
-| W3 | 7.5 | **5.0 to date** | | M1-5 done at **5.0 against 1.5**. M1-7 and M1-8 not started. The W2 hazard fired exactly as written — and then survived the fix |
+| W3 | 7.5 | **6.4 to date** | | M1-5 closed at **6.4 against 1.5**. M1-7 and M1-8 not started. The W2 hazard fired exactly as written — and then survived two rounds of fixes |
 | W4 | 8.0 | | | |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **19.2 to date** | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **20.6 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -365,3 +366,45 @@ invalidates every label written after it. **M1-8 should read ADR-005's closing n
 freezing** — C4.2 already requires the segmenter to treat `\[ … \]` as one sentence and
 never split inside a fence, and `_DECORATION` in `rlens/runner/run.py` is now the list of
 delimiters actually observed in practice.
+
+### Postscript — accepting ADR-005 falsified half of it, and that is the most useful hour of the week
+
+Option B was accepted: withdraw the trap floor, re-point FE-1 at the difficulty contrast.
+The first half was right. The second half rested on **one ad-hoc probe** — M1-4's control
+run, arm 1 wrong at 144 tokens where arm 2 was right at 1453 — and no bank item had ever
+been observed doing that.
+
+So it was measured before being implemented: **14 items x 2 arms, then 5 harder candidates
+x 2 arms. Zero separations.** Eleven items agreed; the three failures are `tool_required`
+items run without tools, which is arm 3's job and not an arm finding.
+
+**The cause is worth the hour on its own.** Arm 1's `low` effort is *adaptive*:
+
+| Item | Arm 1 | Arm 2 | Ratio |
+| --- | --- | --- | --- |
+| `mb-03` (easy, factual) | 3 | 40 | 0.07 |
+| `mb-13` (multi_step, logic) | 37 | 259 | 0.14 |
+| `mb-06` (multi_step, arithmetic) | 169 | 206 | **0.82** |
+| `hm-02` (7-figure successive percentages) | **407** | 423 | **0.96** |
+
+The ratio climbs with difficulty. Arm 1 does not reason *less* — it reasons **as much as it
+needs to**, invisibly, at the same price. So the harder the item, the *less* the arms
+differ, in accuracy and in cost. `reasoning_effort: "low"` caps the style, not the budget.
+
+**This is the same mistaken assumption that sank the traps, and it sank the fallback too:**
+that arm 1 reasons less and therefore fails sooner. Two ADRs now rest on it. Had the
+difficulty contrast been implemented on the probe's authority, FE-1 would have been
+specified in W5 around a row that does not exist in the corpus — discovered by whoever
+built the page, in Month 2, against a frozen contract.
+
+**Generalising from one probe is the error here, and it was mine.** The probe was real; the
+inference from it was not measured. The practice that follows is the same one the detector
+findings keep pointing at: *a number that will be built on gets measured across the corpus
+it will be drawn from, not on the example that suggested it.*
+
+What survives is a genuine result, and a sharper one than the plan expected: **deliberation
+cost up to 13x more reasoning tokens and changed the answer on none of sixteen problems.**
+For an instrument built to make reasoning measurable rather than impressive, that is a
+finding. The accuracy row FE-1 still needs is the **tool** contrast — `mb-08`/`mb-09`/
+`mb-10` wrong on both reasoning arms and, if M1-7 works, right on arm 3. **That is the next
+task**, which is convenient: it is also the one on the critical path.

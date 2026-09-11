@@ -7,10 +7,6 @@
   ],
   "known_answer": "7",
   "checker": "exact",
-  "is_trap": true,
-  "trap_note": "Scaling printers and posters together leaves the per-printer rate unchanged, so the time is unchanged. The trap answer is 21 -- produced by treating the ratio as if only the workload had tripled.",
-  "trap_answers": [
-    "21"
-  ],
-  "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten"
+  "is_trap": false,
+  "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten. Declared a trap in M1-4; claim withdrawn by ADR-005"
 }

@@ -1,0 +1,13 @@
+{
+  "id": "hm-04",
+  "prompt": "A cyclist covers 143 km on day one. On day two she covers 12% more than on day one. On day three she covers 27 km less than her day-two distance. What is her total distance over the three days, in km?",
+  "known_answer": "436.32",
+  "checker": "numeric_tol",
+  "tolerance": 0.01,
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "is_trap": false,
+  "source": "authored for M1-5 (2026-09-11). CANDIDATE, not yet in the bank: the arm-contrast run found 0 of 11 non-tool bank items separating the arms, so ADR-005's recommendation needs items at the difficulty of M1-4's separating probe. 143 + 160.16 + 133.16 = 436.32. Each day depends on the one before, so a slip in day two propagates twice."
+}

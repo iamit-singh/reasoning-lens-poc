@@ -1,0 +1,13 @@
+{
+  "id": "hm-03",
+  "prompt": "A tank contains 4,860 litres. Each hour, 7.5% of the volume currently in the tank is drained away. How many litres remain after 3 hours, to the nearest litre?",
+  "known_answer": "3846",
+  "checker": "numeric_tol",
+  "tolerance": 1.0,
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "is_trap": false,
+  "source": "authored for M1-5 (2026-09-11). CANDIDATE, not yet in the bank: the arm-contrast run found 0 of 11 non-tool bank items separating the arms, so ADR-005's recommendation needs items at the difficulty of M1-4's separating probe. 4860 x 0.925^3 = 4860 x 0.791453125 = 3846.46, so 3846. Compound decay over three steps; applying 22.5% once gives 3766.5 and is the shortcut a hurried chain takes."
+}

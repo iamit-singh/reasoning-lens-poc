@@ -2,7 +2,8 @@
 
 `items/*.json` — 14 items under lever **L1** (down from 18; the L1/L2 decision is recorded
 in [`../docs/day-1-unblock.md`](../docs/day-1-unblock.md)). Floors held: **≥ 5
-`tool_required`, 3 traps, 3 `easy`, 3 `multi_step`**.
+`tool_required`, 3 `easy`, 3 `multi_step`**. ~~3 traps~~ — the trap floor is **withdrawn**
+by [ADR-005](../docs/decisions/ADR-005-traps-do-not-reproduce.md).
 
 Per-item shape (C3.4):
 `{id, prompt, tags[], known_answer, checker, tolerance?, is_trap, trap_note?, source}`
@@ -27,10 +28,15 @@ M1-7's arm-3 runs can, so it is written down here.
 
 ## The traps: declared in M1-4, and **not earned** in M1-5
 
-> **⚠️ `is_trap: true` in `items/` is a DECLARATION, not a verified property.** The
-> authority is [`traps/reproduction-log.md`](traps/reproduction-log.md), and it currently
-> records **0 of 16 candidates earning the tag over 120 runs**. Do not read the flag as
-> evidence that an item traps the model — it does not.
+> **⚠️ No bank item claims `is_trap` any more.** All four declarations were withdrawn by
+> [ADR-005](../docs/decisions/ADR-005-traps-do-not-reproduce.md) (accepted 11 Sep 2026)
+> after **0 of 16 candidates earned the tag over 120 runs**. The items themselves stayed —
+> they are perfectly good items — and lost only the claim the evidence withdrew. Their
+> declarations live on in [`traps/candidates/`](traps/candidates/) with `retired_from` set,
+> so the reproduction log still renders them.
+>
+> **A new `is_trap` claim needs an earned result first.**
+> `test_the_bank_makes_no_unearned_trap_claim` enforces that.
 
 M1-4 declared four traps against a floor of three and wrote down the risk that `mb-12`,
 `mb-13` and `mb-14` are famous cognitive-reflection archetypes the model may have
@@ -43,9 +49,14 @@ chain.**
 The threshold was not lowered and no tag was relabelled as passing. The finding is that
 **there is no shallow regime on this model to trap**: ADR-004 established that thinking
 cannot be switched off and `low` is the floor, and at `low` the chain still solves every
-misdirection we could construct. What the arms *can* be separated by is **difficulty** —
-see [ADR-005](../docs/decisions/ADR-005-traps-do-not-reproduce.md) for the four options,
-the recommendation, and why the four items keep their flag until someone decides.
+misdirection we could construct.
+
+**Nor is there a difficulty contrast to fall back on.**
+[`arm-contrast.md`](arm-contrast.md) measured all 14 items plus 5 harder candidates on both
+arms: **0 separate the arms**, 11 agreed, and the 3 that failed are `tool_required` items
+run without tools. Arm 1's `low` effort turns out to be **adaptive** — 3 tokens on an easy
+item, 407 on a hard one — so making items harder closes the cost gap without opening an
+accuracy gap. See [ADR-006](../docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md).
 
 `traps/candidates/*.json` — the twelve M1-5 candidates. Outside `items/` on purpose: lever
 L1 fixes the bank at exactly 14 items, so "author more candidates" cannot mean growing the
@@ -75,9 +86,18 @@ tokens. That contrast is the result; without it there is no baseline worth the n
 language, not a trap). Whether the arms actually agree is a measurement, and it belongs
 to W3 alongside M1-5.
 
-**M1-5 raised the stakes on this control group.** With the trap axis gone, the
-`easy`-vs-`multi_step` difficulty contrast is the *only* verified way this bank separates
-the arms on accuracy — and it is the contrast ADR-005 recommends FE-1 feature.
+**M1-5 raised the stakes on this control group, then proved it is all there is.**
+[`arm-contrast.md`](arm-contrast.md) found no item separating the arms on accuracy, so the
+`easy` items are not a control group against a contrast — **they are the contrast.** They
+are where the cost ratio is largest and cleanest (arm 1 at 7–24% of arm 2's reasoning
+tokens), and per [ADR-006](../docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) that
+cost row is half of what FE-1 can feature. The other half is the **tool** contrast —
+`mb-08`/`mb-09`/`mb-10` are wrong on both reasoning arms and should be right on arm 3,
+which is the one wrong→right row this bank actually contains. **Unverified until M1-7.**
+
+`arm-contrast.md` / `.json` — every item x both arms, pinned. `candidates/hm-*.json` — five
+harder multi_step candidates authored to look for a separating item. They did not separate
+either, so they have no claim on a bank slot under L1's fixed 14.
 
 ## A grading defect M1-5 found, and what it means for this bank
 

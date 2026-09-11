@@ -30,7 +30,11 @@ BANK = pathlib.Path(__file__).parents[2] / "problem-bank/items"
 #: make B4 #7's `tool_required` share computable and keep the picker credible; the item
 #: count above the floors is the compressible part.
 L1_ITEM_COUNT = 14
-FLOORS = {"tool_required": 5, "traps": 3, "easy": 3, "multi_step": 3}
+#: The trap floor is **withdrawn** by ADR-005 (accepted 11 Sep 2026): 0 of 16 candidates
+#: reproduced over 120 runs, and ADR-006 explains why -- arm 1's minimal effort is
+#: adaptive, so there is no shallow regime to trap. `easy` and `multi_step` carry the arm
+#: contrast instead, and `problem-bank/traps/reproduction-log.md` is the record.
+FLOORS = {"tool_required": 5, "easy": 3, "multi_step": 3}
 
 REQUIRED_FIELDS = {"id", "prompt", "tags", "known_answer", "checker", "is_trap", "source"}
 OPTIONAL_FIELDS = {"tolerance", "trap_note", "trap_answers"}
@@ -155,7 +159,6 @@ def test_l1_item_count_and_tag_floors(items: list[dict[str, Any]]) -> None:
     tags = Counter(t for item in items for t in item["tags"])
     observed = {
         "tool_required": tags["tool_required"],
-        "traps": sum(1 for i in items if i["is_trap"]),
         "easy": tags["easy"],
         "multi_step": tags["multi_step"],
     }
@@ -202,13 +205,25 @@ def test_every_trap_names_the_wrong_chain_it_is_meant_to_induce(
 
 
 @pytest.mark.contract
-def test_traps_are_over_provisioned_against_the_m1_5_threshold(
-    items: list[dict[str, Any]],
-) -> None:
-    """M1-5 expects candidates to FAIL: a trap must reproduce in >= 3 of 5 runs, and the
-    plan's instruction is to over-provision rather than lower the threshold later.
-    Declaring exactly the floor leaves no room for one to not earn its tag."""
-    assert sum(1 for i in items if i["is_trap"]) > FLOORS["traps"]
+def test_the_bank_makes_no_unearned_trap_claim(items: list[dict[str, Any]]) -> None:
+    """ADR-005, accepted: a trap claim in the bank must have been earned in M1-5.
+
+    Four were declared in M1-4 and none reproduced over 120 runs, so all four had the
+    claim withdrawn -- the items themselves are fine and stayed. Their declarations live
+    on in `problem-bank/traps/candidates/` with the evidence attached, because deleting
+    the prose would delete the record of what was tried.
+
+    This asserts the state ADR-005 leaves behind, and it is the guard that matters going
+    forward: **anything re-tagged `is_trap` in the bank must come with a reproduction
+    result**, or the tag is back to meaning nothing. `test_trap_reproduction.py` is where
+    that result is checked.
+    """
+    claimed = [i["id"] for i in items if i["is_trap"]]
+    assert not claimed, (
+        f"{claimed} claim is_trap in the bank. ADR-005 withdrew the floor and every "
+        f"declared trap's claim; a new one needs an earned result in "
+        f"problem-bank/traps/reproduction-log.md first."
+    )
 
 
 # ------------------------------------------------------------------ ADR-004

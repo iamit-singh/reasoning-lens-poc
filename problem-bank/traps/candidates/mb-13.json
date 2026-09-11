@@ -1,0 +1,17 @@
+{
+  "id": "mb-13",
+  "prompt": "If 7 printers take 7 minutes to print 7 posters, how many minutes would 21 printers take to print 21 posters?",
+  "tags": [
+    "multi_step",
+    "logic"
+  ],
+  "known_answer": "7",
+  "checker": "exact",
+  "is_trap": true,
+  "trap_note": "Scaling printers and posters together leaves the per-printer rate unchanged, so the time is unchanged. The trap answer is 21 -- produced by treating the ratio as if only the workload had tripled.",
+  "trap_answers": [
+    "21"
+  ],
+  "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten. RETIRED from the bank by ADR-005 (accepted 11 Sep 2026): reproduced 0/5 in both regimes, so the is_trap claim was withdrawn. Kept here as the measured record; the bank item of the same id is now a plain item.",
+  "retired_from": "problem-bank/items"
+}

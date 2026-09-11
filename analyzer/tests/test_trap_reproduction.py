@@ -65,11 +65,13 @@ def _earned(runs: list[dict[str, Any]], item_id: str) -> list[str]:
 @pytest.mark.contract
 @pytest.mark.xfail(
     strict=True,
-    reason="ADR-005 (Proposed): 0 of 16 candidates reproduce over 120 runs. There is no "
-    "shallow regime on gpt-oss:20b to trap -- ADR-004 established that thinking cannot be "
-    "switched off and `low` is the floor. STRICT on purpose: if a trap ever does "
-    "reproduce, this test passes, the suite fails, and the marker must come off. The "
-    "threshold has not been lowered and no tag has been relabelled as passing.",
+    reason="ADR-005 (ACCEPTED 11 Sep 2026): 0 of 16 candidates reproduce over 120 runs, "
+    "and the trap floor is withdrawn. ADR-006 explains why it cannot be met -- arm 1's "
+    "`low` effort is ADAPTIVE, spending 3 tokens on an easy item and 407 on a hard one, "
+    "so there is no shallow regime to trap. The DoD is kept here rather than deleted "
+    "because it is the record of what was asked for. STRICT on purpose: if a trap ever "
+    "does reproduce, this test passes, the suite fails, and the marker must come off. The "
+    "threshold was never lowered and no tag was relabelled as passing.",
 )
 def test_three_traps_reproduce_at_the_threshold(
     evidence: dict[str, Any], declared: list[dict[str, Any]]
@@ -197,3 +199,29 @@ def test_the_committed_log_matches_the_committed_runs(evidence: dict[str, Any]) 
     log = LOG_PATH.read_text()
     assert f"**{len(evidence['runs'])} runs**" in log, "log's run count is stale"
     assert evidence["pin_fingerprint"] in log, "log's pin does not match the runs file"
+
+
+# ------------------------------------------------------------------ retired declarations
+@pytest.mark.contract
+def test_a_retired_declaration_still_matches_its_bank_item() -> None:
+    """ADR-005 retired four trap declarations out of `items/` into the candidate pool.
+
+    The prompt and answer are now written in two places, so they can drift -- and a
+    reproduction log quoting a prompt the bank no longer contains is a log describing a
+    measurement of something else. The retired copy is a record, so it must stay a
+    faithful one.
+    """
+    for path in sorted(CANDIDATES.glob("*.json")):
+        candidate = json.loads(path.read_text())
+        if not candidate.get("retired_from"):
+            continue
+        bank_path = BANK / f"{candidate['id']}.json"
+        assert bank_path.exists(), f"{candidate['id']}: retired_from a bank item that is gone"
+        item = json.loads(bank_path.read_text())
+        for field in ("prompt", "known_answer", "checker"):
+            assert candidate[field] == item[field], (
+                f"{candidate['id']}: retired copy's {field} has drifted from the bank item"
+            )
+        assert not item["is_trap"], (
+            f"{candidate['id']}: retired as a trap claim but the bank item still claims it"
+        )

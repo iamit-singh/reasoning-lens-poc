@@ -1,0 +1,13 @@
+{
+  "id": "hm-02",
+  "prompt": "A company's revenue was $2,847,000 in 2023. It fell by 13% in 2024 and then rose by 21% in 2025. What was the 2025 revenue, in dollars, to the nearest dollar?",
+  "known_answer": "2997037",
+  "checker": "numeric_tol",
+  "tolerance": 1.0,
+  "tags": [
+    "multi_step",
+    "arithmetic"
+  ],
+  "is_trap": false,
+  "source": "authored for M1-5 (2026-09-11). CANDIDATE, not yet in the bank: the arm-contrast run found 0 of 11 non-tool bank items separating the arms, so ADR-005's recommendation needs items at the difficulty of M1-4's separating probe. 2847000 x 0.87 = 2476890; x 1.21 = 2997036.9, so 2997037. Two successive percentage changes on a seven-figure base -- the arithmetic, not the method, is the hard part."
+}

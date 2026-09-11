@@ -10,7 +10,7 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze ci warm-cache calibrate faithfulness smoke \
-        record-cassettes traps spike-s1 spike-s6 spike-s2 spike-deps models pin-local \
+        record-cassettes traps arm-contrast spike-s1 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
 help:  ## show this help
@@ -69,6 +69,9 @@ smoke:  ## STUB (M3-4) -- local acceptance: 3 items from cache, panel, calibrati
 
 traps:  ## M1-5 -- measure which declared traps reproduce. Needs the served model.
 	$(BIN)/python spikes/m1_5_trap_reproduction.py $(ARGS)
+
+arm-contrast:  ## ADR-004's control group: which items separate the arms? Needs the model.
+	$(BIN)/python spikes/m1_5_arm_contrast.py $(ARGS)
 
 record-cassettes:  ## STUB (M1-14) -- record provider responses once per prompt-bundle version
 	@echo "record-cassettes: not implemented (owner M1-14, W4). This is the frontend's W5 unblock (E11)"; exit 2

@@ -1,9 +1,13 @@
-# ADR-005 — Designed traps do not reproduce on `gpt-oss:20b`; the arm contrast is difficulty, not misdirection
+# ADR-005 — Designed traps do not reproduce on `gpt-oss:20b`
+
+*(This ADR's original subtitle read "…the arm contrast is difficulty, not misdirection". It
+is struck: [ADR-006](ADR-006-arms-1-and-2-do-not-separate.md) found no difficulty contrast
+in the bank either. The claim is corrected below rather than quietly edited out.)*
 
 | | |
 | --- | --- |
-| **Status** | **Proposed** — 11 Sep 2026 (W3). Needs a call on option A/B/C/D below; the recommendation is **B**. |
-| **Decided by** | *open* — touches B6.3's "guaranteed wow moment" and C3.4's trap floor, so it is not the implementer's call |
+| **Status** | **Accepted — option B** · 11 Sep 2026 (W3). **The second half of B did not survive implementation — see [ADR-006](ADR-006-arms-1-and-2-do-not-separate.md).** |
+| **Decided by** | Amit Singh (sole contributor) — it touches B6.3's "guaranteed wow moment" and C3.4's trap floor, so it was escalated rather than assumed |
 | **Amends** | M1-5's DoD · C3.4's `is_trap` semantics · B6.2/FE-1's featured comparison · the L1 trap floor of 3 |
 | **Evidence** | `problem-bank/traps/reproduction-log.md` + `runs.json` — **120 runs, 16 candidates, 1 trap hit** |
 | **Depends on** | [ADR-004](ADR-004-direct-arm-minimal-reasoning.md) — this is its second consequence |
@@ -46,19 +50,22 @@ chain, and that chain is good enough to solve every misdirection we could constr
 
 This is ADR-004's second consequence, and the more expensive one. ADR-004 narrowed B4 #7
 to *"medium vs minimal effort"*; M1-5 shows the minimal-effort arm is not weak enough to
-be fooled **by design**. What it *can* be beaten by is **difficulty**: M1-4's own control
-run has arm 1 wrong at 144 reasoning tokens on a multi-step probe where arm 2 is right at
-1453, and `mb-01` correct on both arms at 5 vs 21 tokens.
+be fooled **by design**.
 
-> **So the arm contrast this PoC can actually demonstrate is difficulty, not
-> misdirection** — which is precisely the collapse ADR-004's note on the `easy` items
-> warned about: *"If every item separates the arms that cleanly, the bank measures
-> DIFFICULTY, not strategy."* The `easy`-vs-`multi_step` axis survives intact and is
-> already verified on real runs. The trap axis does not.
+~~What it *can* be beaten by is **difficulty**: M1-4's own control run has arm 1 wrong at
+144 reasoning tokens on a multi-step probe where arm 2 is right at 1453.~~
+
+> **⚠️ Struck. That was a probe, not a bank item, and it does not generalise.** Measuring
+> the contrast across all 14 bank items plus 5 harder candidates found **0 of 16
+> separating the arms**, because arm 1's `low` effort is *adaptive* — 3 tokens on an easy
+> item, 407 on a hard one. See [ADR-006](ADR-006-arms-1-and-2-do-not-separate.md). The
+> generalisation from one probe to "the arm contrast is difficulty" was wrong, and it was
+> wrong in the same way the trap premise was: both assumed arm 1 reasons less *and
+> therefore fails sooner*.
 
 The cost-of-thought half of B4 #7 is **unaffected** — it is a token-count claim, and the
-4× separation on `mb-01` and the 144-vs-1453 separation both hold. It is the *accuracy*
-half of the arm comparison that has lost its most photogenic instrument.
+cost separation holds across all 11 items where both arms answered (1.2x–13.3x). It is the
+*accuracy* half of the arm comparison that has lost its instrument entirely.
 
 ## Options
 
@@ -69,8 +76,17 @@ half of the arm comparison that has lost its most photogenic instrument.
 | **C** | Change the generation model to one weak enough to trap | High — breaks the pin, re-runs S1/S6, invalidates every recorded number, and ADR-001's same-model rule means it changes *all three* arms | Buying a demo moment by making the subject worse is measuring the wrong thing |
 | **D** | Push candidates to the model's capability ceiling until some fail | ~1 h | Produces **hard items, not traps**. A trap is defined by a *plausible wrong chain*, and an item the model fails through exhaustion has no designed chain to show. It would meet the floor's letter and empty the tag of meaning |
 
-**Recommendation: B.** It is the only option that neither spends more hours on a
-measurement that has answered, nor keeps a tag whose meaning the evidence has withdrawn.
+**Recommendation: B** — accepted. It is the only option that neither spends more hours on
+a measurement that has answered, nor keeps a tag whose meaning the evidence has withdrawn.
+
+> **⚠️ B's first half held; its second half did not.** Withdrawing the trap floor was
+> correct and is implemented. But "re-point FE-1 at the verified difficulty contrast"
+> rested on an **ad-hoc probe**, and measuring the contrast across the corpus before
+> implementing it found **0 of 16 items separating the arms** — there was no difficulty
+> contrast in the bank to point at. [ADR-006](ADR-006-arms-1-and-2-do-not-separate.md)
+> carries that finding, its cause (arm 1's `low` effort is adaptive, not shallow) and the
+> replacement: the **cost** contrast, verified now, plus the **tool** contrast, pending
+> M1-7.
 
 ## Consequences if B is accepted
 
@@ -78,9 +94,9 @@ measurement that has answered, nor keeps a tag whose meaning the evidence has wi
   authority is `problem-bank/traps/reproduction-log.md`, not the flag.
 - The L1 trap floor of 3 is **withdrawn**; `easy` ≥ 3 and `multi_step` ≥ 3 carry the arm
   contrast on their own and are both verified on real runs.
-- **FE-1's featured comparison** becomes the difficulty pair (an `easy` item where the
-  arms agree at 4× cost separation, beside a `multi_step` item where arm 1 is wrong and
-  arm 2 right) — pre-rendered on arrival exactly as B6.2 step 1 requires.
+- ~~**FE-1's featured comparison** becomes the difficulty pair~~ — **superseded by
+  [ADR-006](ADR-006-arms-1-and-2-do-not-separate.md).** No bank item has arm 1 wrong and
+  arm 2 right; the pair does not exist in this corpus.
 - **M2-9 (cue injection) is not affected and becomes more load-bearing.** Faithfulness
   under an injected cue is a separate mechanism from a reasoning trap, and B6.3's wow
   moment now rests on it alone. S4 (M1-13, W4) is the early signal for it and should be
@@ -91,8 +107,10 @@ measurement that has answered, nor keeps a tag whose meaning the evidence has wi
 M1-5 does not block G1 — the plan says so, and says to protect M1-8 over M1-5. So the
 shortfall is recorded where it cannot be lost, without red-lighting the critical path:
 
-- The four declared traps **keep `is_trap: true`**. Flipping them is a scope decision this
-  ADR exists to ask for, and flipping them silently would be the implementer making it.
+- ~~The four declared traps **keep `is_trap: true`**~~ — **now flipped, the decision having
+  been made.** The bank items stay (they are perfectly good items); their declarations moved
+  to `problem-bank/traps/candidates/` with `retired_from` set, so the reproduction log still
+  renders them and the record of what was tried is not deleted.
 - `test_trap_reproduction.py::test_three_traps_reproduce_at_the_threshold` asserts M1-5's
   DoD and is marked **`xfail(strict=True)`** against this ADR. Strict is the point: the
   suite fails if the test ever *passes*, which forces the marker off the moment a trap

@@ -3,7 +3,7 @@
 
 # Trap reproduction log — M1-5
 
-**Recorded** 2026-09-11T06:26:42Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b` @ `sha256:e7b27`) · **120 runs**
+**Recorded** 2026-09-11T06:55:09Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b` @ `sha256:e7b27`) · **120 runs**
 
 A trap is *declared* in M1-4 and **earned here**. An item tagged `is_trap: true` that does not reproduce its declared wrong chain is a normal item with a misleading tag.
 
@@ -32,14 +32,14 @@ Outcomes are `correct`, `trap` (the declared wrong answer), `unparsed` (the answ
 
 | Candidate | Pool | Arm | Pinned | Sampled trap | Correct | Other | Unparsed | Earned |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mb-11` | items | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
-| `mb-11` | items | thinking | correct | **0/5** | 4/5 | 0/5 | 1/5 | — |
-| `mb-12` | items | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
-| `mb-12` | items | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
-| `mb-13` | items | direct | correct | **1/5** | 4/5 | 0/5 | 0/5 | — |
-| `mb-13` | items | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
-| `mb-14` | items | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
-| `mb-14` | items | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-11` | retired | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-11` | retired | thinking | correct | **0/5** | 4/5 | 0/5 | 1/5 | — |
+| `mb-12` | retired | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-12` | retired | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-13` | retired | direct | correct | **1/5** | 4/5 | 0/5 | 0/5 | — |
+| `mb-13` | retired | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-14` | retired | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
+| `mb-14` | retired | thinking | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
 | `tc-01` | candidates | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
 | `tc-02` | candidates | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
 | `tc-03` | candidates | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
@@ -53,8 +53,8 @@ Outcomes are `correct`, `trap` (the declared wrong answer), `unparsed` (the answ
 | `tc-11` | candidates | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
 | `tc-12` | candidates | direct | correct | **0/5** | 5/5 | 0/5 | 0/5 | — |
 
-*Declared in M1-4 (inside the L1 bank): `mb-11`, `mb-12`, `mb-13`, `mb-14`*
-*Authored in M1-5: `tc-01`, `tc-02`, `tc-03`, `tc-04`, `tc-05`, `tc-06`, `tc-07`, `tc-08`, `tc-09`, `tc-10`, `tc-11`, `tc-12`*
+*Declared in M1-4, **claim withdrawn by ADR-005** — the bank items remain, as plain items: `mb-11`, `mb-12`, `mb-13`, `mb-14`*
+*Authored in M1-5, never in the bank: `tc-01`, `tc-02`, `tc-03`, `tc-04`, `tc-05`, `tc-06`, `tc-07`, `tc-08`, `tc-09`, `tc-10`, `tc-11`, `tc-12`*
 
 ## Per candidate
 
