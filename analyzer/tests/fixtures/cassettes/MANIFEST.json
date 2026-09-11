@@ -1,0 +1,12 @@
+{
+  "_README": "Written by scripts/record_cassettes.py (M1-14). The prompt bundle version is the thing analysis cassettes are keyed to: a prompt edit changes it, and every analysis cassette recorded under the old one is stale. Each cassette also carries the sha of its own request and replay refuses a mismatch, so a stale cassette fails loudly instead of replaying the wrong prompt's answer under the new prompt's version.",
+  "recorded_utc": "2026-09-11T12:52:45Z",
+  "prompt_bundle_version": "a6d550b9dc10",
+  "analyzer_backend": "hybrid",
+  "model_analyze": "gpt-5-mini-2025-08-07",
+  "local_model": "gpt-oss:20b",
+  "counts": {
+    "generation": 48,
+    "analysis": 3
+  }
+}

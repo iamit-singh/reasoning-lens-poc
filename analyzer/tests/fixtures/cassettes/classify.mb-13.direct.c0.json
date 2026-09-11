@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 346,
+  "finish_reason": "stop",
+  "latency_ms": 8475,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 704,
+  "reasoning_tokens": 128,
+  "request_digest": "eb3d38dcfadf39d6",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Each printer prints 1 poster in 7 min, so 21 printers print 21 posters in the same 7 minutes (work scales linearly with printers).\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"States the conclusion derived: time required is 7 minutes.\"\n    }\n  ]\n}"
+}

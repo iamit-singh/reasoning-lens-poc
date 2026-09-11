@@ -352,3 +352,29 @@ def test_an_analysis_failure_degrades_one_arm_and_spares_the_others(
     assert broken[0]["steps"], "the steps survive — the trace was never the problem"
     assert all(step["behavior"] is None for step in broken[0]["steps"])
     assert all(arm["status"] != "failed" for arm in report["arms"])
+
+
+def test_both_escalation_states_are_reachable_in_a_fixture() -> None:
+    """**C4.10 requires FE-4 to render "escalated / not escalated", and for a while only one
+    of those was reachable.**
+
+    Every unsound step in `report_flagged.json` carried `escalated: true`, so the
+    first-pass-verdict-only badge had no fixture to be built against. Found by building the
+    component, which is the entire argument for fixtures-first: a state that cannot be
+    reached in mock mode becomes a Month-3 conversation, in the month with no slack for
+    conversations.
+
+    In Month 1 `escalated` is always false in *production* — the tier is M2-5 — so this is
+    the inverse of the usual worry: the fixture has to carry the state the pipeline cannot
+    produce, and also the state it can.
+    """
+    flagged = [
+        step
+        for step in steps_of(load("report_flagged"))
+        if step["validity"] and step["validity"]["verdict"] == "unsound"
+    ]
+    assert any(s["validity"]["escalated"] for s in flagged), "no escalated flagged step"
+    assert any(not s["validity"]["escalated"] for s in flagged), (
+        "no flagged step with escalated: false — FE-4's 'first-pass verdict only' badge "
+        "cannot be built against any committed fixture"
+    )

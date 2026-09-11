@@ -3,6 +3,8 @@ import { allReports, armsOf, reportFor } from "../../lib/reports";
 import ArmPanes from "../../components/ArmPanes";
 import Provenance from "../../components/Provenance";
 import Trace from "../../components/Trace";
+import Scoreboard from "../../components/Scoreboard";
+import FlaggedPanel from "../../components/FlaggedPanel";
 import { taxonomy } from "../../lib/taxonomy";
 
 /**
@@ -54,14 +56,11 @@ export default async function ItemPage({ params }) {
 
       <Provenance report={report} />
 
+      <Scoreboard report={report} arms={arms} />
+
       <Trace arms={arms} definitions={taxonomy()} />
 
-      {/* FE-3's scoreboard and FE-4's flagged-step panel land below this. Named rather than
-          left blank so the next person does not wonder whether something failed to load. */}
-      <p className="notice">
-        The scoreboard with its verdict line (FE-3) and the flagged-step side panel (FE-4)
-        render below this line.
-      </p>
+      <FlaggedPanel arms={arms} />
 
       <footer>
         {report.measurement_context &&

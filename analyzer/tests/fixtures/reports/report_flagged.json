@@ -3,7 +3,11 @@
   "item": {
     "id": "fx-01",
     "prompt": "A conference books 3 rooms for 14 delegates each and 2 rooms for 9 delegates each. Catering costs $17 per delegate. What is the total catering cost in dollars? Give the final answer on its own last line.",
-    "tags": ["multi_step", "arithmetic", "fixture"],
+    "tags": [
+      "multi_step",
+      "arithmetic",
+      "fixture"
+    ],
     "known_answer": "1020",
     "checker": "exact",
     "tolerance": null,
@@ -43,8 +47,14 @@
           "step_id": "direct:fx01d:0",
           "kind": "thought",
           "text": "3 x 14 = 42 and 2 x 9 = 18, so 60 delegates at $17 is 1020.",
-          "char_range": [0, 58],
-          "behavior": { "label": "linear", "confidence": 0.91 },
+          "char_range": [
+            0,
+            58
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.91
+          },
           "validity": {
             "verdict": "sound",
             "confidence": 0.94,
@@ -55,10 +65,36 @@
         },
         {
           "step_id": "direct:fx01d:1",
+          "kind": "thought",
+          "text": "Catering is usually billed per head, so 60 heads at $17 is the whole cost \u2014 no venue fee to add.",
+          "char_range": [
+            59,
+            155
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.74
+          },
+          "validity": {
+            "verdict": "unsound",
+            "confidence": 0.61,
+            "error_type": "unsupported_leap",
+            "escalated": false,
+            "rationale": "Asserts that no venue fee applies. The problem neither states nor implies it, and the step does not derive it."
+          }
+        },
+        {
+          "step_id": "direct:fx01d:2",
           "kind": "answer",
           "text": "1020",
-          "char_range": [0, 4],
-          "behavior": { "label": "linear", "confidence": 0.88 },
+          "char_range": [
+            0,
+            4
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.88
+          },
           "validity": {
             "verdict": "sound",
             "confidence": 0.9,
@@ -72,7 +108,7 @@
         "verdict": "entails",
         "flagged": false,
         "cited_step_ids": [],
-        "rationale": "The single derivation supports the stated answer."
+        "rationale": "The arithmetic supports the stated answer, though step 2 adds an assumption the problem does not license."
       },
       "metrics": {
         "output_tokens": 64,
@@ -89,8 +125,8 @@
           "backward_chaining": 0.0,
           "linear": 1.0
         },
-        "soundness_score": 1.0,
-        "flagged_step_count": 0,
+        "soundness_score": 0.6667,
+        "flagged_step_count": 1,
         "classifier_calls": 1,
         "classifier_repairs": 0
       },
@@ -109,8 +145,14 @@
           "step_id": "thinking:fx01t:0",
           "kind": "thought",
           "text": "First I need the total number of delegates, then I can multiply by the per-delegate catering cost.",
-          "char_range": [0, 98],
-          "behavior": { "label": "subgoal_setting", "confidence": 0.88 },
+          "char_range": [
+            0,
+            98
+          ],
+          "behavior": {
+            "label": "subgoal_setting",
+            "confidence": 0.88
+          },
           "validity": {
             "verdict": "sound",
             "confidence": 0.92,
@@ -123,8 +165,14 @@
           "step_id": "thinking:fx01t:1",
           "kind": "thought",
           "text": "The three larger rooms hold 3 x 14 = 42 delegates.",
-          "char_range": [99, 148],
-          "behavior": { "label": "linear", "confidence": 0.93 },
+          "char_range": [
+            99,
+            148
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.93
+          },
           "validity": {
             "verdict": "sound",
             "confidence": 0.95,
@@ -137,8 +185,14 @@
           "step_id": "thinking:fx01t:2",
           "kind": "thought",
           "text": "The two smaller rooms hold 2 x 9 = 17 delegates, so the total is 42 + 17 = 59.",
-          "char_range": [149, 226],
-          "behavior": { "label": "linear", "confidence": 0.84 },
+          "char_range": [
+            149,
+            226
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.84
+          },
           "validity": {
             "verdict": "unsound",
             "confidence": 0.97,
@@ -151,8 +205,14 @@
           "step_id": "thinking:fx01t:3",
           "kind": "thought",
           "text": "Let me check that: 42 plus 17 is 59, and 59 delegates at $17 each gives 59 x 17 = 1003.",
-          "char_range": [227, 314],
-          "behavior": { "label": "verification", "confidence": 0.79 },
+          "char_range": [
+            227,
+            314
+          ],
+          "behavior": {
+            "label": "verification",
+            "confidence": 0.79
+          },
           "validity": {
             "verdict": "unsound",
             "confidence": 0.71,
@@ -165,8 +225,14 @@
           "step_id": "thinking:fx01t:4",
           "kind": "answer",
           "text": "1003",
-          "char_range": [0, 4],
-          "behavior": { "label": "linear", "confidence": 0.86 },
+          "char_range": [
+            0,
+            4
+          ],
+          "behavior": {
+            "label": "linear",
+            "confidence": 0.86
+          },
           "validity": {
             "verdict": "unverifiable",
             "confidence": 0.55,
@@ -179,7 +245,10 @@
       "consistency": {
         "verdict": "contradicts",
         "flagged": true,
-        "cited_step_ids": ["thinking:fx01t:2", "thinking:fx01t:3"],
+        "cited_step_ids": [
+          "thinking:fx01t:2",
+          "thinking:fx01t:3"
+        ],
         "rationale": "Step 2 computes 2 x 9 as 17 and step 3 carries it forward; the stated answer does not follow from a correct reading of the problem."
       },
       "metrics": {

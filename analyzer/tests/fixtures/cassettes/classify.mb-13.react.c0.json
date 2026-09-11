@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 312,
+  "finish_reason": "stop",
+  "latency_ms": 7038,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 828,
+  "reasoning_tokens": 128,
+  "request_digest": "a7b5a4803086e3f8",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-13-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.89,\"error_type\":null,\"rationale\":\"Correct forward-rate reasoning: 7 printers \u2192 7 posters in 7 min => each printer 1 poster/7 min; scales to 21 printers giving 3 posters/min, so 21 posters in 7 min.\"},{\"step_id\":\"react:react-mb-13-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.86,\"error_type\":null,\"rationale\":\"Final answer restates conclusion (7 minutes), consistent with prior correct derivation.\"}]}"
+}
