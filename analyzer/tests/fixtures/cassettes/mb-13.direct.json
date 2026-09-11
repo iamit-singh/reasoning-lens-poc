@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 49,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 153,
+  "reasoning": "Rate: 7 printers produce 7 posters in 7 min => each printer 1 poster per 7 min. So 21 printers produce 21 posters in 7 min.",
+  "reasoning_tokens": 37,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "7 minutes",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 202
+}

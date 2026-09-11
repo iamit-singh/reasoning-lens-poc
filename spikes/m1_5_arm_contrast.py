@@ -1,6 +1,10 @@
 """The arm contrast across the whole bank — the measurement ADR-004 asked for and
 ADR-005 depends on. **Selects FE-1's featured comparison.**
 
+Covers all three arms since M1-7. Arms 1 and 2 answer "what does the thinking buy?"; arm 3
+answers "what do the tools buy?", and after ADR-006 that second question is the one
+carrying the accuracy claim.
+
 Why this had to be run before ADR-005 could be accepted
 -------------------------------------------------------
 ADR-005 recommends withdrawing the trap floor and re-pointing FE-1's featured comparison
@@ -57,6 +61,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "analyzer/src"))
 from rlens.checkers import check, sole_number
 from rlens.llm import ProviderError, generate
 from rlens.runner.arms import ARMS, messages_for
+from rlens.runner.react import run_react
 from rlens.runner.run import ArmResult
 from rlens.versions import generation_pin
 
@@ -66,6 +71,10 @@ OUT_JSON = ROOT / "problem-bank/arm-contrast.json"
 OUT_MD = ROOT / "problem-bank/arm-contrast.md"
 
 PATTERNS = ("separated", "agreed", "both_wrong", "inverted", "incomplete")
+
+#: The three arms, in the order the report reads. Arm 3 is a LOOP, so `run_cell`
+#: dispatches it rather than calling `generate` once.
+ARM_ORDER = ("direct", "thinking", "react")
 
 
 class _TextOnly:
@@ -113,6 +122,8 @@ def separated_ids(rows: list[dict[str, Any]]) -> list[str]:
 
 
 def run_cell(item: dict[str, Any], arm: str, pin: Any) -> dict[str, Any]:
+    if arm == "react":
+        return _run_react_cell(item, pin)
     spec = ARMS[arm]
     try:
         c = generate(
@@ -132,6 +143,35 @@ def run_cell(item: dict[str, Any], arm: str, pin: Any) -> dict[str, Any]:
         "answer_tokens": c.answer_tokens,
         "text": c.text,
         "reasoning": c.reasoning,
+    }
+
+
+def _run_react_cell(item: dict[str, Any], pin: Any) -> dict[str, Any]:
+    """Arm 3. Reports the loop's shape as well as its answer.
+
+    `tool_calls` is recorded per item because it exposes a tag that may be wrong: an item
+    tagged `tool_required` on which arm 3 calls **no tool** is an item the model does in
+    its head, and `tool_required` feeds a share B4 #7 publishes. Same shape of problem as
+    `is_trap` before M1-5 measured it -- a declaration standing in for a measurement.
+    """
+    result = run_react(item["id"], item["prompt"], pin=pin)
+    final = result.final
+    if final is None:
+        return {"arm": "react", "outcome": "failed", "error": result.failed_reason or "no turns"}
+    answer = final_answer(final.text)
+    return {
+        "arm": "react",
+        "outcome": outcome(item, answer),
+        "answer": answer,
+        # Arm 3's cost is the WHOLE loop, not its last turn (ADR-007).
+        "reasoning_tokens": sum(t.completion.reasoning_tokens or 0 for t in result.turns),
+        "answer_tokens": final.answer_tokens,
+        "turns": result.turn_count,
+        "tool_calls": result.tool_calls_made,
+        "failed_tool_calls": result.failed_tool_calls,
+        "max_turns_exhausted": result.max_turns_exhausted,
+        "text": final.text,
+        "reasoning": final.reasoning,
     }
 
 
@@ -159,14 +199,16 @@ def main(argv: list[str] | None = None) -> int:
 
     rows: list[dict[str, Any]] = []
     for item in items:
-        cells = {arm: run_cell(item, arm, pin) for arm in ("direct", "thinking")}
+        cells = {arm: run_cell(item, arm, pin) for arm in ARM_ORDER}
         pat = pattern(cells["direct"]["outcome"], cells["thinking"]["outcome"])
         rows.append({"item": item["id"], "tags": item["tags"], "pattern": pat, "cells": cells})
-        d, t = cells["direct"], cells["thinking"]
+        d, t, r = cells["direct"], cells["thinking"], cells["react"]
         print(
             f"  {item['id']:<7} {pat:<11} "
-            f"direct={d['outcome']:<9}({d.get('reasoning_tokens')}tok) "
-            f"thinking={t['outcome']:<9}({t.get('reasoning_tokens')}tok)"
+            f"d={d['outcome']:<8}({d.get('reasoning_tokens')}t) "
+            f"th={t['outcome']:<8}({t.get('reasoning_tokens')}t) "
+            f"re={r['outcome']:<8}({r.get('reasoning_tokens')}t "
+            f"{r.get('turns')}turn {r.get('tool_calls')}call)"
         )
 
     payload = {
@@ -202,7 +244,7 @@ def write_md(payload: dict[str, Any]) -> None:
     w("")
     w(
         f"**Recorded** {payload['recorded_utc']} · **pin** `{payload['pin_fingerprint']}` "
-        f"(`{payload['pin']['model']}`) · **{len(rows) * 2} runs**, one per item per arm"
+        f"(`{payload['pin']['model']}`) · **{len(rows)} items x 3 arms**"
     )
     w("")
     w(
@@ -210,48 +252,137 @@ def write_md(payload: dict[str, Any]) -> None:
         "configuration the demo runs in, so one run per cell is the honest form of five."
     )
     w("")
-    counts = {p: sum(1 for r in rows if r["pattern"] == p) for p in PATTERNS}
+
+    counts = {p_: sum(1 for r in rows if r["pattern"] == p_) for p_ in PATTERNS}
     separated = [r for r in rows if r["pattern"] == "separated"]
+    correct = {
+        arm: sum(1 for r in rows if r["cells"][arm]["outcome"] == "correct") for arm in ARM_ORDER
+    }
+    tool_rescued = [
+        r
+        for r in rows
+        if r["cells"]["react"]["outcome"] == "correct"
+        and r["cells"]["direct"]["outcome"] != "correct"
+        and r["cells"]["thinking"]["outcome"] != "correct"
+    ]
+
     w("## Verdict")
+    w("")
+    w(
+        f"**Accuracy:** arm 1 (minimal) {correct['direct']}/{len(rows)} · "
+        f"arm 2 (thinking) {correct['thinking']}/{len(rows)} · "
+        f"**arm 3 (ReAct) {correct['react']}/{len(rows)}**."
+    )
     w("")
     if separated:
         w(
-            f"**{len(separated)} of {len(rows)} items separate the arms** "
+            f"**{len(separated)} of {len(rows)} items separate arms 1 and 2** "
             "(arm 1 wrong, arm 2 right): "
             + ", ".join("`" + r["item"] + "`" for r in separated)
-            + ". FE-1's featured comparison has a bank item to draw on, and ADR-005's "
-            "recommendation stands on corpus evidence rather than on an ad-hoc probe."
+            + "."
         )
     else:
         w(
-            f"**No item separates the arms.** All {len(rows)} items land elsewhere: "
-            f"{counts}. ADR-005's recommendation to re-point FE-1 at the difficulty "
-            "contrast **cannot be satisfied from this bank as it stands** — the contrast "
-            "exists on an ad-hoc probe and nowhere in the committed corpus. That is a "
-            "finding for the reviewer, not something to work around."
+            f"**No item separates arms 1 and 2.** All {len(rows)} land elsewhere: "
+            f"{counts}. Arm 1's `low` effort is *adaptive* rather than shallow, so making "
+            "items harder closes the cost gap without opening an accuracy gap — "
+            "[ADR-006](../docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md)."
         )
     w("")
-    w(f"Patterns: {counts}")
+    if tool_rescued:
+        w(
+            f"**The accuracy separation this bank does contain is TOOLS.** "
+            f"{len(tool_rescued)} items are wrong on both reasoning arms and right on arm "
+            "3: " + ", ".join("`" + r["item"] + "`" for r in tool_rescued) + ". That is the "
+            "wrong→right row FE-1 needs, and it confirms ADR-006's recommendation A on "
+            "corpus evidence rather than on a probe."
+        )
+        w("")
+        w("**And it is cheaper, not just better** \u2014 the part worth putting on screen:")
+        w("")
+        w("| Item | Arm 2 (thinking) | Arm 3 (tools) | |")
+        w("| --- | --- | --- | --- |")
+        for r in tool_rescued:
+            t2 = r["cells"]["thinking"].get("reasoning_tokens") or 0
+            t3 = r["cells"]["react"].get("reasoning_tokens") or 0
+            ratio = f"**{t2 / t3:.0f}x cheaper**" if t3 else "\u2014"
+            w(
+                f"| `{r['item']}` | {r['cells']['thinking']['outcome']}, {t2} reasoning tok "
+                f"| **correct**, {t3} tok | {ratio} |"
+            )
+        w("")
+        w(
+            "On `mb-08` the thinking arm spent **3,966 reasoning tokens failing to recall a "
+            "fact that does not exist** \u2014 every place name in this corpus is invented, "
+            "on purpose \u2014 while the tool arm spent 80 and looked it up. That pair is the "
+            "product in one frame: one reasoning panel showing confabulation at length, "
+            "beside one showing two tool calls. It is a stronger demo row than the "
+            "difficulty contrast the plan expected, and unlike that one it exists."
+        )
+    else:
+        w("**No item is rescued by arm 3 either.** ADR-006's option A has no evidence.")
     w("")
+
     w("## Per item")
     w("")
-    w("| Item | Tags | Arm 1 (minimal) | tok | Arm 2 (thinking) | tok | Ratio | Pattern |")
-    w("| --- | --- | --- | --- | --- | --- | --- | --- |")
+    w(
+        "| Item | Tags | Arm 1 | tok | Arm 2 | tok | Arm 3 | tok | turns | tool calls | "
+        "1v2 pattern |"
+    )
+    w("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for r in rows:
-        d, t = r["cells"]["direct"], r["cells"]["thinking"]
-        dt_, tt = d.get("reasoning_tokens"), t.get("reasoning_tokens")
-        ratio = f"{tt / dt_:.1f}x" if dt_ and tt else "—"
+        d, t, re_ = r["cells"]["direct"], r["cells"]["thinking"], r["cells"]["react"]
         mark = {"separated": "**separated**", "agreed": "agreed"}.get(r["pattern"], r["pattern"])
+        rescued = " ✅" if r in tool_rescued else ""
+        calls = re_.get("tool_calls", "—")
+        tagged = "tool_required" in r["tags"]
+        # A `tool_required` item on which arm 3 called nothing is the mis-tag flagged below.
+        if tagged and calls == 0:
+            calls = "**0**"
         w(
-            f"| `{r['item']}` | {', '.join(r['tags'])} | {d['outcome']} | {dt_} | "
-            f"{t['outcome']} | {tt} | {ratio} | {mark} |"
+            f"| `{r['item']}` | {', '.join(r['tags'])} | {d['outcome']} | "
+            f"{d.get('reasoning_tokens')} | {t['outcome']} | {t.get('reasoning_tokens')} | "
+            f"{re_['outcome']}{rescued} | {re_.get('reasoning_tokens')} | "
+            f"{re_.get('turns', '—')} | {calls} | {mark} |"
         )
     w("")
+
+    mistagged = [
+        r
+        for r in rows
+        if "tool_required" in r["tags"] and r["cells"]["react"].get("tool_calls") == 0
+    ]
+    if mistagged:
+        w("## `tool_required` is a declaration, not a measurement")
+        w("")
+        w(
+            f"**{len(mistagged)} of "
+            f"{sum(1 for r in rows if 'tool_required' in r['tags'])} items tagged "
+            "`tool_required` had arm 3 call no tool at all** — "
+            + ", ".join("`" + r["item"] + "`" for r in mistagged)
+            + " — and answer correctly regardless. The model does that arithmetic in its "
+            "head, so the tag describes an intention rather than a property."
+        )
+        w("")
+        w(
+            "This matters beyond tidiness: `problem-bank/README.md` states that the tag "
+            'floors are *"what make B4 #7\'s `tool_required` share computable"*. A share '
+            f"computed from the tag would be wrong by {len(mistagged)} of "
+            f"{sum(1 for r in rows if 'tool_required' in r['tags'])} items. **The measured "
+            "share is the one in the `tool calls` column above.**"
+        )
+        w("")
+        w(
+            "It is the same shape of problem as `is_trap` before M1-5 measured it, and the "
+            "third tag in a row to turn out to be a claim. Recorded rather than relabelled "
+            "— dropping the tag changes the L1 floor, which is a scope decision."
+        )
+        w("")
+
     w(
         "**The `agreed` rows are the ADR-004 control group and they need the token columns "
-        "beside them.** *The same answer, N times cheaper* is the claim B4 #7 makes; a "
-        "bank of nothing but separating items would measure difficulty and call it "
-        "strategy."
+        "beside them.** *The same answer, N times cheaper* is the claim B4 #7 makes; a bank "
+        "of nothing but separating items would measure difficulty and call it strategy."
     )
     w("")
     OUT_MD.write_text("\n".join(out) + "\n")

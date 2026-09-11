@@ -77,10 +77,36 @@ def main(argv: list[str] | None = None) -> int:
             c = r.completion
             assert c is not None
             if args.record_cassettes:
-                print(f"  cassette -> {record_cassette(f'{item_id}.{r.strategy}', c)}")
-            reasoning = f"{c.reasoning_tokens} reasoning tok" if c.reasoning_tokens else "no trace"
+                # Arm 3 needs ONE CASSETTE PER TURN, under the same names `run_react`
+                # asks for. Recording only the final completion would replay a 3-turn
+                # agent as a 1-turn one that somehow already knew the tool results --
+                # a green test for a conversation that never happened.
+                if r.react is not None:
+                    for i, t in enumerate(r.react.turns):
+                        name = f"{item_id}.{r.strategy}.t{i}"
+                        print(f"  cassette -> {record_cassette(name, t.completion)}")
+                else:
+                    print(f"  cassette -> {record_cassette(f'{item_id}.{r.strategy}', c)}")
+            # Arm 3's cost is the WHOLE loop, not its last turn. Reporting the final
+            # completion's count for a 3-turn agent understates it by however much the
+            # agent thought before it answered -- which for a ReAct arm is most of it.
+            if r.react is not None:
+                tokens = sum(t.completion.reasoning_tokens or 0 for t in r.react.turns)
+                reasoning = f"{tokens} reasoning tok" if tokens else "no trace"
+            else:
+                reasoning = (
+                    f"{c.reasoning_tokens} reasoning tok" if c.reasoning_tokens else "no trace"
+                )
             bound = " BUDGET-BOUND" if c.budget_bound else ""
-            print(f"{r.strategy:<9} {r.trace_quality:<8} {reasoning:<20}{bound}  -> {path}")
+            extra = ""
+            if r.react is not None:
+                rr = r.react
+                extra = f"  {rr.turn_count}t/{rr.max_turns} {rr.tool_calls_made} calls"
+                if rr.failed_tool_calls:
+                    extra += f" ({rr.failed_tool_calls} rejected)"
+                if rr.max_turns_exhausted:
+                    extra += " MAX-TURNS"
+            print(f"{r.strategy:<9} {r.trace_quality:<8} {reasoning:<20}{bound}{extra}  -> {path}")
         else:
             failures += 1
             print(f"{r.strategy:<9} FAILED   {r.failed_reason}", file=sys.stderr)

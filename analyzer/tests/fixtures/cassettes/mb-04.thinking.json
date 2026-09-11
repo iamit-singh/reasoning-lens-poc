@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 4,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 63,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 121,
+  "reasoning": "We need to compute sale price after 15% discount on $40. Discount amount = 0.15 * 40 = 6. So sale price = 40 - 6 = 34. So answer: 34 dollars.",
+  "reasoning_tokens": 49,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "$34.00",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 184
+}

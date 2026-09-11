@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 173,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 369,
+  "reasoning": "We have a classic rate problem. 7 printers take 7 minutes to print 7 posters. So each printer prints 1 poster in 7 minutes? Let's analyze: If 7 printers produce 7 posters in 7 minutes, that implies each printer prints 1 poster in 7 minutes. So printer rate = 1 poster per 7 minutes = 1/7 posters per minute. For 21 printers, same rate per printer. So total rate = 21 * (1/7) = 3 posters per minute. To print 21 posters at 3 per minute takes 21 / 3 = 7 minutes. So answer: 7 minutes. Alternatively, scaling: If printers and posters scale proportionally, time stays same. So answer: 7 minutes.",
+  "reasoning_tokens": 161,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "7 minutes",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 542
+}

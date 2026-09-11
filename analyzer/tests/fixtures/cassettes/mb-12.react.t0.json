@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 4,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 107,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 376,
+  "reasoning": "We need to solve: notebook + pen = 2.60, notebook = pen + 2.00. Let pen = x, notebook = x + 2.00. Sum: x + (x + 2.00) = 2.60 => 2x + 2.00 = 2.60 => 2x = 0.60 => x = 0.30. So pen costs $0.30.",
+  "reasoning_tokens": 93,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "$0.30",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 483
+}

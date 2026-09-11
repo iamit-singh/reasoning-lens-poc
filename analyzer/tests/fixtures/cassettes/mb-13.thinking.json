@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 271,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 128,
+  "reasoning": "We have a classic rate problem. 7 printers take 7 minutes to print 7 posters. So each printer prints 1 poster in 7 minutes? Let's analyze: If 7 printers produce 7 posters in 7 minutes, that means total printing capacity: 7 printers * 7 minutes = 49 printer-minutes produce 7 posters. So each poster requires 49/7 = 7 printer-minutes. So each printer prints 1 poster in 7 minutes. So 21 printers produce 21 posters: each printer prints 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.\n\nBut maybe there's nuance: If printers are identical and each prints at same rate. So 7 printers produce 7 posters in 7 minutes. So each printer prints 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.\n\nBut maybe they want to trick: 7 printers produce 7 posters in 7 minutes. So 1 printer produces 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.\n\nThus answer: 7 minutes.",
+  "reasoning_tokens": 259,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "7 minutes",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 399
+}

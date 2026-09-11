@@ -1,0 +1,17 @@
+{
+  "_README": "The ReAct `lookup` corpus. 12 facts under lever L2 -- EXACT MATCH ONLY, no fuzzy matching and no embedding lookup. Owner: M1-7. Every place and institution here is INVENTED on purpose: a lookup item about a real city measures whether the model already knows the answer, the tool never gets called, and `tool_required` becomes a label for something that did not happen. The four facts mb-08/09/10 depend on are specified in ../README.md and must not change without re-checking those items.",
+  "facts": {
+    "fairhaven_population": "128400",
+    "brightwater_population": "96750",
+    "meridian_institute_founded": "1887",
+    "meridian_institute_departments": "metallurgy, hydrology, cartography",
+    "fairhaven_founded": "1834",
+    "brightwater_founded": "1851",
+    "fairhaven_area_km2": "214",
+    "brightwater_area_km2": "168",
+    "fairhaven_elevation_m": "87",
+    "brightwater_elevation_m": "143",
+    "meridian_institute_director": "Dr Alessandra Voss",
+    "meridian_institute_staff": "412"
+  }
+}

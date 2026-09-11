@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 10,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 78,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 135,
+  "reasoning": "Need founding year of Meridian Institute. Likely refers to Meridian Institute (Meridian Institute for Public Policy? Or Meridian Institute in UK?). Quick guess: founded 2005? But uncertain. Maybe Meridian Institute is a think tank in UK founded 2005. I'll answer 2005.",
+  "reasoning_tokens": 58,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "The Meridian Institute was founded in 2005.",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 213
+}

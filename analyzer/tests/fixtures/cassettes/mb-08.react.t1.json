@@ -1,0 +1,32 @@
+{
+  "answer_tokens": 0,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 32,
+  "finish_reason": "tool_calls",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 399,
+  "reasoning": "We need population of Brightwater.",
+  "reasoning_tokens": 7,
+  "requested_effort": "medium",
+  "structural_token_residual": 25,
+  "text": "",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [
+    {
+      "arguments": {
+        "query": "brightwater_population"
+      },
+      "id": "call_nixeh13g",
+      "name": "lookup"
+    }
+  ],
+  "total_tokens": 431
+}

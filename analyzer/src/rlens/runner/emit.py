@@ -55,7 +55,7 @@ def _require_otel() -> Any:
 
 def llm_span_attributes(
     comp: Completion,
-    messages: list[dict[str, str]],
+    messages: list[dict[str, Any]],
     pin: GenerationPin,
 ) -> dict[str, Any]:
     """The LLM span's attributes, in the namespace S2 measured as live (ADR-002 §1).
@@ -77,7 +77,14 @@ def llm_span_attributes(
     }
     for i, m in enumerate(messages):
         attrs[f"llm.input_messages.{i}.message.role"] = m["role"]
-        attrs[f"llm.input_messages.{i}.message.content"] = m["content"]
+        attrs[f"llm.input_messages.{i}.message.content"] = m.get("content") or ""
+        # Arm 3's history contains the assistant turns that REQUESTED tools. Recording
+        # what was asked for, beside the TOOL span that shows what happened, is what makes
+        # a derailed loop readable after the fact rather than a gap in the transcript.
+        if m.get("tool_calls"):
+            attrs[f"llm.input_messages.{i}.message.tool_calls"] = json.dumps(
+                m["tool_calls"], sort_keys=True
+            )
     attrs["llm.output_messages.0.message.role"] = "assistant"
     attrs["llm.output_messages.0.message.content"] = comp.text
 
@@ -138,6 +145,46 @@ def arm_span_attributes(
     if failed_reason:
         attrs[f"{NS}.failed_reason"] = failed_reason
     return attrs
+
+
+def tool_span_attributes(
+    name: str,
+    description: str,
+    arguments: dict[str, Any],
+    observation: str,
+    *,
+    ok: bool,
+    turn: int,
+    seq: int,
+) -> dict[str, Any]:
+    """A TOOL span, in the names the STOCK LangGraph trace actually emits.
+
+    Not invented: these are read off `tests/fixtures/spans/langgraph_react_reference.json`,
+    the third-party capture S2 committed -- `tool.name`, `tool.description`, `input.value`,
+    `output.value`, `output.mime_type`. Same reasoning as ADR-002: emitting the names real
+    instrumentation emits is what lets C4.2's segmenter have **one** ReAct code path
+    instead of one for our arm 3 and one for everybody else's agent. B12's whole claim is
+    "integration, not a rewrite", and it is worth nothing if our own trees are a dialect.
+
+    `rlens.seq` exists because the serialised tree carries no timestamps, and C3.2's
+    `step_id` embeds an ordinal. Ordering a ReAct trace by span id would work until turn
+    10 sorted before turn 2. An explicit integer is cheaper than a lexical-sort bug that
+    silently reorders steps -- and reordering steps after labelling has begun is Hazard 1.
+    """
+    return {
+        "openinference.span.kind": "TOOL",
+        "tool.name": name,
+        "tool.description": description,
+        "input.value": json.dumps(arguments, sort_keys=True),
+        "output.value": observation,
+        "output.mime_type": "text/plain",
+        # Ours, so `rlens.*`. Whether the tool actually answered is a question the metrics
+        # need, and a substring search for "NOT FOUND" in `output.value` is not an answer
+        # to it -- it is a re-derivation of something the tool already knew.
+        f"{NS}.tool.ok": ok,
+        f"{NS}.turn": turn,
+        f"{NS}.seq": seq,
+    }
 
 
 # ------------------------------------------------------------------ exporters

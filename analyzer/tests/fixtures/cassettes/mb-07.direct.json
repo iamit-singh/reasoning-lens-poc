@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 6,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 101,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 162,
+  "reasoning": "Compute interest: principal 12500, rate 7.4% =0.074, time 3.5 years. Simple interest = PRT =12500*0.074*3.5 =12500*0.259 = 3237.5? Let's compute: 0.074*3.5=0.259. 12500*0.259=3237.5.",
+  "reasoning_tokens": 85,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "$3,237.50",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 263
+}

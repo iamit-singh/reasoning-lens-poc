@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 6,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 255,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 378,
+  "reasoning": "We need simple interest: I = P * r * t. P=12500. r=7.4% per year = 0.074. t=3 years 6 months = 3.5 years. So I = 12500 * 0.074 * 3.5. Compute: 12500 * 0.074 = 12500 * 74/1000 = 12500 * 0.074 = 925? Let's compute precisely: 12500 * 0.074 = 12500 * 74 / 1000 = (12500*74)/1000. 12500*74 = 12500*70 + 12500*4 = 875000 + 50000 = 925000. Divide by 1000 = 925. So interest per year is 925. For 3.5 years: 925 * 3.5 = 925 * 3 + 925 * 0.5 = 2775 + 462.5 = 3237.5. So total interest $3,237.50. So answer: 3237.50.",
+  "reasoning_tokens": 239,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "$3,237.50",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 633
+}

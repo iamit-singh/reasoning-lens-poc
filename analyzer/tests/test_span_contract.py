@@ -232,3 +232,147 @@ def test_the_direct_arm_emits_no_reasoning_attribute_when_it_has_no_trace() -> N
     )
     attrs = llm_span_attributes(bare, [{"role": "user", "content": "q"}], TEST_PIN)
     assert "llm.output_messages.0.message.reasoning" not in attrs
+
+
+# ------------------------------------------------------------------ arm 3 (M1-7)
+#: Arm 3's contract is asserted against REAL bank items rather than `probe-01`.
+#: `probe-01` exists because arms 1-2 were built before the bank did (M1-6 precedes
+#: M1-4); arm 3 has a bank to run against, and using it means this test also proves the
+#: committed corpus and the real lookup path work under replay. Note the tools are NOT
+#: mocked -- only the model is. So this exercises the loop, both tools, the corpus and the
+#: emission path together, with the only non-deterministic part replayed.
+REACT_TOOL_ITEM = "mb-08"  # two lookups, three turns -- the fullest loop in the bank
+REACT_NO_TOOL_ITEM = "mb-01"  # an `easy` item: one turn, no tools, no turns burned
+
+
+@pytest.fixture(scope="module")
+def react_results() -> dict[str, ArmResult]:
+    os.environ["MOCK_LLM"] = "1"
+    return {
+        item: asyncio.run(run_arm(ARMS["react"], item, "unused under replay", pin=TEST_PIN))
+        for item in (REACT_TOOL_ITEM, REACT_NO_TOOL_ITEM)
+    }
+
+
+@pytest.mark.contract
+def test_the_react_arm_emits_one_root_chain_with_llm_and_tool_children(
+    react_results: dict[str, ArmResult],
+) -> None:
+    """C4.1: one root CHAIN per arm, LLM spans per model call, TOOL spans per tool call."""
+    result = react_results[REACT_TOOL_ITEM]
+    roots = [s for s in result.spans if s["parentSpanId"] is None]
+    assert len(roots) == 1
+    assert roots[0]["attributes"]["openinference.span.kind"] == "CHAIN"
+
+    assert result.react is not None
+    kinds = [s["attributes"]["openinference.span.kind"] for s in result.spans]
+    # One LLM span per model call and one TOOL span per tool call -- counted against what
+    # the loop recorded, so a span the emitter forgot to write cannot pass unnoticed.
+    assert kinds.count("LLM") == result.react.turn_count >= 2
+    assert kinds.count("TOOL") == result.react.tool_calls_made >= 1
+    assert all(s["parentSpanId"] == roots[0]["spanId"] for s in result.spans if s["parentSpanId"])
+
+
+@pytest.mark.contract
+def test_the_react_arm_really_called_its_tools_under_replay(
+    react_results: dict[str, ArmResult],
+) -> None:
+    """The model is replayed; the TOOLS are not. A green test here means the loop fed real
+    arguments to the real corpus and got real observations back -- which is the half a
+    cassette cannot fake."""
+    result = react_results[REACT_TOOL_ITEM]
+    assert result.react is not None
+    assert result.react.tool_calls_made >= 1
+    assert result.react.failed_tool_calls == 0
+    tools = [s for s in result.spans if s["attributes"]["openinference.span.kind"] == "TOOL"]
+    for span in tools:
+        attrs = span["attributes"]
+        assert attrs["rlens.tool.ok"] is True
+        assert attrs["output.value"].strip()
+        assert not attrs["output.value"].startswith("NOT FOUND:")
+
+
+@pytest.mark.contract
+def test_react_tool_spans_use_the_third_party_attribute_names() -> None:
+    """Read off `fixtures/spans/langgraph_react_reference.json`, not invented -- ADR-007.
+
+    This asserts the convergence directly: every attribute name our TOOL spans use for
+    the tool itself must also appear on the stock LangGraph capture. A private dialect
+    would cost C4.2 a second ReAct branch, and B12's "integration, not a rewrite" claim
+    is worth nothing if our own trees are the exception to it.
+    """
+    import json
+    import pathlib
+
+    reference = json.loads(
+        (
+            pathlib.Path(__file__).parent / "fixtures/spans/langgraph_react_reference.json"
+        ).read_text()
+    )
+    ref_spans = reference.get("resourceSpans") or reference
+    ref_tool = next(
+        s for s in ref_spans if (s.get("attributes") or {}).get("openinference.span.kind") == "TOOL"
+    )
+    theirs = set(ref_tool["attributes"])
+
+    os.environ["MOCK_LLM"] = "1"
+    result = asyncio.run(
+        run_arm(ARMS["react"], REACT_TOOL_ITEM, "unused under replay", pin=TEST_PIN)
+    )
+    ours = next(s for s in result.spans if s["attributes"]["openinference.span.kind"] == "TOOL")
+    # Our own metadata is namespaced and is allowed to be ours alone; everything else
+    # must be a name their instrumentation also emits.
+    shared = {k for k in ours["attributes"] if not k.startswith("rlens.")}
+    assert shared <= theirs, f"names we invented: {sorted(shared - theirs)}"
+    assert {"tool.name", "input.value", "output.value"} <= shared
+
+
+@pytest.mark.contract
+def test_an_easy_item_terminates_without_burning_turns(
+    react_results: dict[str, ArmResult],
+) -> None:
+    """C4.1's DoD names this explicitly. "An agent that burns 6 turns on an arithmetic
+    item is a cost bug that shows up as a latency bug in Month 3.\""""
+    result = react_results[REACT_NO_TOOL_ITEM]
+    assert result.react is not None
+    assert result.react.turn_count == 1
+    assert result.react.tool_calls_made == 0
+    assert not result.react.max_turns_exhausted
+    assert result.trace_quality == "full"
+    assert not [s for s in result.spans if s["attributes"]["openinference.span.kind"] == "TOOL"]
+
+
+@pytest.mark.contract
+def test_the_react_arm_carries_reasoning_on_every_turn(
+    react_results: dict[str, ArmResult],
+) -> None:
+    """ADR-007's whole reason for existing, asserted on recorded output rather than
+    argued. On a tool-calling turn the visible content is empty and the thought is in
+    `reasoning` -- so if this attribute were missing, every ReAct `thought` step C4.2
+    produces would be empty and nothing would look broken."""
+    result = react_results[REACT_TOOL_ITEM]
+    llms = [s for s in result.spans if s["attributes"]["openinference.span.kind"] == "LLM"]
+    assert len(llms) >= 2
+    for span in llms:
+        assert span["attributes"].get("llm.output_messages.0.message.reasoning", "").strip(), (
+            f"{span['spanId']} carries no reasoning text"
+        )
+
+
+@pytest.mark.contract
+def test_the_react_root_span_carries_the_pin_tuple_and_the_loop_counters(
+    react_results: dict[str, ArmResult],
+) -> None:
+    attrs = react_results[REACT_TOOL_ITEM].spans[0]["attributes"]
+    assert attrs["rlens.strategy"] == "react"
+    assert attrs["rlens.pin.fingerprint"] == TEST_PIN.fingerprint()
+    assert attrs["rlens.pin.digest"] == TEST_PIN.digest
+    assert attrs["rlens.deterministic"] is False
+    for key in (
+        "rlens.react.turns",
+        "rlens.react.max_turns",
+        "rlens.react.max_turns_exhausted",
+        "rlens.react.tool_calls",
+        "rlens.react.failed_tool_calls",
+    ):
+        assert key in attrs, f"the root span does not record {key}"

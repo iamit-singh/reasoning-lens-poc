@@ -8,10 +8,10 @@ by [ADR-005](../docs/decisions/ADR-005-traps-do-not-reproduce.md).
 Per-item shape (C3.4):
 `{id, prompt, tags[], known_answer, checker, tolerance?, is_trap, trap_note?, source}`
 
-`corpus/facts.json` — the ReAct `lookup` corpus. **12 facts under lever L2**, exact match only.
-Owned by M1-7 (W3), but **three items already committed depend on it**, so the facts they
-need are specified here rather than left for M1-7 to infer. An item whose lookup returns
-nothing is not a `tool_required` item, it is a broken one:
+`corpus/facts.json` — the ReAct `lookup` corpus. **12 facts under lever L2**, exact match
+only. Written by M1-7, and the four facts the already-committed items depend on are
+specified here rather than left for M1-7 to infer. An item whose lookup returns nothing is
+not a `tool_required` item, it is a broken one:
 
 | Fact key | Value | Needed by |
 | --- | --- | --- |
@@ -25,6 +25,18 @@ whether the model already knows the answer, not whether it used the tool — the
 answers from memory, the tool is never called, and the `tool_required` tag becomes a
 label for something that did not happen. `test_bank_answers.py` cannot catch that; only
 M1-7's arm-3 runs can, so it is written down here.
+
+**M1-7 ran, and the invented names paid for themselves twice over.** On `mb-08` arm 2 spent
+**3,966 reasoning tokens failing to recall a population that does not exist** while arm 3
+spent 80 and looked it up. A real city would have been answered from memory and there would
+have been nothing to see.
+
+> **⚠️ `lookup` matching is EXACT, and the tool description therefore lists every key.**
+> Probed before arm 3 was built: with the keys unlisted the model asks for
+> `"population of Fairhaven"` — sensible, and a miss every time. L2 forbids fuzzy matching,
+> so discoverability is the only move left inside the lever. This does not scale past a few
+> dozen facts and does not have to; L2 fixes the corpus at 12. See
+> [ADR-007](../docs/decisions/ADR-007-react-arm-on-the-provider-layer.md).
 
 ## The traps: declared in M1-4, and **not earned** in M1-5
 
@@ -113,4 +125,17 @@ not be.** `315` is matched by `315 square metres`; it is not matched by `not 315
 worked line carrying four numbers — the latter reports `unparsed` rather than wrong,
 because an unreadable answer counted as wrong understates accuracy for free.
 
-Owners: M1-4 (items, W2) · M1-5 (trap validation, W3 — **DoD not met, see ADR-005**) · M1-7 (corpus, W3).
+## `tool_required` is a declaration too
+
+**2 of the 5 items tagged `tool_required` had arm 3 call no tool at all** — `mb-06` and
+`mb-07`, both arithmetic — and answered correctly regardless. The floors above say the tag
+is *"what makes B4 #7's `tool_required` share computable"*; a share computed from the tag is
+wrong by two items out of five. **The measured share is in
+[`arm-contrast.md`](arm-contrast.md)'s `tool calls` column.**
+
+`is_trap` claimed 4 and earned 0. `tool_required` claims 5 and measures 3. The rule this
+bank has earned: **a tag is a hypothesis until a run confirms it.** Recorded rather than
+relabelled — dropping a tag changes an L1 floor, which is a scope decision.
+
+Owners: M1-4 (items, W2) · M1-5 (trap validation + arm contrast, W3 — **trap DoD not met,
+see ADR-005**) · M1-7 (corpus, arm 3, W3).

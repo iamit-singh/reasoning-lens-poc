@@ -1,0 +1,32 @@
+{
+  "answer_tokens": 0,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 42,
+  "finish_reason": "tool_calls",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 368,
+  "reasoning": "We need to look up population of Fairhaven and Brightwater. Use lookup function.",
+  "reasoning_tokens": 17,
+  "requested_effort": "medium",
+  "structural_token_residual": 25,
+  "text": "",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [
+    {
+      "arguments": {
+        "query": "fairhaven_population"
+      },
+      "id": "call_raffxh0g",
+      "name": "lookup"
+    }
+  ],
+  "total_tokens": 410
+}

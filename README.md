@@ -49,8 +49,9 @@ make arm-contrast        # which items separate the arms? (ADR-004's control gro
 | Runner arms 1-2, provider abstraction, OTEL emission | ✅ | M1-6 |
 | Problem bank, 14 items under L1, checkers + their contract | ✅ | M1-4 |
 | Trap reproduction — **measured, DoD not met (0/16 over 120 runs); floor withdrawn** | ✅ [ADR-005](docs/decisions/ADR-005-traps-do-not-reproduce.md) accepted | M1-5 |
-| Arm contrast across the bank — **0 of 16 items separate arms 1 and 2** | ⚠️ [ADR-006](docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) | M1-5 |
-| Runner arm 3 (ReAct), segmenter, classifier, `ReasoningReport` | ⬜ W3–W4 | M1-7 … M1-10 |
+| Arm contrast — **0 of 16 items separate arms 1 and 2; arm 3 rescues 3** | ⚠️ [ADR-006](docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) | M1-5 / M1-7 |
+| Runner arm 3 — ReAct loop, calculator + lookup, TOOL spans | ✅ **14/14 on the bank** | M1-7 · [ADR-007](docs/decisions/ADR-007-react-arm-on-the-provider-layer.md) |
+| Segmenter, classifier, `ReasoningReport` | ⬜ W3–W4 | M1-8 … M1-10 |
 | Backend, frontend | ⬜ W5+ (frontend starts after the G1 freeze) | M2/M3 |
 
 Weeks 1 and 2 are closed. **G0 is 5 of 6** — the open check is the analysis tier, blocked
@@ -64,6 +65,12 @@ So B4 #7's accuracy claim needs re-wording, and what FE-1 can feature is the **c
 contrast (verified: 1.2×–13.3× for the same answer on 11 of 11 items) plus the **tool**
 contrast (arm 3 vs arms 1–2 on the three `tool_required` items — the one wrong→right row
 this bank contains, and unverified until M1-7 lands).
+
+M1-7 then confirmed option A's half of that on corpus evidence: **arm 3 answers 14/14
+where arms 1 and 2 manage 11/14**, and the three it rescues are `tool_required` lookups. On
+`mb-08` the thinking arm spent **3,966 reasoning tokens failing to recall a fact that does
+not exist** while the tool arm spent 80 and looked it up — see
+[`problem-bank/arm-contrast.md`](problem-bank/arm-contrast.md).
 
 M1-5's DoD is kept as a strict `xfail` so the shortfall cannot be lost and cannot quietly
 drift in either direction — see `analyzer/tests/test_trap_reproduction.py`.

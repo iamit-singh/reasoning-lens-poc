@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 1,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 43,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 160,
+  "reasoning": "We have doubling each day. If covers whole pond on day 48, then day 47 half, day 46 quarter. So answer day 46.",
+  "reasoning_tokens": 32,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "46",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 203
+}

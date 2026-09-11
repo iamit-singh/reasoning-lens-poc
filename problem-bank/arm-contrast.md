@@ -2,34 +2,54 @@
 
 # The arm contrast across the bank — pinned regime
 
-**Recorded** 2026-09-11T06:49:12Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b`) · **28 runs**, one per item per arm
+**Recorded** 2026-09-11T07:22:35Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b`) · **14 items x 3 arms**
 
 Pinned only — `temperature=0` at the committed seed is byte-stable and is the configuration the demo runs in, so one run per cell is the honest form of five.
 
 ## Verdict
 
-**No item separates the arms.** All 14 items land elsewhere: {'separated': 0, 'agreed': 11, 'both_wrong': 2, 'inverted': 0, 'incomplete': 1}. ADR-005's recommendation to re-point FE-1 at the difficulty contrast **cannot be satisfied from this bank as it stands** — the contrast exists on an ad-hoc probe and nowhere in the committed corpus. That is a finding for the reviewer, not something to work around.
+**Accuracy:** arm 1 (minimal) 11/14 · arm 2 (thinking) 11/14 · **arm 3 (ReAct) 14/14**.
 
-Patterns: {'separated': 0, 'agreed': 11, 'both_wrong': 2, 'inverted': 0, 'incomplete': 1}
+**No item separates arms 1 and 2.** All 14 land elsewhere: {'separated': 0, 'agreed': 11, 'both_wrong': 2, 'inverted': 0, 'incomplete': 1}. Arm 1's `low` effort is *adaptive* rather than shallow, so making items harder closes the cost gap without opening an accuracy gap — [ADR-006](../docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md).
+
+**The accuracy separation this bank does contain is TOOLS.** 3 items are wrong on both reasoning arms and right on arm 3: `mb-08`, `mb-09`, `mb-10`. That is the wrong→right row FE-1 needs, and it confirms ADR-006's recommendation A on corpus evidence rather than on a probe.
+
+**And it is cheaper, not just better** — the part worth putting on screen:
+
+| Item | Arm 2 (thinking) | Arm 3 (tools) | |
+| --- | --- | --- | --- |
+| `mb-08` | unparsed, 3966 reasoning tok | **correct**, 80 tok | **50x cheaper** |
+| `mb-09` | wrong, 1568 reasoning tok | **correct**, 38 tok | **41x cheaper** |
+| `mb-10` | wrong, 847 reasoning tok | **correct**, 36 tok | **24x cheaper** |
+
+On `mb-08` the thinking arm spent **3,966 reasoning tokens failing to recall a fact that does not exist** — every place name in this corpus is invented, on purpose — while the tool arm spent 80 and looked it up. That pair is the product in one frame: one reasoning panel showing confabulation at length, beside one showing two tool calls. It is a stronger demo row than the difficulty contrast the plan expected, and unlike that one it exists.
 
 ## Per item
 
-| Item | Tags | Arm 1 (minimal) | tok | Arm 2 (thinking) | tok | Ratio | Pattern |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `mb-01` | easy, factual | correct | 5 | correct | 21 | 4.2x | agreed |
-| `mb-02` | easy, arithmetic | correct | 4 | correct | 34 | 8.5x | agreed |
-| `mb-03` | easy, factual | correct | 3 | correct | 40 | 13.3x | agreed |
-| `mb-04` | easy, arithmetic | correct | 18 | correct | 49 | 2.7x | agreed |
-| `mb-05` | multi_step, arithmetic | correct | 24 | correct | 78 | 3.2x | agreed |
-| `mb-06` | multi_step, arithmetic, tool_required | correct | 169 | correct | 206 | 1.2x | agreed |
-| `mb-07` | multi_step, arithmetic, tool_required | correct | 85 | correct | 227 | 2.7x | agreed |
-| `mb-08` | multi_step, factual, tool_required | wrong | 74 | unparsed | 3966 | 53.6x | incomplete |
-| `mb-09` | factual, tool_required | wrong | 58 | wrong | 1568 | 27.0x | both_wrong |
-| `mb-10` | factual, tool_required | wrong | 83 | wrong | 847 | 10.2x | both_wrong |
-| `mb-11` | multi_step, geometry | correct | 34 | correct | 125 | 3.7x | agreed |
-| `mb-12` | arithmetic | correct | 35 | correct | 99 | 2.8x | agreed |
-| `mb-13` | multi_step, logic | correct | 37 | correct | 259 | 7.0x | agreed |
-| `mb-14` | logic | correct | 32 | correct | 194 | 6.1x | agreed |
+| Item | Tags | Arm 1 | tok | Arm 2 | tok | Arm 3 | tok | turns | tool calls | 1v2 pattern |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `mb-01` | easy, factual | correct | 5 | correct | 21 | correct | 23 | 1 | 0 | agreed |
+| `mb-02` | easy, arithmetic | correct | 4 | correct | 34 | correct | 46 | 1 | 0 | agreed |
+| `mb-03` | easy, factual | correct | 3 | correct | 40 | correct | 25 | 1 | 0 | agreed |
+| `mb-04` | easy, arithmetic | correct | 18 | correct | 49 | correct | 36 | 1 | 0 | agreed |
+| `mb-05` | multi_step, arithmetic | correct | 24 | correct | 78 | correct | 101 | 1 | 0 | agreed |
+| `mb-06` | multi_step, arithmetic, tool_required | correct | 169 | correct | 206 | correct | 124 | 1 | **0** | agreed |
+| `mb-07` | multi_step, arithmetic, tool_required | correct | 85 | correct | 227 | correct | 239 | 1 | **0** | agreed |
+| `mb-08` | multi_step, factual, tool_required | wrong | 74 | unparsed | 3966 | correct ✅ | 80 | 3 | 2 | incomplete |
+| `mb-09` | factual, tool_required | wrong | 58 | wrong | 1568 | correct ✅ | 38 | 2 | 1 | both_wrong |
+| `mb-10` | factual, tool_required | wrong | 83 | wrong | 847 | correct ✅ | 36 | 2 | 1 | both_wrong |
+| `mb-11` | multi_step, geometry | correct | 34 | correct | 125 | correct | 113 | 1 | 0 | agreed |
+| `mb-12` | arithmetic | correct | 35 | correct | 99 | correct | 93 | 1 | 0 | agreed |
+| `mb-13` | multi_step, logic | correct | 37 | correct | 259 | correct | 161 | 1 | 0 | agreed |
+| `mb-14` | logic | correct | 32 | correct | 194 | correct | 65 | 1 | 0 | agreed |
+
+## `tool_required` is a declaration, not a measurement
+
+**2 of 5 items tagged `tool_required` had arm 3 call no tool at all** — `mb-06`, `mb-07` — and answer correctly regardless. The model does that arithmetic in its head, so the tag describes an intention rather than a property.
+
+This matters beyond tidiness: `problem-bank/README.md` states that the tag floors are *"what make B4 #7's `tool_required` share computable"*. A share computed from the tag would be wrong by 2 of 5 items. **The measured share is the one in the `tool calls` column above.**
+
+It is the same shape of problem as `is_trap` before M1-5 measured it, and the third tag in a row to turn out to be a claim. Recorded rather than relabelled — dropping the tag changes the L1 floor, which is a scope decision.
 
 **The `agreed` rows are the ADR-004 control group and they need the token columns beside them.** *The same answer, N times cheaper* is the claim B4 #7 makes; a bank of nothing but separating items would measure difficulty and call it strategy.
 

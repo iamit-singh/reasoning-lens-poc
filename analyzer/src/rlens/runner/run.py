@@ -8,12 +8,15 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import pathlib
 from dataclasses import dataclass, field
 from typing import Any
 
 from rlens.llm import Completion, ProviderError, generate
 from rlens.runner.arms import ARMS, ArmSpec, messages_for
 from rlens.runner.emit import arm_span_attributes, llm_span_attributes
+from rlens.runner.paths import data_path, missing_data_message
+from rlens.runner.react import ReactResult, build_react_spans, run_react
 from rlens.versions import GenerationPin, generation_pin
 
 #: Lines that close or decorate a block without carrying an answer. A closed list, not a
@@ -52,6 +55,11 @@ class ArmResult:
     completion: Completion | None = None
     failed_reason: str | None = None
     spans: list[dict[str, Any]] = field(default_factory=list)
+    #: Arm 3 only. The loop's full record -- turns, tool invocations, whether `max_turns`
+    #: bound. Present on the result rather than only in the spans because the CLI reports
+    #: it and M1-9's metrics will read it, and re-deriving "how many tools were called"
+    #: by filtering a span tree is a re-derivation of something already known.
+    react: ReactResult | None = None
 
     @property
     def ok(self) -> bool:
@@ -94,6 +102,10 @@ async def run_arm(
     """Run one arm to a result. Never raises for a provider or timeout failure."""
     pin = pin or generation_pin()
     timeout = timeout if timeout is not None else float(os.environ.get("ARM_TIMEOUT_S", "180"))
+    if spec.strategy == "react":
+        return await _run_react_arm(
+            spec, item_id, prompt, pin=pin, timeout=timeout, cassette=cassette
+        )
     messages = messages_for(spec, prompt)
     cassette = cassette or f"{item_id}.{spec.strategy}"
 
@@ -142,6 +154,73 @@ async def run_arm(
     )
     result.spans = _build_spans(result, spec, messages, pin)
     return result
+
+
+async def _run_react_arm(
+    spec: ArmSpec,
+    item_id: str,
+    prompt: str,
+    *,
+    pin: GenerationPin,
+    timeout: float,
+    cassette: str | None,
+) -> ArmResult:
+    """Arm 3. One timeout for the WHOLE loop, not per turn.
+
+    Per-turn timeouts would let a stuck agent spend `max_turns x ARM_TIMEOUT_S` -- 18
+    minutes at the committed settings -- while every individual turn looked healthy. C4.1
+    budgets the arm, so the arm is what is bounded.
+    """
+    try:
+        result = await asyncio.wait_for(
+            asyncio.to_thread(
+                run_react,
+                item_id,
+                prompt,
+                pin=pin,
+                cassette_prefix=cassette,
+            ),
+            timeout=timeout,
+        )
+    except TimeoutError:
+        return ArmResult(
+            strategy=spec.strategy,
+            item_id=item_id,
+            trace_quality="partial",
+            failed_reason=f"timeout after {timeout:g}s",
+        )
+
+    if result.failed_reason is not None and not result.turns:
+        # The provider failed on turn 0: there is no trace at all. Other arms still render.
+        return ArmResult(
+            strategy=spec.strategy,
+            item_id=item_id,
+            trace_quality="partial",
+            failed_reason=result.failed_reason,
+            react=result,
+        )
+
+    # `partial` covers three distinct shapes, and all three are genuinely incomplete
+    # traces rather than failures: the loop ran out of turns, the provider died mid-loop
+    # after some turns succeeded, or the model asked to think and returned nothing.
+    final = result.final
+    degraded = (
+        result.max_turns_exhausted
+        or result.failed_reason is not None
+        or (final is not None and not final.reasoning)
+    )
+    quality = "partial" if degraded else "full"
+
+    arm = ArmResult(
+        strategy=spec.strategy,
+        item_id=item_id,
+        trace_quality=quality,
+        completion=final,
+        failed_reason=result.failed_reason,
+        react=result,
+    )
+    arm.spans = build_react_spans(result, item_id, pin, trace_quality=quality)
+    return arm
 
 
 def _build_spans(
@@ -206,15 +285,16 @@ def load_item(item_id: str, bank_dir: str | None = None) -> dict[str, Any]:
     The bank itself is M1-4 (W2-c), after this task -- so the CLI also takes `--prompt`,
     and this raises a message saying which task owns the gap rather than a bare KeyError.
     """
-    root = bank_dir or os.environ.get("PROBLEM_BANK_DIR", "problem-bank/items")
-    path = os.path.join(root, f"{item_id}.json")
-    if not os.path.exists(path):
-        raise FileNotFoundError(
-            f"No bank item at {path}. The problem bank is M1-4 (W2-c) and may not exist "
-            f"yet -- use `--prompt` to run an ad-hoc prompt until it does."
-        )
-    with open(path) as fh:
-        item: dict[str, Any] = json.load(fh)
+    root = (
+        pathlib.Path(bank_dir)
+        if bank_dir
+        else data_path("problem-bank/items", env_var="PROBLEM_BANK_DIR")
+    )
+    path = root / f"{item_id}.json"
+    if not path.exists():
+        where = missing_data_message("problem-bank/items", "PROBLEM_BANK_DIR")
+        raise FileNotFoundError(f"No bank item at {path}. {where}")
+    item: dict[str, Any] = json.loads(path.read_text())
     return item
 
 

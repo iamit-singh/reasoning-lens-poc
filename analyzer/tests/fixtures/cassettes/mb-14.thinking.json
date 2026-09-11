@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 4,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 208,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 135,
+  "reasoning": "We have a patch of algae that doubles in area each day. It covers the whole pond on day 48. We need to find the day when it covered a quarter of the pond. Since it doubles each day, going backward one day halves the area. So if it covers the whole pond on day 48, then on day 47 it covered half the pond. On day 46 it covered a quarter. So answer: day 46. But check: The question: \"On which day did it cover a quarter of the pond?\" If day 48 is whole pond, day 47 half, day 46 quarter. So answer: day 46. That seems straightforward. But maybe they consider day 1 as first day? But the question: \"covers the whole pond on day 48.\" So day 48 is whole. So day 46 is quarter. So answer: 46. No trick. So final answer: 46.",
+  "reasoning_tokens": 194,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "Day\u202f46.",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 343
+}

@@ -1,11 +1,11 @@
-"""The strategy arms. C4.1, arms 1-2; arm 3 (ReAct) is M1-7.
+"""The strategy arms. C4.1, all three.
 
 The arms exist to be *compared*, and everything that differs between them is a
 confound unless it is the thing under study. So they share one model by construction
 (ADR-001's same-model rule), one pin, one item, and one emission path. What differs is
 the regime: whether the model thinks, and what the system prompt permits.
 
-Owner: M1-6.
+Owner: M1-6 (arms 1-2) · M1-7 (arm 3).
 """
 
 from __future__ import annotations
@@ -35,6 +35,17 @@ DIRECT_SYSTEM = (
 THINKING_SYSTEM = (
     "Solve the problem. Think it through as carefully as you need to, "
     "then give the final answer on its own last line."
+)
+
+
+#: Arm 3 imposes nothing on the reasoning either, and adds one thing the other two do not
+#: need: **the termination condition, stated**. "Answer without calling a tool" is what
+#: ends the loop, and a model that does not know that spends turns confirming itself
+#: against a `max_turns` of 6. It still does not say HOW to think -- see `react.py`.
+REACT_SYSTEM = (
+    "Solve the problem. You have tools available; use them when they help, and do not "
+    "use them when they do not. When you have the answer, reply without calling any "
+    "tool and give the final answer on its own last line."
 )
 
 
@@ -69,6 +80,13 @@ ARMS: dict[str, ArmSpec] = {
     ),
     "thinking": ArmSpec(
         "thinking", THINKING_SYSTEM, thinking=True, reasoning_effort=None, deterministic=False
+    ),
+    # Arm 3 is a LOOP, not a single call, so `run_arm` dispatches it to `react.run_react`
+    # rather than calling `generate` once. It is declared here anyway so that `--all-arms`,
+    # `sorted(ARMS)` and the CLI's `--arm` choices all derive from one place -- an arm that
+    # existed only inside a dispatch branch would be an arm the CLI could not name.
+    "react": ArmSpec(
+        "react", REACT_SYSTEM, thinking=True, reasoning_effort=None, deterministic=False
     ),
 }
 

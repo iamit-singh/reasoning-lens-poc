@@ -28,6 +28,10 @@ keep it honest, including when it is unflattering.
 | 2026-09-11 | W3 | M1-5 | 1.2 | **Two grading defects, neither about traps, both found only because M1-5 is the first task that grades real model output.** (1) `exact` was a string compare, so `7 minutes` scored **wrong** against a declared `7` — **18 of the first 48 runs, 37.5%**. It is now numeric-aware, refusing negation and multi-number ambiguity; `test_checkers.py` (27 tests) grades the shapes a model actually writes. (2) The answer extractor returned `\]` from a LaTeX display block, and the line above it carries four numbers — so `unparsed` is now a first-class outcome, separate from wrong. **Fully unbudgeted.** Would have surfaced in M3 as "the model is worse than expected" |
 | 2026-09-11 | W3 | M1-5 | 1.2 | ADR-005 (four options, recommendation, consequences) · `test_trap_reproduction.py` — M1-5's DoD as a **strict `xfail`** so the shortfall cannot be lost and cannot drift in either direction, plus 8 contract tests over the committed evidence · bank README rewritten so `is_trap` reads as a declaration · `make lint` widened to the repo, which `ruff.toml` already claimed to cover while only `analyzer/` was checked |
 | 2026-09-11 | W3 | M1-5 | 1.4 | **ADR-005 accepted (option B) — and implementing it found its second half false.** B said "re-point FE-1 at the verified difficulty contrast"; that rested on an **ad-hoc probe**, so the contrast was measured across the corpus first. **0 of 16 items separate the arms** (14 bank + 5 harder candidates; 11 agreed, 3 are `tool_required` run without tools). Cause: **arm 1's `low` effort is ADAPTIVE** — 3 reasoning tokens on `mb-03`, **407 on `hm-02` against arm 2's 423**. Harder items close the cost gap without opening an accuracy gap, so there is no difficulty band where arm 1 fails and arm 2 does not. **ADR-006 filed as *Proposed***. Trap floor withdrawn and the four declarations retired into `traps/candidates/` with `retired_from`, so the log still renders them. What FE-1 can feature: the **cost** contrast (1.2–13.3× for the same answer, 11 of 11) plus the **tool** contrast, unverified until M1-7 |
+| 2026-09-11 | W3 | M1-7 | 3.4 | **Arm 3 done. DoD MET: 3 arms runnable from the CLI on every bank item; `react` 14/14 vs 11/14 for arms 1-2.** ReAct loop on the provider layer, `max_turns=6`, AST calculator (no `eval` -- the expression is model output), 12-fact L2 corpus, TOOL spans in the stock-LangGraph attribute names. **ADR-007: not LangGraph, and the probe is the reason** -- on a tool-calling turn `content` is EMPTY and the whole thought is in `reasoning`, the field S2 proved LangChain drops, so a LangGraph arm 3 would emit a perfect ReAct trace with every `thought` step blank. All three DoD checks verified explicitly: `max_turns` trips cleanly, `mb-01` terminates in 1 turn 0 calls, a lookup miss returns a well-formed negative observation that names the keys and the model recovers on the next turn. +0.4 over the 3.0 |
+| 2026-09-11 | W3 | M1-7 | 0.6 | **ADR-006's open row closed on corpus evidence: arm 3 turns 3 wrongs into rights** (`mb-08`/`mb-09`/`mb-10`) **and is 24-50x cheaper doing it.** On `mb-08` arm 2 spent **3,966 reasoning tokens failing to recall a fact that does not exist** -- every place name is invented, on purpose -- while arm 3 spent 80 and looked it up. That pair is the product in one frame and is a better demo row than the difficulty contrast the plan expected. Also: **2 of 5 `tool_required` items had arm 3 call NO tool** (`mb-06`, `mb-07`), so the tag is a claim like `is_trap` was; the measured share is in `arm-contrast.md`. Contrast harness extended to 3 arms; 42 runs |
+| 2026-09-11 | W3 | M1-7 | 0.5 | **A cwd-relative data path that would have failed silently.** `problem-bank/corpus/facts.json` resolved relative to the working directory, so it only worked from the repo root -- and a missing corpus raises inside a tool call, which the loop is DESIGNED to swallow into an observation. From anywhere else arm 3 would have run, called `lookup`, received `no fact corpus at ...` as a well-formed observation, and answered wrong on a green run with a plausible chain explaining why. `runner/paths.py` resolves env -> cwd -> checkout and names every place it looked; `load_item` had the same latent bug and is fixed with it. Found by the first test that ran from `analyzer/` |
+| 2026-09-11 | W3 | M1-7 | 0.8 | 52 tests across `test_tools.py` (35 -- the calculator whitelist tested as the security boundary it is: `__import__`, `open`, lambdas, huge exponents), `test_react_loop.py` (17 -- the loop driven by a SCRIPTED provider, because a cassette cannot be made to produce a six-turn runaway or a tool-name typo on demand) and 6 arm-3 contract tests replaying real cassettes with the tools NOT mocked. **One test earned its keep immediately**: it caught arm 3 emitting `input.mime_type`, which the stock LangGraph capture does not -- dropped, since "plausibly in the spec" is not the standard, "observed in a real trace" is. 49 cassettes recorded (224 KB), so MOCK_LLM CI now covers the whole bank x arms matrix |
 
 ## Month-1 planned-vs-actual
 
@@ -35,9 +39,9 @@ keep it honest, including when it is unflattering.
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
-| W3 | 7.5 | **6.4 to date** | | M1-5 closed at **6.4 against 1.5**. M1-7 and M1-8 not started. The W2 hazard fired exactly as written — and then survived two rounds of fixes |
+| W3 | 7.5 | **11.7 to date** | | M1-5 closed at **6.4 against 1.5**; M1-7 at **5.3 against 3.0**. M1-8 and S3 not started. Already 4.2 over the whole week's budget with two tasks left |
 | W4 | 8.0 | | | |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **20.6 to date** | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **25.9 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -408,3 +412,108 @@ For an instrument built to make reasoning measurable rather than impressive, tha
 finding. The accuracy row FE-1 still needs is the **tool** contrast — `mb-08`/`mb-09`/
 `mb-10` wrong on both reasoning arms and, if M1-7 works, right on arm 3. **That is the next
 task**, which is convenient: it is also the one on the critical path.
+
+## W3 — M1-7 at 5.3 h against 3.0, and the arm comparison finally has a result
+
+### The probe that decided the implementation, before a line of it was written
+
+C4.1 says *"LangGraph ReAct loop"*. S2 had already established that
+`langchain_openai.ChatOpenAI` drops the runtime's `reasoning` field — that finding is what
+ADR-002 exists to work around for arms 1 and 2. So one thing needed checking first: **where
+does the thought text live on a tool-calling turn?**
+
+| Field | Length |
+| --- | --- |
+| `content` | **0 chars** |
+| `reasoning` | 86 chars — `'We need to look up the population of Fairhaven. Use lookup tool…'` |
+
+The visible content is **empty** and the entire thought is in the field LangChain discards.
+C4.2 defines ReAct segmentation as *"the thought text preceding each TOOL span becomes one
+`thought` step"* — so a LangGraph arm 3 would have emitted a structurally perfect ReAct
+trace with **every thought step blank**, and nothing would have looked broken. ADR-007.
+
+B12's evidence is untouched: *the analyzer* must ingest a stock LangGraph trace, and
+`test_third_party_spans.py` does exactly that and stays green. Arm 3's TOOL spans use the
+attribute names read off that same capture — `tool.name`, `input.value`, `output.value` —
+so C4.2 gets **one** ReAct code path rather than one for us and one for everyone else.
+
+### The arm comparison has a result, and it is not the one the plan expected
+
+| | Arm 1 (minimal) | Arm 2 (thinking) | **Arm 3 (ReAct)** |
+| --- | --- | --- | --- |
+| Correct, 14 items | 11/14 | 11/14 | **14/14** |
+
+ADR-006 predicted the only accuracy separation in this bank would be **tools**, and said so
+as a claim needing confirmation. It confirms: `mb-08`, `mb-09` and `mb-10` are wrong on both
+reasoning arms and right on arm 3. **And arm 3 is cheaper doing it:**
+
+| Item | Arm 2 | Arm 3 | |
+| --- | --- | --- | --- |
+| `mb-08` | unparsed, **3,966** reasoning tok | correct, **80** tok | 50× |
+| `mb-09` | wrong, 1,568 | correct, 38 | 41× |
+| `mb-10` | wrong, 847 | correct, 36 | 24× |
+
+> On `mb-08` the thinking arm spent **3,966 reasoning tokens failing to recall a population
+> that does not exist.** Every place name in the corpus is invented — M1-4 wrote that down
+> as a hazard about `tool_required` being a label for something that did not happen, and it
+> has now paid for itself twice: a real city would have been answered from memory and there
+> would have been nothing to see. **That pair is the product in one frame:** one reasoning
+> panel showing confabulation at length, beside one showing two tool calls and eighty
+> tokens.
+
+This is a better demo row than the difficulty contrast the plan wanted, and unlike that one
+it exists in the corpus. B4 #7's wording is now specific and both halves are measured:
+**tools buy the answer; thinking buys cost.**
+
+### A silent-failure path worth more than the half hour it cost
+
+`problem-bank/corpus/facts.json` was resolved relative to the working directory. That works
+from the repo root, which is where the CLI is always run, and the first test that ran from
+`analyzer/` found it.
+
+**The interesting part is how it would have failed in production.** A missing corpus raises
+inside a tool call — and the ReAct loop is *designed* to swallow tool exceptions into
+observations, because that is what lets a model recover from a bad call. So from any other
+directory, arm 3 would have run, called `lookup`, received `no fact corpus at
+problem-bank/corpus/facts.json` as a perfectly well-formed observation, reported it
+honestly, and answered wrong — **a green run, with a plausible chain explaining why the
+fact could not be found.** `runner/paths.py` now resolves env → cwd → checkout and names
+every place it looked; the corpus being absent is raised as the configuration failure it is,
+before a turn is spent. `load_item` had the same latent bug and is fixed alongside.
+
+### The third tag to turn out to be a claim
+
+**2 of the 5 items tagged `tool_required` had arm 3 call no tool at all** — `mb-06` and
+`mb-07`, both arithmetic — and answered correctly regardless. `problem-bank/README.md` says
+the tag floors are *"what make B4 #7's `tool_required` share computable"*; a share computed
+from the tag is wrong by two of five.
+
+`is_trap` claimed 4 and earned 0. `tool_required` claims 5 and measures 3. **The rule this
+bank has earned: a tag is a hypothesis until a run confirms it** — recorded rather than
+relabelled, because dropping a tag changes an L1 floor and that is a scope decision.
+
+### Capacity, and the honest W3 projection
+
+**25.9 h spent of a 26.4 h month, against 12 h of Lead allocation — with M1-8 and S3 still
+to run.** W3 alone is at 11.7 against 7.5, and M1-5 plus M1-7 have between them absorbed
+more hours than any two tasks so far.
+
+The like-for-like read still holds and still matters: M1-7's loop, tools, corpus and
+emission came in at **3.4 against 3.0**. The other 1.9 h is the three-arm contrast
+measurement, a silent-failure defect, and 52 tests. None of it is rework, and the contrast
+measurement is the one that closed a headline claim.
+
+**The month will land near 29-30 h against 12 allocated.** G2 should expect the Option-2
+contingency to be drawn on, and that projection has been stable and rising for three weeks.
+
+**M1-8 is next and is the one to protect** — it blocks G1, and it is the task where a
+mistake invalidates every label written after it. Two things now waiting for it:
+
+- **ADR-005's closing note on LaTeX.** `_DECORATION` in `runner/run.py` is the list of
+  delimiters actually observed ending a response; C4.2 already requires the segmenter to
+  treat `\[ … \]` as one sentence and never split inside a fence.
+- **Arm 3's trace shape is ready for it.** `rlens.seq` carries the execution order because
+  the serialised tree has no timestamps, and C3.2's `step_id` embeds an ordinal — ordering
+  by span id would work until turn 10 sorted before turn 2. The ReAct path is structural
+  only (one `tool_call` + one `observation` per TOOL span), so the segmenter has TOOL spans
+  in `rlens.seq` order and the `reasoning` text on each LLM span to make thought steps from.

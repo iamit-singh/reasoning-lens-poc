@@ -82,6 +82,16 @@ class Completion:
     replayed: bool = False
     invocation_parameters: dict[str, Any] = field(default_factory=dict)
 
+    #: Tool calls the model asked for, normalised to `{id, name, arguments}` with
+    #: `arguments` already parsed from the JSON string the wire carries. Empty for arms 1
+    #: and 2, which are given no tools -- an empty tuple, not None, because "asked for no
+    #: tools" is a real and common outcome rather than a missing value.
+    #:
+    #: Defaulted so the cassettes recorded before arm 3 existed still replay. A required
+    #: field here would have made every committed cassette unreadable, and re-recording
+    #: them to add an empty list is exactly the kind of churn a default prevents.
+    tool_calls: tuple[dict[str, Any], ...] = ()
+
 
 def _encoding_for(model: str) -> str | None:
     """The encoding for this model, or None if we do not know it.
@@ -153,6 +163,9 @@ def _replay(name: str) -> Completion:
             f"`make record-cassettes` (M1-14), or run with MOCK_LLM=0 against a served model."
         )
     data = json.loads(path.read_text())
+    # JSON has no tuples, and a cassette recorded before arm 3 existed has no tool_calls
+    # at all. Both are normalised here rather than at every call site.
+    data["tool_calls"] = tuple(data.get("tool_calls") or ())
     return Completion(**{**data, "replayed": True})
 
 
@@ -188,6 +201,7 @@ def generate(
     cassette: str | None = None,
     timeout: int | None = None,
     base_url: str | None = None,
+    tools: list[dict[str, Any]] | None = None,
 ) -> Completion:
     """One model call against the pinned local generation model.
 
@@ -214,6 +228,11 @@ def generate(
         "top_p": pin.top_p,
         "seed": pin.seed,
     }
+    # Arm 3 only. Absent for arms 1 and 2, and absent is not the same as `[]`: an empty
+    # tools array is a request that says "you may call tools" and offers none, which some
+    # runtimes answer by refusing to answer at all.
+    if tools:
+        payload["tools"] = tools
     # BOTH arms name an effort, and arm 1's is `low` rather than absent. Omitting the
     # parameter yields the runtime's DEFAULT, which sits close to arm 2's -- the arms
     # would then differ only in their system prompt while thinking almost identically,
@@ -246,6 +265,26 @@ def generate(
         head, _, tail = text.partition("</think>")
         reasoning, text = head.replace("<think>", "").strip(), tail.strip()
 
+    # The wire carries `arguments` as a JSON *string*. Parsing it here is the whole reason
+    # this belongs in llm.py: it is a provider payload shape, and C2.2 confines those to
+    # this module. A malformed string is kept as `{"_raw": ...}` rather than dropped --
+    # S6 measured 20/20 well-formed calls, but it measured four short prompts, not a
+    # six-turn loop with tool results fed back in, and S6's own write-up says so. A call
+    # we could not parse must reach the loop as a visible bad call.
+    tool_calls: list[dict[str, Any]] = []
+    for raw in msg.get("tool_calls") or []:
+        fn = raw.get("function") or {}
+        argtext = fn.get("arguments") or "{}"
+        try:
+            parsed = json.loads(argtext)
+            if not isinstance(parsed, dict):
+                parsed = {"_raw": argtext}
+        except json.JSONDecodeError:
+            parsed = {"_raw": argtext}
+        tool_calls.append(
+            {"id": raw.get("id") or "", "name": fn.get("name") or "", "arguments": parsed}
+        )
+
     usage = data.get("usage") or {}
     completion_tokens = int(usage.get("completion_tokens") or 0)
     r_tok, a_tok, enc = _count_split(pin.model, reasoning, text)
@@ -269,5 +308,6 @@ def generate(
         budget_bound=_budget_bound(finish, r_tok, budget if thinking else 0),
         requested_effort=effort or "",
         attempts=attempt,
-        invocation_parameters={k: v for k, v in payload.items() if k not in ("messages",)},
+        invocation_parameters={k: v for k, v in payload.items() if k not in ("messages", "tools")},
+        tool_calls=tuple(tool_calls),
     )

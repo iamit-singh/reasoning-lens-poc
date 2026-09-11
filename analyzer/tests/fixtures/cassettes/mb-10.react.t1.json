@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 9,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 39,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 395,
+  "reasoning": "We need to list the three departments. The answer: Metallurgy, Hydrology, Cartography.",
+  "reasoning_tokens": 20,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "Metallurgy, Hydrology, Cartography",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 434
+}

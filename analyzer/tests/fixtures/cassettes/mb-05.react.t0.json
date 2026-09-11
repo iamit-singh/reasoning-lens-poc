@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 113,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 385,
+  "reasoning": "We need total books on shelves. Total units: 3 floors * 14 units = 42 units. Each unit holds 32 books, so total capacity: 42 * 32 = 1344 books. 118 books are checked out and missing from shelves. So books on shelves = 1344 - 118 = 1226. Let's double-check: 42*32 = 1344. Subtract 118 gives 1226. So answer: 1226 books.",
+  "reasoning_tokens": 101,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "1226",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 498
+}

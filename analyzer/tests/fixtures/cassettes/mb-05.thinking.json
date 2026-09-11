@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 2,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 90,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 144,
+  "reasoning": "We need to compute total books originally on shelves: 3 floors * 14 units per floor * 32 books per unit = 3*14*32. 14*32 = 448. 3*448 = 1344. Then subtract 118 checked out: 1344 - 118 = 1226. So answer: 1226 books on shelves.",
+  "reasoning_tokens": 78,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "1226",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 234
+}

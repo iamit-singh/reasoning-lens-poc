@@ -1,0 +1,32 @@
+{
+  "answer_tokens": 0,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 57,
+  "finish_reason": "tool_calls",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 351,
+  "reasoning": "We need to look up the founding year of the Meridian Institute. The tool lookup has key \"meridian_institute_founded\". Use that.",
+  "reasoning_tokens": 29,
+  "requested_effort": "medium",
+  "structural_token_residual": 28,
+  "text": "",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [
+    {
+      "arguments": {
+        "query": "meridian_institute_founded"
+      },
+      "id": "call_6jc7fzdn",
+      "name": "lookup"
+    }
+  ],
+  "total_tokens": 408
+}

@@ -2,11 +2,11 @@
 
 | | |
 | --- | --- |
-| **Status** | **Proposed** — 11 Sep 2026 (W3). Needs a call on what FE-1 features and how B4 #7 is worded. |
+| **Status** | **Proposed** — 11 Sep 2026 (W3). Needs a call on what FE-1 features and how B4 #7 is worded. **Option A's tool contrast is now MEASURED and confirmed — see the postscript.** |
 | **Decided by** | *open* — it narrows a headline claim, so it is not the implementer's call |
 | **Supersedes** | the second half of [ADR-005](ADR-005-traps-do-not-reproduce.md)'s option B ("re-point FE-1 at the difficulty contrast"), which turns out not to be satisfiable |
 | **Amends** | B4 #7's accuracy claim · B6.2/FE-1's featured comparison · `check_regime_separation`'s warning text |
-| **Evidence** | `problem-bank/arm-contrast.md` + `.json` — 14 bank items x 2 arms, pinned · 5 harder candidates x 2 arms · the 120 runs behind ADR-005 |
+| **Evidence** | `problem-bank/arm-contrast.md` + `.json` — 14 bank items x **3** arms, pinned · 5 harder candidates x 2 arms · the 120 runs behind ADR-005 |
 | **Depends on** | [ADR-004](ADR-004-direct-arm-minimal-reasoning.md) — this is the sharper version of it |
 
 ## Context
@@ -76,8 +76,8 @@ Two contrasts are real, measured and reproducible. Neither is the one the plan e
 2. **Tool use — arm 3 vs arms 1 and 2.** `mb-08`, `mb-09` and `mb-10` are wrong on **both**
    reasoning arms, because the facts they need are in `corpus/facts.json` and neither arm
    can reach it. If arm 3 answers them, that is a genuine **wrong → right** row: the one
-   separation this bank actually contains. **It is unverified until M1-7 runs**, which is
-   the next task on the critical path.
+   separation this bank actually contains. ~~It is unverified until M1-7 runs~~ —
+   **verified, see the postscript. Arm 3 is 14/14.**
 
 ## Options
 
@@ -110,3 +110,52 @@ specified in W5.
   exactly the contrast option A features.
 - `problem-bank/candidates/hm-*.json` stay **candidates**. They did not separate the arms,
   so they have no claim on a bank slot under L1's fixed 14.
+
+---
+
+## Postscript — M1-7 ran, and option A's evidence is now in the corpus (11 Sep 2026)
+
+Arm 3 was built the same day (M1-7, [ADR-007](ADR-007-react-arm-on-the-provider-layer.md))
+and the contrast re-measured across all three arms:
+
+| | Arm 1 (minimal) | Arm 2 (thinking) | **Arm 3 (ReAct)** |
+| --- | --- | --- | --- |
+| Correct, 14 bank items | 11/14 | 11/14 | **14/14** |
+
+**All three of the predicted wrong → right rows landed.** `mb-08`, `mb-09` and `mb-10` are
+wrong on both reasoning arms and correct on arm 3. Option A's accuracy claim now rests on
+corpus evidence rather than on a probe — which is exactly the standard this ADR was written
+to insist on, so it is worth stating plainly that the standard was met rather than assumed.
+
+**And the rows are cheaper, not merely better:**
+
+| Item | Arm 2 (thinking) | Arm 3 (tools) | |
+| --- | --- | --- | --- |
+| `mb-08` | unparsed, **3,966** reasoning tok | correct, **80** tok | 50× cheaper |
+| `mb-09` | wrong, 1,568 tok | correct, 38 tok | 41× cheaper |
+| `mb-10` | wrong, 847 tok | correct, 36 tok | 24× cheaper |
+
+> On `mb-08` the thinking arm spent **3,966 reasoning tokens failing to recall a fact that
+> does not exist** — every place name in the corpus is invented, on purpose — while the
+> tool arm spent 80 and looked it up. **That pair is the product in one frame:** one
+> reasoning panel showing confabulation at length, beside one showing two tool calls. It is
+> a better demo row than the difficulty contrast the plan originally expected, and unlike
+> that one it exists in the corpus.
+
+So **option A is recommended more strongly than when this ADR was filed**, and B4 #7's
+re-wording is now specific: *tools* buy the answer; *thinking* buys cost. Both halves are
+measured.
+
+### One new finding, and it is the third tag in a row to be a claim rather than a property
+
+**2 of the 5 items tagged `tool_required` had arm 3 call no tool at all** — `mb-06` and
+`mb-07`, both arithmetic — and answered correctly regardless. `problem-bank/README.md`
+states that the tag floors are *"what make B4 #7's `tool_required` share computable"*, so a
+share computed from the tag is wrong by two items out of five. The measured share is in
+`arm-contrast.md`'s `tool calls` column.
+
+This is the same shape as `is_trap` before M1-5 measured it, and the pattern is now worth
+naming as a rule rather than a recurrence: **in this bank, a tag is a hypothesis until a run
+confirms it.** `is_trap` claimed 4 and earned 0; `tool_required` claims 5 and measures 3.
+Recorded rather than relabelled, because dropping the tag changes the L1 floor and that is a
+scope decision — the same reason ADR-005 escalated rather than flipping the trap flags.

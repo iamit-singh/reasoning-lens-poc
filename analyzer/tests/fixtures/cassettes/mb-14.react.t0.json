@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 4,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 79,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 376,
+  "reasoning": "We have a patch that doubles each day. It covers whole pond on day 48. So area fraction at day 48 is 1. Since doubling each day, going back one day reduces area by half. So day 47: half pond. Day 46: quarter pond. So answer: day 46.",
+  "reasoning_tokens": 65,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "Day\u202f46.",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 455
+}

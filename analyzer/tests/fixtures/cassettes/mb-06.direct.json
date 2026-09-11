@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 3,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 182,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "low",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 167,
+  "reasoning": "Compute total watts: 47*21=987 servers. 987*385= 987*400-987*15=394800-14805=379, - wait compute: 394800-14805=379, - actually 394800-14805=379, - 394800-14000=380800, minus 805=380 - sorry. Let's compute precisely: 987*385 = 987*(300+80+5)= 987*300=296100; 987*80=78960; 987*5=4935; sum=296100+78960=375060; +4935=379995 watts. Convert to kW: 379995/1000=379.995 kW. Rounded down to nearest whole kilowatt: 379 kW.",
+  "reasoning_tokens": 169,
+  "requested_effort": "low",
+  "structural_token_residual": 10,
+  "text": "379 kW",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 349
+}

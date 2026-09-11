@@ -1,0 +1,24 @@
+{
+  "answer_tokens": 34,
+  "attempts": 1,
+  "budget_bound": false,
+  "completion_tokens": 100,
+  "finish_reason": "stop",
+  "invocation_parameters": {
+    "model": "gpt-oss:20b",
+    "reasoning_effort": "medium",
+    "seed": 20260910,
+    "temperature": 0.0,
+    "top_p": 1.0
+  },
+  "model": "gpt-oss:20b",
+  "prompt_tokens": 430,
+  "reasoning": "We have Fairhaven population 128,400. Brightwater population 96,750. Difference: 128,400 - 96,750 = 31,650. Let's compute: 128,400 - 96,750 = 31,650. Provide answer.",
+  "reasoning_tokens": 56,
+  "requested_effort": "medium",
+  "structural_token_residual": 10,
+  "text": "Fairhaven has 128,400 residents, while Brightwater has 96,750.  \nSo Fairhaven has **31,650** more people than Brightwater.",
+  "tokenizer": "o200k_harmony",
+  "tool_calls": [],
+  "total_tokens": 530
+}
