@@ -158,6 +158,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--annotator", default=os.environ.get("ANNOTATOR", ""), help="your name")
     ap.add_argument("--count", type=int, default=0, help="stop after this many (0 = no limit)")
     ap.add_argument("--status", action="store_true", help="show progress and exit")
+    # Exists because smoke-testing this tool without it writes a fake label into
+    # calibration/labels/, where everything downstream treats a row as ground truth. A
+    # deleted fake is fine; an undeleted one is a label nobody wrote being counted as one.
+    ap.add_argument("--dry-run", action="store_true", help="render and prompt, write nothing")
     args = ap.parse_args(argv)
 
     record = json.loads(SAMPLING.read_text())
@@ -242,13 +246,19 @@ def main(argv: list[str] | None = None) -> int:
                 # A skip is DATA -- it says the rubric could not decide this step -- so it
                 # is written down rather than silently leaving a gap in the queue.
                 row["skipped"] = True
-            with labels_path(annotator).open("a") as fh:
-                fh.write(json.dumps(row) + "\n")
+            if args.dry_run:
+                print(f"  DRY RUN -- not written: {json.dumps(row)[:120]}...\n")
+            else:
+                with labels_path(annotator).open("a") as fh:
+                    fh.write(json.dumps(row) + "\n")
+                print(f"  recorded{' (skipped)' if behavior is None else ''}\n")
             written += 1
-            print(f"  recorded{' (skipped)' if behavior is None else ''}\n")
     except (KeyboardInterrupt, EOFError):
         print("\n  stopped. Everything labelled so far is already written.\n")
 
+    if args.dry_run:
+        print(f"  {written} this session, DRY RUN -- nothing written\n")
+        return 0
     total = len(already_labelled(annotator))
     print(f"  {written} this session · {total} of {len(queue)} in {labels_path(annotator)}")
     return 0
