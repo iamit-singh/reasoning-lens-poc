@@ -5,6 +5,7 @@ import Provenance from "../../components/Provenance";
 import Trace from "../../components/Trace";
 import Scoreboard from "../../components/Scoreboard";
 import FlaggedPanel from "../../components/FlaggedPanel";
+import Download from "../../components/Download";
 import { taxonomy } from "../../lib/taxonomy";
 
 /**
@@ -61,6 +62,8 @@ export default async function ItemPage({ params }) {
       <Trace arms={arms} definitions={taxonomy()} />
 
       <FlaggedPanel arms={arms} />
+
+      <Download report={report} />
 
       <footer>
         {report.measurement_context &&

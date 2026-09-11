@@ -26,6 +26,10 @@ export default [
         console: "readonly",
         localStorage: "readonly",
         sessionStorage: "readonly",
+        URL: "readonly",
+        Blob: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
       },
     },
     rules: {
