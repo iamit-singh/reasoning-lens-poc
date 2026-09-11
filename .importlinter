@@ -29,6 +29,7 @@ source_modules =
     rlens.consistency
     rlens.metrics
     rlens.pipeline
+    rlens.calibrate
 forbidden_modules =
     anthropic
     openai
@@ -38,6 +39,7 @@ name = Analyzer layering - contracts at the bottom, pipeline at the top
 type = layers
 layers =
     rlens.runner
+    rlens.calibrate
     rlens.pipeline
     rlens.metrics
     rlens.consistency | rlens.judge | rlens.classify

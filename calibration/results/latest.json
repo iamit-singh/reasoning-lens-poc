@@ -1,0 +1,47 @@
+{
+  "_README": "Written by `make calibrate` (M2-13). FE-6 renders this VERBATIM with zero hard-coded numbers. A null is a real state meaning 'not measured yet' and must render as such -- never as 0, and never by hiding the row.",
+  "classifier_vs_human": {
+    "behavior": null,
+    "soundness": null
+  },
+  "faithfulness": {
+    "flips": null,
+    "note": "M2-9. See docs/spikes/S4-cues.md and ADR-009 -- 0 of 48 trials flipped.",
+    "verbalisation_rate": null
+  },
+  "inter_annotator": {
+    "behavior": null,
+    "note": "Human vs human. NOT COMPUTABLE with a single annotator -- not harder, not noisier: not computable. A null here means the second annotator has not labelled yet, and the headline claim cannot be made until they have.",
+    "soundness": null
+  },
+  "measurement_context": {
+    "calibration_run_id": "cal-2026-09-11",
+    "classifier_kappa_dev": null,
+    "classifier_kappa_heldout": null,
+    "consistency_fp_rate": null,
+    "judge_precision": null,
+    "judge_recall": null,
+    "majority_class_baseline": null,
+    "n_dev": 0,
+    "n_heldout": null,
+    "per_class_f1": null
+  },
+  "run": {
+    "analyzer_backend": "hybrid",
+    "analyzer_version": "0.1.0",
+    "annotators": [],
+    "generated_at": "2026-09-11T13:18:06Z",
+    "judge_triage_pin": null,
+    "labels_loaded": 0,
+    "labels_skipped_by_annotator": 0,
+    "mode": "dev",
+    "predictions_loaded": 17,
+    "prompt_bundle_version": "a6d550b9dc10",
+    "steps_joined_behavior": 0,
+    "steps_joined_soundness": 0
+  },
+  "seeded_errors": {
+    "note": "M2-6.",
+    "recall_by_mutation_type": null
+  }
+}

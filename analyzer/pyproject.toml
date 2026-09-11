@@ -39,6 +39,16 @@ dev = [
   "ruff>=0.6",
   "mypy>=1.11",
   "import-linter>=2.0",
+  # DEV-ONLY, and the placement is the decision. C5.5 names sklearn for kappa and
+  # classification_report; `rlens.metrics` implements both directly, because sklearn drags
+  # numpy and scipy -- on the order of 100 MB -- into a package whose declared virtue (I1)
+  # is that it installs with four small dependencies and ingests a span tree.
+  #
+  # The risk of hand-rolling is a wrong headline number, which is the worst failure
+  # available here. So the reference implementation is installed for the TESTS, which
+  # assert agreement to 10 decimal places on random label sequences as well as fixed
+  # cases. Production stays lean; the numbers are still checked against sklearn.
+  "scikit-learn>=1.5",
 ]
 
 [project.scripts]
@@ -63,6 +73,28 @@ no_implicit_reexport = true
 [[tool.mypy.overrides]]
 module = ["jsonschema.*"]
 ignore_missing_imports = true
+
+# scikit-learn is a DEV-ONLY dependency (see `dev` above) and it drags numpy's stubs in.
+# `python_version = "3.11"` is deliberate -- it is the floor this package supports, and
+# lowering the bar to whatever the local interpreter happens to be would stop catching
+# syntax this package promises to run on. But numpy's stubs use 3.12-only syntax, so
+# type-checking them fails on a config that is correct for OUR code.
+#
+# `follow_imports = "skip"` rather than `ignore_missing_imports`: the reference
+# implementation is only ever touched from tests, and nothing in `rlens` imports it.
+[[tool.mypy.overrides]]
+# Narrowed to numpy: it is the only one mypy actually reaches, and `warn_unused_configs`
+# prints a note for every override that is not. A tool that prints a note on every clean
+# run teaches people to stop reading its output.
+module = ["numpy.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true
+ignore_missing_imports = true
+
+# NOTE, unresolved: `requires-python = ">=3.11"` and `python_version = "3.11"` are a claim
+# nothing verifies. CI runs 3.12, the Makefile installs 3.12, and no job has ever executed
+# this package on 3.11. Either add a 3.11 matrix entry or raise the floor to 3.12 -- but
+# not as a side effect of a dev dependency, which is how it nearly happened here.
 
 # ---------------------------------------------------------------- pytest
 [tool.pytest.ini_options]

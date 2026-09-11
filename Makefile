@@ -61,8 +61,8 @@ ci: lint typecheck unit contract integration-mock boundaries schema-freeze rubri
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
 	@echo "warm-cache: not implemented (owner M3-2). CACHE_KEY inputs: see analyzer/src/rlens/versions.py"; exit 2
 
-calibrate:  ## STUB (M2-1/M2-3) -- kappa and per-class F1; --dev on PRs, --final pre-release
-	@echo "calibrate: not implemented (owner M2-1). Refuses --final unless the prompt bundle is pinned (C5.4)"; exit 2
+calibrate:  ## M2-13 -- kappa, CIs, per-class F1, baseline. --final is C5.4-guarded
+	cd $(ANALYZER) && ../$(BIN)/python -m rlens.calibrate $(ARGS)
 
 faithfulness:  ## STUB (M2-9) -- cue-injection batch job and the committed panel
 	@echo "faithfulness: not implemented (owner M2-9). See docs/spikes/S4-cues.md"; exit 2
