@@ -5,7 +5,7 @@ visible: three strategy arms over the same problem bank, span-tree ingest, deter
 segmentation, behavior classification, and a calibration page that publishes the agreement
 numbers whatever they turn out to be.
 
-**Status: Month 1, Week 3.** See [`docs/ledger.md`](docs/ledger.md) for actuals and
+**Status: Month 1, Week 4 — the G1 week.** See [`docs/ledger.md`](docs/ledger.md) for actuals and
 [`../month-1-task-breakdown.md`](../month-1-task-breakdown.md) for the plan this repo
 executes — as amended by [plan amendment 001](../plan-amendment-001-local-hybrid.md).
 
@@ -33,6 +33,13 @@ make traps               # M1-5: which declared traps actually reproduce?
 make arm-contrast        # which items separate the arms? (ADR-004's control group)
 make spans               # replay every item from cassettes -- no GPU, no network
 make spike-s3            # S3: what batch size does the classifier tolerate?
+make spike-s4            # S4: do injected cues move the answer? (M2-9's go/no-go)
+
+make report ARGS="--item mb-08"   # span trees -> a ReasoningReport
+make record-cassettes             # M1-14: record the analysis tier, once per prompt bundle
+make classify-reliability ARGS="--runs 20"   # M1-9's DoD. COSTS SPEND
+make draw-sample                  # M1-11: the random-90, drawn ONCE before any label
+make label ARGS="--annotator you" # M1-11: the blind labelling tool
 ```
 
 ## What exists today
@@ -41,12 +48,12 @@ make spike-s3            # S3: what batch size does the classifier tolerate?
 | --- | --- | --- |
 | C2.1 repo tree, `reasoning-lens-analyzer` package | ✅ | M1-0 |
 | C2.2 boundary contract (import-linter + provider-symbol grep), **proven by a reverted violation** | ✅ | M1-0 |
-| C7.2 every-PR CI job set (9 jobs, all green) | ✅ | M1-0 |
+| C7.2 every-PR CI job set — 10 jobs (`rubric-drift` added in W4) | ✅ | M1-0 / M1-11 |
 | C5.4 held-out label protection | ✅ wired, dormant until the freeze | M1-0 / M2-1 |
 | C2.3 version + cache-key discipline | ✅ | M1-0 |
 | Hybrid runtime decided; pin is a tuple, not an id | ✅ | ADR-001 |
-| S1 reasoning-fidelity harness (local + OpenAI) | ✅ written · ⏳ needs the model pulled | M1-1 |
-| S6 local tool-calling harness — **gates arm 3** | ✅ written · ⏳ needs the model pulled | new, W2 |
+| S1 reasoning-fidelity — local **and** OpenAI, both run | ✅ [S1-provider.md](docs/spikes/S1-provider.md) | M1-1 |
+| S6 local tool-calling — **gated arm 3**, 20/20 | ✅ [S6-tools.md](docs/spikes/S6-tools.md) | M1-16 |
 | ~~S5 DNS delegation~~ | ❌ **cancelled** — nothing is deployed | ADR-003 |
 | Runner arms 1-2, provider abstraction, OTEL emission | ✅ | M1-6 |
 | Problem bank, 14 items under L1, checkers + their contract | ✅ | M1-4 |
@@ -56,11 +63,43 @@ make spike-s3            # S3: what batch size does the classifier tolerate?
 | `NormalizedTrace` / `Step` contracts (C3.2) + OTEL ingest | ✅ | M1-8 |
 | Deterministic segmenter + 12 goldens — **frozen at `segmenter-frozen-v1`** | ✅ [ADR-008](docs/decisions/ADR-008-segmenter-token-unit.md) | M1-8 |
 | S3 — batched classification; decides M1-9's batch size | ✅ [S3-batching.md](docs/spikes/S3-batching.md) | M1-12 |
-| Behavior classifier, `ReasoningReport` | ⬜ W4 · **G1** | M1-9, M1-10 |
+| Analysis tier pinned — `gpt-5-mini` / `gpt-5`, both probed live | ✅ **G0 is 6/6** | M1-1 |
+| Behavior classifier v0 — chunked, repair retry, degrade-not-fabricate | ✅ | M1-9 |
+| `ReasoningReport` JSON Schema + 4 fixtures — **the G1 freeze** | ✅ | M1-10 |
+| `python -m rlens` — span trees → a report, end to end | ✅ | M1-10 |
+| Rubric v1, blind labelling tool, the random-90 draw | ✅ tooling · ⛔ **40 labels need a human** | M1-11 |
+| Cassette recording + offline replay | ✅ recorder · ⏳ recording | M1-14 |
+| S4 — cue injection; M2-9's early warning | ⏳ running | M1-13 |
 | Backend, frontend | ⬜ W5+ (frontend starts after the G1 freeze) | M2/M3 |
 
-Weeks 1 and 2 are closed. **G0 is 5 of 6** — the open check is the analysis tier, blocked
-on an OpenAI key (`MODEL_ANALYZE` unset), which is not the implementer's to unblock.
+Weeks 1, 2 and 3 are closed. **G0 is 6 of 6.** The last check — the analysis tier pinned to
+an exact dated id — was blocked on a key for three weeks and closed in W4 the day one
+arrived. Closing it also turned ADR-001's central premise from an expectation into a
+measurement: asked the S1 probe, `gpt-5-mini-2025-08-07` billed **384 reasoning tokens and
+returned 0 characters of reasoning text**. The local runtime returns 2,535 for the same
+probe. Arm 2 cannot be built on OpenAI — not "should not", cannot.
+
+### Three W4 findings, in the order they will matter to a reader
+
+**1. The behavior taxonomy barely populates.** Over a full bank × 3 arms pass the
+classifier produced `linear` 252, `verification` 35, `subgoal_setting` 22,
+`backward_chaining` 1, **`backtracking` 0** — of 310 steps. No trace contains all five
+classes, so §6.3's "harvest `report_nominal` from a real run" is not achievable, and κ's
+per-class F1 will be undefined for classes with no instances. This is the third time a
+phenomenon the plan assumed has failed to appear on this model, after
+[ADR-005](docs/decisions/ADR-005-traps-do-not-reproduce.md) (traps) and
+[ADR-006](docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) (arm separation).
+
+**2. `step_id` was not unique across the corpus.** `direct:direct-llm-0:0` named the first
+step of all fourteen items; 310 steps collapsed to 155 distinct ids. C3.2 calls it "the
+join key for every label ever written" and it was not a key. Found by M1-11's sampling draw
+**before a single label existed**, which is exactly what the plan's ordering buys.
+
+**3. The analysis deadline was decorative.** A single call ran **969 seconds against a
+110-second `ANALYSIS_DEADLINE_S`**: `urlopen(timeout=…)` bounds socket operations, and the
+block was inside the call. Now enforced as a wall-clock budget. C11 budgets 18 s for
+classify+triage and this tier does not meet it — a measured fact for the M3 latency
+conversation rather than a surprise.
 
 **One open decision is on the critical path for the demo, not for G1.**
 [ADR-006](docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) is *Proposed*: arms 1 and
