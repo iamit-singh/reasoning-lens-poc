@@ -39,7 +39,16 @@ export default [
   },
   {
     // Build-time modules and config: Node globals, no browser.
-    files: ["app/lib/reports.js", "*.config.mjs", "app/**/page.jsx", "app/**/layout.jsx"],
+    // Anything that reads the repo at build time. Listed by path rather than by a
+    // glob over `app/lib/` so that adding a client-safe module there does not silently
+    // acquire Node globals it has no business having.
+    files: [
+      "app/lib/reports.js",
+      "app/lib/taxonomy.js",
+      "*.config.mjs",
+      "app/**/page.jsx",
+      "app/**/layout.jsx",
+    ],
     languageOptions: {
       globals: { process: "readonly", __dirname: "readonly", console: "readonly" },
     },

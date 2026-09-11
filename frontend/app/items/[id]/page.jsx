@@ -2,6 +2,8 @@ import Link from "next/link";
 import { allReports, armsOf, reportFor } from "../../lib/reports";
 import ArmPanes from "../../components/ArmPanes";
 import Provenance from "../../components/Provenance";
+import Trace from "../../components/Trace";
+import { taxonomy } from "../../lib/taxonomy";
 
 /**
  * The per-item route (FE-1's routing half).
@@ -52,13 +54,13 @@ export default async function ItemPage({ params }) {
 
       <Provenance report={report} />
 
-      {/* FE-2 renders the annotated trace here; FE-3 the scoreboard; FE-4 the flagged-step
-          panel. Named rather than left blank so the next person does not wonder whether
-          something failed to load. */}
+      <Trace arms={arms} definitions={taxonomy()} />
+
+      {/* FE-3's scoreboard and FE-4's flagged-step panel land below this. Named rather than
+          left blank so the next person does not wonder whether something failed to load. */}
       <p className="notice">
-        The annotated step-by-step trace (FE-2), the scoreboard (FE-3) and the flagged-step
-        panel (FE-4) render below this line. This build has FE-1 only — the shell, the
-        featured comparison, the picker and routing.
+        The scoreboard with its verdict line (FE-3) and the flagged-step side panel (FE-4)
+        render below this line.
       </p>
 
       <footer>
