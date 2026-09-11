@@ -276,3 +276,23 @@ def test_the_schema_ships_inside_the_package() -> None:
     validate in CI and be absent from the wheel the backend imports."""
     assert SCHEMA_PATH.is_file()
     assert "src/rlens/schemas" in SCHEMA_PATH.as_posix()
+
+
+# ------------------------------------------------------------------ G1 check 10
+def test_every_frontend_surface_is_annotated_with_the_fixture_it_consumes() -> None:
+    """**G1 check 10, as amendment 001 redefined it.**
+
+    The original check was a 15-minute walkthrough with the frontend owner. There is no
+    frontend owner — Amit is the sole contributor and cannot walk himself through the
+    fixtures — so the amendment replaced the conversation with a written artifact: each
+    fixture annotated with which UI surface consumes it.
+
+    A written artifact that nothing checks decays into a written artifact that is wrong,
+    which is worse than the conversation it replaced. So the table is asserted: all eight
+    surfaces named, and every fixture the table cites actually present.
+    """
+    readme = (FIXTURES / "README.md").read_text()
+    for surface in (f"FE-{n}" for n in range(1, 9)):
+        assert f"**{surface}**" in readme, f"{surface} has no row in the fixtures README"
+    for name in NAMES:
+        assert f"`{name}`" in readme, f"{name} is committed but no surface claims it"

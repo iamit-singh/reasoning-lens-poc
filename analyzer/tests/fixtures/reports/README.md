@@ -52,3 +52,38 @@ frontend owner assume it came from a run, both exist and both say which they are
 
 Regenerate the measured one with `make report ARGS="--item mb-13"` and copy it here. It is
 the only fixture that can go stale, and that is the price of being the only real one.
+
+---
+
+## Which surface consumes which fixture — **this section is G1 check 10**
+
+§8.2's check 10 was *"the frontend owner has been walked through the fixtures; no open
+questions"*. [Plan amendment 001](../../../../plan-amendment-001-local-hybrid.md) replaced
+it, because Amit is now the sole contributor and **cannot walk himself through them**. The
+replacement is a written artifact: *the fixtures are committed, schema-validated, and each
+is annotated with which UI surface consumes it.* That is this table, and it is the check.
+
+| Surface | What it renders | Fixture it is built against | The state it would otherwise miss |
+| --- | --- | --- | --- |
+| **FE-1** shell, picker, routing | item picker by tag; featured comparison on arrival | `report_measured` | Real `tags`, real prompt lengths. The authored items are `fx-` and would not appear under a bank tag |
+| **FE-2** annotated trace renderer | 3 panes, 5 tag colours, hover definitions | `report_nominal` **and** `report_degraded` | Nominal is the **only** fixture with all five tag colours. Degraded carries `provider_summarised` and the unannotated fallback — `behavior: null` on every step, which is a *different* render from "no steps" |
+| **FE-3** scoreboard + verdict line | per-arm metrics; soundness beside its precision/recall; failed-arm column | `report_degraded` | The **failed-arm column**: `status: "failed"`, `metrics: null`, `steps: []`. And `measurement_context` all-null — I3 says soundness never renders without its precision/recall, and null is the state it is in until M2-17, so FE-3 must render "not yet measured" rather than hiding the block |
+| **FE-4** flagged-step side panel | rubric verdict, error type, escalated badge, consistency warning | `report_flagged` | The only fixture with `verdict: "unsound"`, a non-null `error_type`, `escalated: true` and a populated `rationale` together — and the only `consistency.verdict: "contradicts"` with citations |
+| **FE-5** faithfulness panel | side-by-side hinted/unhinted | *none — `faithfulness/panel.json`, M2-9* | Not part of `ReasoningReport`. Named here so nobody looks for it |
+| **FE-6** calibration page | `/api/calibration` verbatim, zero hard-coded numbers | *none — `calibration/results/latest.json`, M2-8* | Same. The `measurement_context` block in a report is the *per-report* copy, not the page |
+| **FE-7** report download | blob download; the JSON must validate | any of the four | The download **is** this object. `test_every_fixture_validates` is the same assertion FE-7's DoD makes |
+| **FE-8** progress + banners | SSE progress, `degraded` / `cached-only` / `illustrative replay` banners | `report_degraded` | **All of it.** `degraded.reason`, `escalation_capped`, `budget_bound`, `trace_quality: provider_summarised`, and a failed arm. FE-8 is 1.5 h of *unbudgeted* Month-3 work whose every state must be reachable in mock mode |
+
+### Three things worth knowing before writing a component against these
+
+1. **`null` is a state, not an absence.** `consistency`, `metrics.est_cost_usd`,
+   `soundness_score` and every field of `measurement_context` are null in Month 1 because
+   the code that fills them is Month 2's. A component that renders nothing when they are
+   null will look finished and be wrong: I3 requires "not yet measured" to be visible.
+2. **A degraded arm has steps and no labels.** `behavior: null` and `validity: null` on
+   every step, with the text intact. This is deliberate (C4.3) — a fabricated `linear`
+   would render identically to a real one, so the classifier refuses to produce one.
+   Anything that assumes `step.behavior.label` exists will throw on a real report.
+3. **`correct` is `true | false | null`.** Null means the answer could not be parsed, which
+   is a third outcome and not a quiet `false` — `false` asserts the model answered and was
+   wrong.
