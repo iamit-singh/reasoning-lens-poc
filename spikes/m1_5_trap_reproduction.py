@@ -65,10 +65,9 @@ from typing import Any
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "analyzer/src"))
 
-from rlens.checkers import check, sole_number
+from rlens.checkers import check, final_answer_line, sole_number
 from rlens.llm import ProviderError, generate
 from rlens.runner.arms import ARMS, messages_for
-from rlens.runner.run import ArmResult
 from rlens.versions import GenerationPin, generation_pin
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -155,27 +154,6 @@ def validate(item: dict[str, Any]) -> None:
             )
 
 
-def final_answer(text: str) -> str:
-    """Delegated to the runner's own rule, deliberately.
-
-    A harness that read answers more generously than the pipeline does would measure a
-    trap the pipeline will never see. `ArmResult.final_answer` is the one rule, and M1-5
-    fixed it rather than working around it: the naive "last non-empty line" returned the
-    LaTeX delimiter `\\]` on `mb-11`, scoring a correct answer unreadable.
-    """
-    return ArmResult(
-        strategy="", item_id="", trace_quality="full", completion=_TextOnly(text)
-    ).final_answer
-
-
-class _TextOnly:
-    """The one field `final_answer` reads. Keeps this harness off the Completion
-    constructor, whose eighteen fields are `llm.py`'s business and not ours."""
-
-    def __init__(self, text: str) -> None:
-        self.text = text
-
-
 def grade(item: dict[str, Any], answer: str) -> str:
     """`correct` | `trap` | `unparsed` | `other`, by the item's own declared checker.
 
@@ -228,7 +206,7 @@ def run_once(
             "error": str(exc),
             "elapsed_s": round(time.time() - started, 2),
         }
-    answer = final_answer(c.text)
+    answer = final_answer_line(c.text)
     return {
         "run_id": run_id,
         "item": item["id"],
@@ -301,7 +279,7 @@ def regrade(runs: list[dict[str, Any]], traps: list[dict[str, Any]]) -> int:
         item = by_id.get(r["item"])
         if item is None or "text" not in r:
             continue
-        answer = final_answer(r["text"])
+        answer = final_answer_line(r["text"])
         outcome = grade(item, answer)
         if (r.get("answer"), r.get("outcome")) != (answer, outcome):
             print(f"  regrade {r['run_id']:<34} {r.get('outcome')} -> {outcome}   {answer[:46]!r}")

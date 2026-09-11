@@ -58,11 +58,10 @@ from typing import Any
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent / "analyzer/src"))
 
-from rlens.checkers import check, sole_number
+from rlens.checkers import check, final_answer_line, sole_number
 from rlens.llm import ProviderError, generate
 from rlens.runner.arms import ARMS, messages_for
 from rlens.runner.react import run_react
-from rlens.runner.run import ArmResult
 from rlens.versions import generation_pin
 
 ROOT = pathlib.Path(__file__).parent.parent
@@ -75,20 +74,6 @@ PATTERNS = ("separated", "agreed", "both_wrong", "inverted", "incomplete")
 #: The three arms, in the order the report reads. Arm 3 is a LOOP, so `run_cell`
 #: dispatches it rather than calling `generate` once.
 ARM_ORDER = ("direct", "thinking", "react")
-
-
-class _TextOnly:
-    """The one field `ArmResult.final_answer` reads."""
-
-    def __init__(self, text: str) -> None:
-        self.text = text
-
-
-def final_answer(text: str) -> str:
-    """The runner's own rule, not a second one. See `m1_5_trap_reproduction.final_answer`."""
-    return ArmResult(
-        strategy="", item_id="", trace_quality="full", completion=_TextOnly(text)
-    ).final_answer
 
 
 def outcome(item: dict[str, Any], answer: str) -> str:
@@ -134,7 +119,7 @@ def run_cell(item: dict[str, Any], arm: str, pin: Any) -> dict[str, Any]:
         )
     except ProviderError as exc:
         return {"arm": arm, "outcome": "failed", "error": str(exc)}
-    answer = final_answer(c.text)
+    answer = final_answer_line(c.text)
     return {
         "arm": arm,
         "outcome": outcome(item, answer),
@@ -158,7 +143,7 @@ def _run_react_cell(item: dict[str, Any], pin: Any) -> dict[str, Any]:
     final = result.final
     if final is None:
         return {"arm": "react", "outcome": "failed", "error": result.failed_reason or "no turns"}
-    answer = final_answer(final.text)
+    answer = final_answer_line(final.text)
     return {
         "arm": "react",
         "outcome": outcome(item, answer),

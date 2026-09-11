@@ -12,32 +12,13 @@ import pathlib
 from dataclasses import dataclass, field
 from typing import Any
 
+from rlens.checkers import final_answer_line
 from rlens.llm import Completion, ProviderError, generate
 from rlens.runner.arms import ARMS, ArmSpec, messages_for
 from rlens.runner.emit import arm_span_attributes, llm_span_attributes
 from rlens.runner.paths import data_path, missing_data_message
 from rlens.runner.react import ReactResult, build_react_spans, run_react
 from rlens.versions import GenerationPin, generation_pin
-
-#: Lines that close or decorate a block without carrying an answer. A closed list, not a
-#: pattern: anything broader starts discarding short answers. `315` is a legitimate final
-#: line and must never look like decoration, which rules out "skip lines with no letters".
-#: C4.2 already requires the segmenter to know about LaTeX blocks and code fences for
-#: exactly the same reason -- these are the delimiters that show up in practice.
-_DECORATION = frozenset(
-    {
-        "\\]",
-        "\\[",
-        "\\)",
-        "\\(",
-        "$$",
-        "```",
-        "---",
-        "***",
-        "___",
-        "**",
-    }
-)
 
 
 @dataclass
@@ -67,27 +48,12 @@ class ArmResult:
 
     @property
     def final_answer(self) -> str:
-        """The last line carrying content. C4.1's arms both ask for the answer on its own
-        last line -- and the model does not always oblige.
-
-        **M1-5 found the naive form of this returning `\\]`.** Asked for the garden area,
-        the thinking arm closed with a LaTeX display block, so "the last non-empty line"
-        was the closing delimiter: a correct answer scored as unreadable. Trailing
-        decoration is therefore skipped, by the same listed-rules approach `checkers.py`
-        takes -- see `_DECORATION`.
-
-        What this deliberately does NOT do is hunt for a number inside the chain. The
-        line above that `\\]` holds four numbers, and a grader willing to pick the right
-        one out of a worked line would pick the right one out of a WRONG worked line just
-        as happily. An answer we cannot read is reported as unreadable, not guessed at.
-        """
+        """C4.1's arms both ask for the answer on its own last line -- and the model does
+        not always oblige. The rule lives in `rlens.checkers` so the segmenter and the
+        measurement harnesses read answers exactly the way the runner reports them."""
         if not self.completion:
             return ""
-        for line in reversed(self.completion.text.strip().splitlines()):
-            stripped = line.strip()
-            if stripped and stripped not in _DECORATION:
-                return stripped
-        return ""
+        return final_answer_line(self.completion.text)
 
 
 async def run_arm(
@@ -142,8 +108,16 @@ async def run_arm(
     # An arm that asked for thinking and got none is NOT a full trace. Saying "full"
     # here would put an empty reasoning panel in front of a reviewer with nothing
     # marking it as degraded, which is exactly the failure C3.1's rule exists to prevent.
+    #
+    # **And the mirror case is just as real, which M1-8 found by segmenting the corpus.**
+    # `mb-08.thinking` produced 141 reasoning steps and an EMPTY `content`: the model
+    # looped 126 times on a fact that does not exist and never answered. Reasoning was
+    # present, so the old rule called that trace `full`. It is not -- there is no answer
+    # in it. Downstream that would be recorded as `correct: false`, i.e. the model
+    # answered and was wrong, when the model never answered at all. It is the same
+    # distinction M1-5 had to draw between `unparsed` and `wrong`, one layer up.
     quality = "full"
-    if spec.thinking and not completion.reasoning:
+    if (spec.thinking and not completion.reasoning) or not final_answer_line(completion.text):
         quality = "partial"
 
     result = ArmResult(
@@ -208,6 +182,8 @@ async def _run_react_arm(
         result.max_turns_exhausted
         or result.failed_reason is not None
         or (final is not None and not final.reasoning)
+        # A loop that ended without a visible answer is a partial trace, same as above.
+        or (final is not None and not final_answer_line(final.text))
     )
     quality = "partial" if degraded else "full"
 

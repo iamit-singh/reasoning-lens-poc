@@ -13,6 +13,11 @@ dist/
 build/
 .DS_Store
 
+# Runner output: span trees. Regenerable OFFLINE from the committed cassettes with
+# `make spans` (MOCK_LLM=1, no GPU, no network), so committing 42 of them would be
+# committing a derived artifact that anyone can rebuild byte-identically.
+out/
+
 # Spike raw output: recorded provider/model responses. Regenerable, and a failed
 # self-test run is not evidence of anything. The written finding lands in
 # docs/spikes/*.md and the ADRs -- that is what gets committed.

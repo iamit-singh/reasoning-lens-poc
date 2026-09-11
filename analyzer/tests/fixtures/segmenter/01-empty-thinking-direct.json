@@ -1,0 +1,36 @@
+{
+  "name": "01-empty-thinking-direct",
+  "covers": "Empty thinking (Direct arm) -> zero thought steps, NOT an error",
+  "why": "C4.2's first named edge case. Arm 1 legitimately has almost no trace, and a segmenter that raised here would fail on the cost-of-thought baseline itself.",
+  "input": {
+    "strategy": "direct",
+    "item_id": "mb-02",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "direct-llm-0",
+        "reasoning": "",
+        "content": "68",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "68",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "answer",
+        "span_id": "direct-llm-0",
+        "step_id": "direct:direct-llm-0:0",
+        "char_range": [
+          0,
+          2
+        ],
+        "text": "68"
+      }
+    ]
+  }
+}

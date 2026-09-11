@@ -1,0 +1,69 @@
+{
+  "name": "04-fenced-code-block",
+  "covers": "Fenced code block -> NEVER split inside the fence",
+  "why": "The fence content is chosen to be a trap: its lines start with `Wait`, `So ` and `Then`, and it contains a blank line. Unprotected it would shatter into four steps. Protected it is exactly one.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "probe-code",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "Let me write the computation out as pseudocode so the steps are unambiguous.\n\n```text\nWait for the rack count to be confirmed before anything else happens.\n\nSo multiply the racks by the servers held in each one of them.\nThen multiply that product by the watts each server draws.\n```\n\nSo the pseudocode gives 379.995 kilowatts and the floor of that is 379 kilowatts.",
+        "content": "379",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "379",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          76
+        ],
+        "text": "Let me write the computation out as pseudocode so the steps are unambiguous."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          78,
+          282
+        ],
+        "text": "```text\nWait for the rack count to be confirmed before anything else happens.\n\nSo multiply the racks by the servers held in each one of them.\nThen multiply that product by the watts each server draws.\n```"
+      },
+      {
+        "ordinal": 2,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          284,
+          365
+        ],
+        "text": "So the pseudocode gives 379.995 kilowatts and the floor of that is 379 kilowatts."
+      },
+      {
+        "ordinal": 3,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:3",
+        "char_range": [
+          0,
+          3
+        ],
+        "text": "379"
+      }
+    ]
+  }
+}

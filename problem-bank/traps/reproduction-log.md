@@ -3,7 +3,7 @@
 
 # Trap reproduction log — M1-5
 
-**Recorded** 2026-09-11T06:55:09Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b` @ `sha256:e7b27`) · **120 runs**
+**Recorded** 2026-09-11T07:35:17Z · **pin** `5aa89afe54c45fd0` (`gpt-oss:20b` @ `sha256:e7b27`) · **120 runs**
 
 A trap is *declared* in M1-4 and **earned here**. An item tagged `is_trap: true` that does not reproduce its declared wrong chain is a normal item with a misleading tag.
 

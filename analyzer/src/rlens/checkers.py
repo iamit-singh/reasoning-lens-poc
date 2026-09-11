@@ -29,6 +29,40 @@ _STRIP_CHARS = "$£€,"
 _TRAILING_PUNCT = ".!;:"
 
 
+#: Lines that close or decorate a block without carrying an answer. A closed list, not a
+#: pattern: anything broader starts discarding short answers. `315` is a legitimate final
+#: line and must never look like decoration, which rules out "skip lines with no letters".
+#: C4.2 requires the segmenter to know about LaTeX blocks and code fences for the same
+#: reason -- these are the delimiters that show up in practice.
+DECORATION = frozenset({"\\]", "\\[", "\\)", "\\(", "$$", "```", "---", "***", "___", "**"})
+
+
+def final_answer_line(text: str) -> str:
+    """The last line of a response that carries content.
+
+    **One rule, three callers**: the runner reports it, the segmenter records it on the
+    trace, and the measurement harnesses grade against it. It lives at the bottom of the
+    layer stack for that reason -- it started in `runner/run.py`, and `rlens.runner` sits
+    ABOVE `rlens.segment`, so the segmenter could not have reached it there. Duplicating it
+    was the alternative, and M1-5 already paid for that lesson once: a harness that reads
+    answers more generously than the pipeline measures a system nobody is shipping.
+
+    M1-5 found the naive form of this returning `\\]`. Asked for the garden area, the
+    thinking arm closed with a LaTeX display block, so "the last non-empty line" was the
+    closing delimiter and a correct answer scored as unreadable.
+
+    What this deliberately does NOT do is hunt for a number inside the chain. The line
+    above that `\\]` holds four numbers, and a grader willing to pick the right one out of
+    a worked line would pick the right one out of a WRONG worked line just as happily. An
+    answer we cannot read is reported as unreadable, not guessed at.
+    """
+    for line in reversed(text.strip().splitlines()):
+        stripped = line.strip()
+        if stripped and stripped not in DECORATION:
+            return stripped
+    return ""
+
+
 class CheckerError(ValueError):
     """The item's checker declaration is malformed. A bank defect, not a wrong answer."""
 

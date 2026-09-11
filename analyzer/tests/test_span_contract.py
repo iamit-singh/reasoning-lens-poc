@@ -17,6 +17,7 @@ import os
 from typing import Any
 
 import pytest
+from rlens.llm import Completion
 from rlens.runner.arms import ARMS
 from rlens.runner.run import (
     REGIME_SEPARATION_MAX_RATIO,
@@ -376,3 +377,68 @@ def test_the_react_root_span_carries_the_pin_tuple_and_the_loop_counters(
         "rlens.react.failed_tool_calls",
     ):
         assert key in attrs, f"the root span does not record {key}"
+
+
+# ------------------------------------------------------------------ M1-8's finding
+@pytest.mark.contract
+def test_a_trace_with_no_visible_answer_is_partial_not_full() -> None:
+    """Found by segmenting the corpus, not by reading the code.
+
+    `mb-08.thinking` produced **141 reasoning steps and an empty `content`**: the model
+    looped 126 times on a fact that does not exist and never answered. Reasoning was
+    present, so the original rule called that trace `full`.
+
+    It is not full -- there is no answer in it. Downstream that becomes `correct: false`,
+    which asserts the model answered and was wrong, when the model never answered at all.
+    It is M1-5's `unparsed` vs `wrong` distinction one layer up, and the cost of getting it
+    wrong is the same: a number that looks like a measurement and is not.
+    """
+    os.environ["MOCK_LLM"] = "1"
+    reasoning_only = Completion(
+        text="",  # the model said nothing visible
+        reasoning="Let's think: there is a Brightwater in New York? " * 20,
+        model="gpt-oss:20b",
+        finish_reason="length",
+        prompt_tokens=10,
+        completion_tokens=2000,
+        total_tokens=2010,
+        reasoning_tokens=1990,
+        answer_tokens=0,
+        tokenizer="o200k_harmony",
+        structural_token_residual=10,
+        budget_bound=True,
+        requested_effort="medium",
+        attempts=1,
+    )
+    result = ArmResult(
+        strategy="thinking", item_id="mb-08", trace_quality="full", completion=reasoning_only
+    )
+    assert result.final_answer == "", "the premise: there is no answer to extract"
+
+    # And the same judgement must come out of ingest, or our trees and a third-party tree
+    # would get different verdicts from identical evidence.
+    from rlens.ingest.otel import parse as ingest_parse
+
+    tree = {
+        "resourceSpans": [
+            {
+                "name": "arm.thinking",
+                "spanId": "root",
+                "parentSpanId": None,
+                "attributes": {"openinference.span.kind": "CHAIN", "rlens.strategy": "thinking"},
+                "events": [],
+            },
+            {
+                "name": "llm.generate",
+                "spanId": "llm-0",
+                "parentSpanId": "root",
+                "attributes": {
+                    "openinference.span.kind": "LLM",
+                    "llm.output_messages.0.message.reasoning": "Let's think. " * 50,
+                    "llm.output_messages.0.message.content": "",
+                },
+                "events": [],
+            },
+        ]
+    }
+    assert ingest_parse(tree).trace_quality == "partial"

@@ -10,7 +10,7 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze ci warm-cache calibrate faithfulness smoke \
-        record-cassettes traps arm-contrast spike-s1 spike-s6 spike-s2 spike-deps models pin-local \
+        record-cassettes spans traps arm-contrast spike-s1 spike-s3 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
 help:  ## show this help
@@ -67,6 +67,24 @@ faithfulness:  ## STUB (M2-9) -- cue-injection batch job and the committed panel
 smoke:  ## STUB (M3-4) -- local acceptance: 3 items from cache, panel, calibration, download
 	@echo "smoke: not implemented (owner M3-4). Runs against localhost (ADR-003: local-only)"; exit 2
 
+# The PIN has to come from .env, and that is worth a note rather than a silent source.
+# The pin tuple is EVIDENCE (C2.3/I3: a published number is reproducible or it is not
+# published) and it lives in a gitignored file, because `.env` mixes it with a real
+# OPENAI_API_KEY. M1-15 already hit this and worked around it by duplicating the tuple
+# into ADR-001 as prose. The consequence surfaces here: on a fresh checkout `make spans`
+# replays the cassettes correctly but stamps an EMPTY pin, and the runner's own warning
+# ("traces from this run are NOT publishable") is the only thing that says so. Splitting
+# the non-secret pin into a committed file belongs with M1-14, which owns replay.
+spans:  ## regenerate out/spans from the committed cassettes -- no GPU, no network
+	@rm -rf out/spans && mkdir -p out/spans
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	for f in problem-bank/items/*.json; do \
+	  id=$$(basename $$f .json); \
+	  MOCK_LLM=1 $(BIN)/python -m rlens.runner --item $$id --all-arms --out out/spans \
+	    >/dev/null 2>&1 || echo "  regenerate FAILED for $$id"; \
+	done
+	@echo "out/spans: $$(ls out/spans | wc -l | tr -d ' ') span trees replayed from cassettes"
+
 traps:  ## M1-5 -- measure which declared traps reproduce. Needs the served model.
 	$(BIN)/python spikes/m1_5_trap_reproduction.py $(ARGS)
 
@@ -92,6 +110,9 @@ demo:  ## the demo: cached-only, zero external dependency
 # ---------------------------------------------------------------- spikes
 spike-s1:  ## S1 -- reasoning-trace fidelity: local (gates arm 2) + OpenAI
 	$(BIN)/python spikes/s1_reasoning_fidelity.py $(ARGS)
+
+spike-s3:  ## S3 -- batched classification. DECIDES M1-9's batch size; gates the freeze.
+	$(BIN)/python spikes/s3_batching.py $(ARGS)
 
 spike-s6:  ## S6 -- local tool-calling reliability. GATES ARM 3; run before W3.
 	$(BIN)/python spikes/s6_local_tool_calling.py $(ARGS)

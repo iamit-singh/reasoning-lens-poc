@@ -1,0 +1,69 @@
+{
+  "name": "02-discourse-markers",
+  "covers": "C4.2 2c -- split BEFORE a marker-initial sentence",
+  "why": "The core of the text path. `Wait` and `So ` are both in C4.2's list; the split lands before them, not after.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "mb-13",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "Seven printers take seven minutes for seven posters, so each printer makes one poster in seven minutes and the rate per printer is fixed.\nWait, I should check whether tripling both sides changes the time at all here.\nSo twenty-one printers make twenty-one posters in the same seven minutes as before.",
+        "content": "7 minutes",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "7 minutes",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          137
+        ],
+        "text": "Seven printers take seven minutes for seven posters, so each printer makes one poster in seven minutes and the rate per printer is fixed."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          138,
+          216
+        ],
+        "text": "Wait, I should check whether tripling both sides changes the time at all here."
+      },
+      {
+        "ordinal": 2,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          217,
+          300
+        ],
+        "text": "So twenty-one printers make twenty-one posters in the same seven minutes as before."
+      },
+      {
+        "ordinal": 3,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:3",
+        "char_range": [
+          0,
+          9
+        ],
+        "text": "7 minutes"
+      }
+    ]
+  }
+}

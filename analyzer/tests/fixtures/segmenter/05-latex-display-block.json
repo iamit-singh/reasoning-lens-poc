@@ -1,0 +1,58 @@
+{
+  "name": "05-latex-display-block",
+  "covers": "LaTeX \\[ ... \\] -> treated as one sentence",
+  "why": "The block contains two sentence-ending periods. Splitting on them would cut a display equation in half and produce steps no annotator could label.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "mb-11",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "The path reduces each side of the garden by twice its width, so both dimensions shrink.\n\\[\n\\text{Inner length}=24-2(1.5)=21\\ \\text{m}. \\qquad \\text{Inner width}=18-2(1.5)=15\\ \\text{m}.\n\\]\nSo the inner area is 21 times 15, which is 315 square metres in total here.",
+        "content": "315",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "315",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          187
+        ],
+        "text": "The path reduces each side of the garden by twice its width, so both dimensions shrink.\n\\[\n\\text{Inner length}=24-2(1.5)=21\\ \\text{m}. \\qquad \\text{Inner width}=18-2(1.5)=15\\ \\text{m}.\n\\]"
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          188,
+          263
+        ],
+        "text": "So the inner area is 21 times 15, which is 315 square metres in total here."
+      },
+      {
+        "ordinal": 2,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          0,
+          3
+        ],
+        "text": "315"
+      }
+    ]
+  }
+}

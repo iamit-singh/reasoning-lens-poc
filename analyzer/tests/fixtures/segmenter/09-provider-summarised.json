@@ -1,0 +1,58 @@
+{
+  "name": "09-provider-summarised",
+  "covers": "Provider-summarised thinking -> segment NORMALLY, trace_quality carried through",
+  "why": "The degradation is a label on the trace, not a change to the algorithm. Both sentences clear the merge threshold, so 'normally' means two steps -- which is what makes this fixture show anything at all.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "probe-summary",
+    "trace_quality": "provider_summarised",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "The model considered the two populations recorded in the fact store and worked out the gap between them.\nSo the difference between Fairhaven and Brightwater comes to 31,650 people in total.",
+        "content": "31650",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "provider_summarised",
+    "final_answer": "31650",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          104
+        ],
+        "text": "The model considered the two populations recorded in the fact store and worked out the gap between them."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          105,
+          189
+        ],
+        "text": "So the difference between Fairhaven and Brightwater comes to 31,650 people in total."
+      },
+      {
+        "ordinal": 2,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          0,
+          5
+        ],
+        "text": "31650"
+      }
+    ]
+  }
+}

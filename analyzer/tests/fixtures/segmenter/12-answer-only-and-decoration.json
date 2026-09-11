@@ -1,0 +1,36 @@
+{
+  "name": "12-answer-only-and-decoration",
+  "covers": "Final answer text -> a single `answer` step, NEVER a thought step",
+  "why": "Also pins the split between the two answer notions: the STEP carries what the model wrote, including the stray LaTeX delimiter, while `final_answer` carries the extracted line the report compares against `known_answer`.",
+  "input": {
+    "strategy": "direct",
+    "item_id": "probe-answer",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "direct-llm-0",
+        "reasoning": "",
+        "content": "The final answer is 42.\n\\]",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "The final answer is 42.",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "answer",
+        "span_id": "direct-llm-0",
+        "step_id": "direct:direct-llm-0:0",
+        "char_range": [
+          0,
+          26
+        ],
+        "text": "The final answer is 42.\n\\]"
+      }
+    ]
+  }
+}

@@ -31,6 +31,8 @@ make spike-s1            # does the local model hand back raw reasoning?
 make spike-s6            # can it call tools? GATES ARM 3 -- run before W3
 make traps               # M1-5: which declared traps actually reproduce?
 make arm-contrast        # which items separate the arms? (ADR-004's control group)
+make spans               # replay every item from cassettes -- no GPU, no network
+make spike-s3            # S3: what batch size does the classifier tolerate?
 ```
 
 ## What exists today
@@ -51,7 +53,10 @@ make arm-contrast        # which items separate the arms? (ADR-004's control gro
 | Trap reproduction — **measured, DoD not met (0/16 over 120 runs); floor withdrawn** | ✅ [ADR-005](docs/decisions/ADR-005-traps-do-not-reproduce.md) accepted | M1-5 |
 | Arm contrast — **0 of 16 items separate arms 1 and 2; arm 3 rescues 3** | ⚠️ [ADR-006](docs/decisions/ADR-006-arms-1-and-2-do-not-separate.md) | M1-5 / M1-7 |
 | Runner arm 3 — ReAct loop, calculator + lookup, TOOL spans | ✅ **14/14 on the bank** | M1-7 · [ADR-007](docs/decisions/ADR-007-react-arm-on-the-provider-layer.md) |
-| Segmenter, classifier, `ReasoningReport` | ⬜ W3–W4 | M1-8 … M1-10 |
+| `NormalizedTrace` / `Step` contracts (C3.2) + OTEL ingest | ✅ | M1-8 |
+| Deterministic segmenter + 12 goldens — **frozen at `segmenter-frozen-v1`** | ✅ [ADR-008](docs/decisions/ADR-008-segmenter-token-unit.md) | M1-8 |
+| S3 — batched classification; decides M1-9's batch size | ✅ [S3-batching.md](docs/spikes/S3-batching.md) | M1-12 |
+| Behavior classifier, `ReasoningReport` | ⬜ W4 · **G1** | M1-9, M1-10 |
 | Backend, frontend | ⬜ W5+ (frontend starts after the G1 freeze) | M2/M3 |
 
 Weeks 1 and 2 are closed. **G0 is 5 of 6** — the open check is the analysis tier, blocked
@@ -82,6 +87,14 @@ span tree. It never imports `backend/`, `frontend/` or `problem-bank/`, and prov
 shapes appear only in `llm.py` and `ingest/otel.py`. This is enforced in CI from Week 1, not
 by convention: `.importlinter` plus `scripts/check_provider_symbols.sh`, duplicated in
 `analyzer/tests/test_boundaries.py` so a developer finds out before pushing.
+
+**The segmenter is frozen.** `step_id` is `"{strategy}:{span_id}:{ordinal}"` and every
+label written in Month 2 joins on it, so a change to `analyzer/src/rlens/segment.py` after
+labelling begins silently detaches every label from its text. The tag `segmenter-frozen-v1`
+marks the frozen state; `analyzer/tests/fixtures/segmenter/` records what it means, and
+`test_segmenter_deterministic` asserts each fixture is byte-identical across three runs.
+A diff in a golden is a question about whether the freeze is being broken, not a test to
+update — see [`calibration/sampling.json`](calibration/sampling.json).
 
 **I3** — a published number is reproducible or it is not published. Every version travels
 with every report and forms the cache key. Under a local model that is **stricter** than the

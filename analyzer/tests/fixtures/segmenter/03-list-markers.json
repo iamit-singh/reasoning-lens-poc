@@ -1,0 +1,80 @@
+{
+  "name": "03-list-markers",
+  "covers": "C4.2 2c -- the list-marker rule, which fires on a bare newline with no punctuation",
+  "why": "Discourse markers follow sentence punctuation; list markers usually do not. Without a line-start candidate boundary an enumerated chain would be one step.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "mb-08",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "I will work through the two populations in order and then subtract them.\n1. Fairhaven has a population of 128,400 people according to the record.\n2. Brightwater has a population of 96,750 people according to the record.\n3. The difference between those two figures is 31,650 people exactly.",
+        "content": "31650",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "31650",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          72
+        ],
+        "text": "I will work through the two populations in order and then subtract them."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          73,
+          145
+        ],
+        "text": "1. Fairhaven has a population of 128,400 people according to the record."
+      },
+      {
+        "ordinal": 2,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          146,
+          219
+        ],
+        "text": "2. Brightwater has a population of 96,750 people according to the record."
+      },
+      {
+        "ordinal": 3,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:3",
+        "char_range": [
+          220,
+          289
+        ],
+        "text": "3. The difference between those two figures is 31,650 people exactly."
+      },
+      {
+        "ordinal": 4,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:4",
+        "char_range": [
+          0,
+          5
+        ],
+        "text": "31650"
+      }
+    ]
+  }
+}

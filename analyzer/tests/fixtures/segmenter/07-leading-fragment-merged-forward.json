@@ -1,0 +1,58 @@
+{
+  "name": "07-leading-fragment-merged-forward",
+  "covers": "A short FIRST fragment has no previous step, so it merges FORWARD",
+  "why": "C4.2 2d says 'into the previous step' and does not say what happens when there is none. A frozen file cannot have an open question, so the direction is pinned here: forward, because it is the only one available and the rule's purpose is to eliminate the one-word step either way.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "probe-lead",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "Hmm.\nThe algae patch doubles every day and covers the whole pond on day forty-eight, so working backwards is the sound approach here.\nSo half the pond on day forty-seven and a quarter on day forty-six.",
+        "content": "46",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "46",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          133
+        ],
+        "text": "Hmm.\nThe algae patch doubles every day and covers the whole pond on day forty-eight, so working backwards is the sound approach here."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          134,
+          201
+        ],
+        "text": "So half the pond on day forty-seven and a quarter on day forty-six."
+      },
+      {
+        "ordinal": 2,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          0,
+          2
+        ],
+        "text": "46"
+      }
+    ]
+  }
+}

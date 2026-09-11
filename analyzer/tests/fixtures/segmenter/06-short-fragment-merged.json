@@ -1,0 +1,58 @@
+{
+  "name": "06-short-fragment-merged",
+  "covers": "Fragment under the threshold -> merged INTO THE PREVIOUS step",
+  "why": "`Wait.` is a marker-initial sentence of one word. C4.2 2c splits it out and 2d merges it back; the pair of rules exists to keep the split points without creating one-word steps that poison per-class F1.",
+  "input": {
+    "strategy": "thinking",
+    "item_id": "probe-merge",
+    "trace_quality": "full",
+    "calls": [
+      {
+        "span_id": "thinking-llm-0",
+        "reasoning": "The notebook and pen together cost two dollars and sixty cents in total, and the notebook costs two dollars more than the pen does.\nWait.\nSo if the pen is p then the notebook is p plus two, and the sum is two p plus two equals two dollars sixty.",
+        "content": "0.30",
+        "seq": 0
+      }
+    ],
+    "tools": []
+  },
+  "expected": {
+    "trace_quality": "full",
+    "final_answer": "0.30",
+    "steps": [
+      {
+        "ordinal": 0,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:0",
+        "char_range": [
+          0,
+          137
+        ],
+        "text": "The notebook and pen together cost two dollars and sixty cents in total, and the notebook costs two dollars more than the pen does.\nWait."
+      },
+      {
+        "ordinal": 1,
+        "kind": "thought",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:1",
+        "char_range": [
+          138,
+          245
+        ],
+        "text": "So if the pen is p then the notebook is p plus two, and the sum is two p plus two equals two dollars sixty."
+      },
+      {
+        "ordinal": 2,
+        "kind": "answer",
+        "span_id": "thinking-llm-0",
+        "step_id": "thinking:thinking-llm-0:2",
+        "char_range": [
+          0,
+          4
+        ],
+        "text": "0.30"
+      }
+    ]
+  }
+}
