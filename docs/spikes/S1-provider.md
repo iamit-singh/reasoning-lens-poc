@@ -110,13 +110,40 @@ hide. At 1.0% of output, the account reconciles.
 recomputable from committed text with a pinned encoding, and it reconciles against the
 runtime's own billing to within the structural overhead.
 
-### OpenAI analysis tier — not yet run
+### OpenAI analysis tier — run 11 Sep 2026 (W4). **The expectation is now a measurement.**
 
-`--only openai` still needs a key, and `MODEL_ANALYZE` / `MODEL_ESCALATE` are unset. G0
-check 5 (analyzer tier pinned to an exact dated id, never an alias) is therefore also open.
-Per ADR-001, S1 must still run against OpenAI: the claim that it summarises thinking is a
-strong expectation, not a measurement, and this project's thesis is that the difference
-matters.
+A key arrived in W4, so the half of S1 that had been deferred since W1 was run against the
+pinned analyzer tier, `gpt-5-mini-2025-08-07`:
+
+| | |
+| --- | --- |
+| Raw reasoning text returned | **none — 0 chars** |
+| Reasoning tokens billed | **384** |
+| Probe answer correct | ✅ yes |
+| Verdict | `EXPECTED` — the chain stays server-side |
+
+**384 reasoning tokens were billed and zero were returned as text.** The model reasoned,
+we paid for it, and we cannot read a word of it.
+
+This is the load-bearing premise of [ADR-001](../decisions/ADR-001-provider.md), and until
+today it was an expectation this project had *asserted* rather than *shown* — which, given
+that the whole PoC exists to insist on the difference between those two things, was an
+uncomfortable place to leave it. It is now shown, on this account, against this exact
+dated id, with the raw response on disk.
+
+**What it settles:** arm 2 cannot be built on OpenAI. Not "should not" — cannot. Arm 2's
+entire purpose is to display a model's own native thinking, and there is nothing to
+display. The local runtime returns 2,535 characters for the same probe.
+
+> **Note the asymmetry, because it is the argument for the hybrid split in one line.** The
+> *generation* tier must return raw reasoning, and only the local model does. The
+> *analysis* tier must return well-formed structured rows, and it does not matter in the
+> slightest whether we can read its reasoning — indeed S3 and [ADR-001](../decisions/ADR-001-provider.md)
+> both want it to do *less* of it (`reasoning_effort: low`). The two tiers have opposite
+> requirements, which is precisely why one provider was never going to serve both well.
+
+G0 check 5 is **closed**: `MODEL_ANALYZE=gpt-5-mini-2025-08-07`,
+`MODEL_ESCALATE=gpt-5-2025-08-07`, both exact dated ids, both probed live. **G0 is 6/6.**
 
 ## What this changes downstream
 

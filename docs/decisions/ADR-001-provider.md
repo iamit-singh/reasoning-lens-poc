@@ -107,8 +107,57 @@ architecture. The gate now asks three things of the **local** model:
 | 2 | Reasoning tokens countable | exactly, with the model's own tokenizer — **an improvement: this measurement gets more accurate, not less** | ✅ **PASS** — the runtime reports none, so counted locally with `o200k_harmony`: **741 reasoning tokens, 73.4% of output**, reconciling to the runtime's billed 1020 within a +10 structural residual. [S1](../spikes/S1-provider.md) |
 | 3 | **Tool contract held** | calculator + lookup called correctly and repeatably — gates arm 3, must pass **before** W3 | ✅ **PASS** — 20/20, 100% on all four scenarios incl. tool-choice and the false-positive check. [S6](../spikes/S6-tools.md) |
 | 4 | Pin tuple recorded | every field above, reproducibly | ✅ **PASS** — recorded below and in `.env`; `make pin-local` reproduces it |
-| 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias | ⬜ **OPEN** — no OpenAI key yet; `MODEL_ANALYZE` / `MODEL_ESCALATE` unset |
+| 5 | Analyzer tier pinned separately | exact dated OpenAI id, never an alias | ✅ **PASS** — 11 Sep 2026 (W4). Key arrived; `MODEL_ANALYZE=gpt-5-mini-2025-08-07`, `MODEL_ESCALATE=gpt-5-2025-08-07`. Both verified live, see below |
 | 6 | This ADR committed | ✅ | ✅ |
+
+### The analysis pin, as run — closed 11 Sep 2026 (W4)
+
+G0 check 5 was the one check this gate could not answer in W1, and it stayed open for
+three weeks for a reason that was never technical: there was no key. One arrived, so the
+check is closed on measurement rather than on intent.
+
+```
+MODEL_ANALYZE=gpt-5-mini-2025-08-07     # classifier + triage (C4.3)
+MODEL_ESCALATE=gpt-5-2025-08-07         # escalation tier (M2-5)
+ANALYZE_REASONING_EFFORT=low
+ANALYZE_MAX_OUTPUT_TOKENS=16000
+```
+
+**Both ids were probed before being written down**, because an id that appears in the
+model list is not the same as an id that answers:
+
+| | `gpt-5-mini-2025-08-07` | `gpt-5-2025-08-07` |
+| --- | --- | --- |
+| `response_format: json_object` | ✅ strict JSON returned | ✅ |
+| `reasoning_effort: low` | ✅ accepted, 64 reasoning tokens | ✅ accepted, 64 |
+| `max_completion_tokens` | ✅ honoured, `finish_reason: stop` | ✅ honoured |
+| Latency, trivial prompt | **3.8 s** | **19.9 s** |
+
+**`MODEL_ESCALATE` is stronger, and the 5x latency is the reason the tiering exists.**
+gpt-5 costs five times the wall clock of gpt-5-mini on an identical request. Running
+every step through it would blow C11's analysis deadline; running *only escalated* steps
+through it is affordable, which is why `ESCALATION_MAX_STEPS=8` is a cap and not a
+suggestion. The tier is a real quality difference bought with a real cost, and both
+halves are now measured rather than assumed.
+
+> **The `reasoning_effort: low` row is the one that matters for M1-9.** S3 measured the
+> local analyzer tier spending its entire output budget in the reasoning channel and
+> returning empty `content`. OpenAI exposes the same dial, and the same setting. The
+> parameter is honoured here — verified from the *output*, which is the only place this
+> project accepts a parameter as honoured.
+
+### What this does and does not change
+
+**It does not re-open the generation decision.** Arm 2 still needs raw reasoning text and
+OpenAI still does not return it; a key changes nothing about that, and moving generation
+to OpenAI would delete the finding this PoC exists to make. All three arms stay local.
+
+**It does change what S3's numbers mean.** [S3](../spikes/S3-batching.md) ran against the
+*local* analyzer tier because this pin did not exist, and it said so in its own header and
+in consequence 5: *re-run when the hybrid tier is pinned.* M1-9 measures its parse-failure
+rate against this pin, and that measurement supersedes S3's for the purpose of M1-9's DoD.
+S3's structural findings — chunk-and-stitch, assert the cap, `length` is a hard error —
+are properties of the *task*, not of the runtime, and carry over unchanged.
 
 ### The generation pin, as run
 
