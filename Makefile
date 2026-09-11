@@ -10,7 +10,7 @@ ANALYZER := analyzer
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze rubric-drift label draw-sample ci warm-cache calibrate faithfulness smoke \
-        record-cassettes classify-reliability taxonomy-coverage report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
+        record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
 help:  ## show this help
@@ -94,6 +94,9 @@ draw-sample:  ## M1-11 -- draw the random-90. Runs ONCE, before the first label 
 
 label:  ## M1-11 -- the BLIND labelling tool. Two labels per step, one pass (C5.2)
 	$(BIN)/python scripts/label.py $(ARGS)
+
+confidence-histogram:  ## M2-4 -- is validity_confidence a signal or decoration? (ADR-002)
+	$(BIN)/python spikes/m2_4_confidence.py $(ARGS)
 
 taxonomy-coverage:  ## M1-9 -- does the CORPUS contain the behaviours? No model, no network
 	$(BIN)/python spikes/m1_9_taxonomy_coverage.py $(ARGS)
