@@ -44,9 +44,9 @@ keep it honest, including when it is unflattering.
 | -------- | ---- | ---- | ---- | --------- |
 | W1 | 3.3 | 6.7 | **+3.4** | Planned drops 0.5 (DNS cancelled). Actual carries 1.2 h of amendment work, **1.4 h of W2 work pulled forward** (M1-15 + M1-16) and **0.5 h unbudgeted** (the tokenizer for G0 check 2). See the like-for-like note below |
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
-| W3 | 7.5 | **18.7** | **+11.2** | **COMPLETE.** M1-5 6.4/1.5 · M1-7 5.3/3.0 · M1-8 5.0/2.0 · S3 1.9/1.0. `segmenter-frozen-v1` tagged. The heaviest week on the plan ran 2.5x its budget |
+| W3 | 7.5 | **18.6** | **+11.1** | **COMPLETE.** M1-5 6.4/1.5 · M1-7 5.3/3.0 · M1-8 5.0/2.0 · S3 1.9/1.0. `segmenter-frozen-v1` tagged. The heaviest week on the plan ran 2.5x its budget |
 | W4 | 8.0 | | | |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **32.9 to date** | | |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **32.8 to date** | | |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -523,7 +523,7 @@ mistake invalidates every label written after it. Two things now waiting for it:
   only (one `tool_call` + one `observation` per TOOL span), so the segmenter has TOOL spans
   in `rlens.seq` order and the `reasoning` text on each LLM span to make thought steps from.
 
-## W3 closed — 18.7 h against 7.5, and the segmenter is frozen
+## W3 closed — 18.6 h against 7.5, and the segmenter is frozen
 
 ### The freeze went in with its precondition measured, not assumed
 
@@ -604,11 +604,11 @@ sentence, and the model really did say one thing 126 times.
 
 ### Capacity — the C10.1 bet, settled
 
-**32.9 h spent against a 26.4 h month and a 12 h Lead allocation.** W3 alone ran **18.7
+**32.8 h spent against a 26.4 h month and a 12 h Lead allocation.** W3 alone ran **18.6
 against 7.5**, 2.5x its budget, and it was already flagged in the plan as the heaviest week
 with the least slack.
 
-The like-for-like read still holds and is still the useful one. Of W3's 18.7 hours, the
+The like-for-like read still holds and is still the useful one. Of W3's 18.6 hours, the
 **estimated work came in at 11.3** (M1-5's measurement 2.6/1.5, M1-7's loop 3.4/3.0, M1-8's
 segmenter 2.4/2.0, S3 1.9/1.0, plus the ADRs those tasks require). The other **7.4 h is six
 defects and three ADRs**, none of it rework and every one of it a thing that would have
