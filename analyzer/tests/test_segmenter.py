@@ -389,3 +389,38 @@ def test_an_unterminated_maths_delimiter_does_NOT_protect_to_the_end() -> None:
     )
     spans = segment_text(text)
     assert len(spans) > 1, "an unclosed maths delimiter must not freeze the rest of the text"
+
+
+# ------------------------------------------------------------------ the join key is a key
+@pytest.mark.contract
+def test_step_ids_are_unique_across_the_whole_corpus() -> None:
+    """**C3.2 calls `step_id` "the join key for every label ever written". This asserts it
+    actually is one.**
+
+    `NormalizedTrace` already enforces uniqueness *within* a trace, and that is what hid
+    this: every trace was individually valid while `direct:direct-llm-0:0` named the first
+    step of all fourteen items at once. 310 steps collapsed to 155 distinct ids, and any
+    code that builds a dict keyed by `step_id` across traces -- the calibration draw, a
+    kappa harness, a label join -- silently lost half its rows without erroring.
+
+    Found by M1-11's sampling draw on its first run, which reported 19 steps drawn from a
+    four-step trace. Found *before the first label existed*, which is the entire reason the
+    plan orders the draw ahead of the labelling pass.
+
+    The fix put the item id into the span id and kept it deterministic, so cassette replay
+    and the goldens above are unaffected: the ordinals did not move, only the id's middle
+    component, and no text changed step.
+    """
+    trees = sorted((pathlib.Path(__file__).resolve().parents[2] / "out/spans").glob("*.json"))
+    if not trees:
+        pytest.skip("no span trees; run `make spans`")
+
+    owners: dict[str, list[str]] = {}
+    for path in trees:
+        for step in segment(parse(json.loads(path.read_text()))).steps:
+            owners.setdefault(step.step_id, []).append(path.name)
+
+    collisions = {sid: names for sid, names in owners.items() if len(names) > 1}
+    assert not collisions, (
+        f"{len(collisions)} step_id(s) name more than one step, e.g. {list(collisions.items())[:2]}"
+    )

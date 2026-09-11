@@ -210,7 +210,17 @@ def _build_spans(
     when a run is exported to Langfuse.
     """
     assert result.completion is not None
-    root_id = f"{spec.strategy}-root"
+    # **The item id is IN the span id, and that is a correctness fix, not decoration.**
+    # `step_id` is `{strategy}:{span_id}:{ordinal}` and C3.2 calls it the join key for
+    # every label ever written. Without the item id, `direct:direct-llm-0:0` named the
+    # first step of all 14 items at once -- 310 steps collapsed to 155 distinct ids, and
+    # any code building a dict keyed by step_id across traces silently lost half of them.
+    # M1-11's sampling draw hit it on its first run, before a single label existed.
+    #
+    # Still fully deterministic: regenerating a tree from its cassette yields the same
+    # ids, which is what makes the segmenter goldens and cassette replay reproducible. A
+    # random id would have bought uniqueness by giving that up.
+    root_id = f"{spec.strategy}-{result.item_id}-root"
     return [
         {
             "name": f"arm.{spec.strategy}",
@@ -228,7 +238,7 @@ def _build_spans(
         },
         {
             "name": "llm.generate",
-            "spanId": f"{spec.strategy}-llm-0",
+            "spanId": f"{root_id}-llm-0",
             "parentSpanId": root_id,
             "attributes": llm_span_attributes(result.completion, messages, pin),
             "events": [],

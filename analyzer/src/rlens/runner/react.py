@@ -216,7 +216,9 @@ def build_react_spans(
     Ordering is carried by `rlens.seq`, never by list position or span id: see
     `emit.tool_span_attributes`.
     """
-    root_id = "react-root"
+    # See `run._arm_spans` for why the item id belongs in the span id: without it,
+    # `step_id` is not unique across the corpus and it is C3.2's label join key.
+    root_id = f"react-{item_id}-root"
     spans: list[dict[str, Any]] = [
         {
             "name": "arm.react",
