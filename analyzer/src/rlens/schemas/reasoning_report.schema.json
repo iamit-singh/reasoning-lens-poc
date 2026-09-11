@@ -34,7 +34,11 @@
         "id": { "type": "string", "pattern": "^[a-z]+-[0-9]+$" },
         "prompt": { "type": "string" },
         "tags": { "type": "array", "items": { "type": "string" } },
-        "known_answer": { "type": ["string", "null"] },
+        "known_answer": {
+          "description": "A string for `exact` and `numeric_tol`, and an ARRAY OF STRINGS for `set_match` — C3.4 defines it that way and mb-03's answer really is ['red','green','blue']. Typed as string-only until the pipeline ran over the whole bank and the schema rejected a real report, which is the G1 freeze doing its job in the week it was meant to. A UI that renders this must handle both.",
+          "type": ["string", "array", "null"],
+          "items": { "type": "string" }
+        },
         "checker": {
           "type": ["string", "null"],
           "enum": ["exact", "numeric_tol", "set_match", null]

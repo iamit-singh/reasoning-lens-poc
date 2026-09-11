@@ -296,3 +296,59 @@ def test_every_frontend_surface_is_annotated_with_the_fixture_it_consumes() -> N
         assert f"**{surface}**" in readme, f"{surface} has no row in the fixtures README"
     for name in NAMES:
         assert f"`{name}`" in readme, f"{name} is committed but no surface claims it"
+
+
+# ------------------------------------------------------------------ B6.5, at the pipeline
+def test_an_analysis_failure_degrades_one_arm_and_spares_the_others(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """**B6.5 as an assertion rather than an intention.**
+
+    `classify` returns a degraded result when the *model* answers badly, and raises when
+    the *transport* fails — a truncation, a deadline, a dead connection. Letting that raise
+    propagate would lose two good arms to one bad call, which is exactly backwards from
+    what C4.1's failed-arm state exists for.
+
+    The arm has to be **present** and marked failed. An absent arm is indistinguishable
+    from one nobody ran.
+    """
+    import json as _json
+
+    from rlens import pipeline
+    from rlens.llm import ProviderError
+
+    spans = pathlib.Path(__file__).resolve().parents[2] / "out/spans"
+    if not spans.is_dir() or not list(spans.glob("mb-13.*.json")):
+        pytest.skip("no span trees; run `make spans`")
+
+    calls = {"n": 0}
+
+    def sometimes_fails(*args: object, **kwargs: object) -> object:
+        calls["n"] += 1
+        if calls["n"] == 2:  # the thinking arm
+            raise ProviderError("the 16000-token output cap bound")
+        from rlens.classify import ClassificationResult
+
+        return ClassificationResult(strategy="x", item_id="mb-13")
+
+    monkeypatch.setattr(pipeline, "classify", sometimes_fails)
+    item = _json.loads(
+        (pathlib.Path(__file__).resolve().parents[2] / "problem-bank/items/mb-13.json").read_text()
+    )
+    report = pipeline.analyze_item(item, spans)
+
+    validate_report(report)
+    assert len(report["arms"]) == 3, "the arm must be present, not omitted"
+    broken = [arm for arm in report["arms"] if arm.get("degraded")]
+    assert len(broken) == 1
+    assert broken[0]["degraded"]["reason"] == "analysis_unavailable"
+
+    # **`status` stays `ok`, and that is the half of this test that matters.** The arm
+    # generated fine — there is a complete trace. `failed` means the generation call did
+    # not return, and claiming it here would tell a reader the model never answered. That
+    # is the `unparsed`-vs-`wrong` distinction M1-5 and M1-8 each paid for, arriving a
+    # third time in a third place.
+    assert broken[0]["status"] == "ok"
+    assert broken[0]["steps"], "the steps survive — the trace was never the problem"
+    assert all(step["behavior"] is None for step in broken[0]["steps"])
+    assert all(arm["status"] != "failed" for arm in report["arms"])

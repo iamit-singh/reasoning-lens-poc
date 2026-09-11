@@ -37,6 +37,7 @@ from rlens.checkers import CheckerError, check
 from rlens.classify import ClassificationResult, StepRow, classify
 from rlens.contracts import NormalizedTrace
 from rlens.ingest import otel
+from rlens.llm import ProviderError
 from rlens.segment import segment
 from rlens.versions import (
     ANALYZER_VERSION,
@@ -118,10 +119,18 @@ def build_arm(
     *,
     item: dict[str, Any],
     status: str = "ok",
+    degraded: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """One arm's block of the report."""
+    """One arm's block of the report.
+
+    `degraded` is an override for the case where there is no `ClassificationResult` to
+    read one off -- an analysis call that failed at the transport rather than at the
+    model. The arm still carries its steps, because the TRACE is fine; it is the
+    annotation that is missing, and those are different failures.
+    """
     labels = classification.by_step_id() if classification else {}
-    degraded = classification.degraded if classification else None
+    if degraded is None:
+        degraded = classification.degraded if classification else None
 
     steps = []
     for step in trace.steps:
@@ -324,7 +333,35 @@ def analyze_item(
         # RECORD_CASSETTES=1, ignore otherwise -- so the recorded call and the production
         # call are the same call, taken on the same code path (M1-14).
         prefix = f"classify.{item['id']}.{strategy}"
-        result = classify(trace, item_prompt=item["prompt"], cassette_prefix=prefix)
+        try:
+            result = classify(trace, item_prompt=item["prompt"], cassette_prefix=prefix)
+        except ProviderError as exc:
+            # **B6.5: the other arms still render.** `classify` returns a degraded result
+            # for a model that answered badly, but RAISES for a transport failure -- a
+            # truncation, a deadline, a dead connection. Letting that propagate would lose
+            # two good arms to one bad call, which is the opposite of what C4.1's
+            # failure handling exists for.
+            #
+            # **`status` stays `ok`.** The schema is explicit that `failed` means the
+            # GENERATION call did not return, and this arm generated fine -- there is a
+            # complete trace sitting right here. What failed is a downstream stage, which
+            # is precisely what `degraded` means. Marking it `failed` would tell a reader
+            # the model never answered, which is a claim about the model that the evidence
+            # does not support: the same `unparsed`-vs-`wrong` distinction M1-5 and M1-8
+            # each paid for, arriving a third time.
+            arms.append(
+                build_arm(
+                    trace,
+                    None,
+                    item=item,
+                    degraded={
+                        "reason": "analysis_unavailable",
+                        "affects": ["behavior", "validity"],
+                        "detail": f"{type(exc).__name__}: {str(exc)[:300]}",
+                    },
+                )
+            )
+            continue
         arms.append(build_arm(trace, result, item=item))
     if not arms:
         raise FileNotFoundError(
