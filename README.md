@@ -5,9 +5,20 @@ visible: three strategy arms over the same problem bank, span-tree ingest, deter
 segmentation, behavior classification, and a calibration page that publishes the agreement
 numbers whatever they turn out to be.
 
-**Status: Month 1, Week 4 — the G1 week.** See [`docs/ledger.md`](docs/ledger.md) for actuals and
+**Status: Month 2, Week 5.** Months 1–3 all have work in them, and that is not drift —
+G1's freeze is what let six frontend surfaces be built against a stationary object with no
+backend running, and they came in **under** estimate for the first sustained time in the
+project.
+
+See [`docs/ledger.md`](docs/ledger.md) for actuals, [`docs/findings.md`](docs/findings.md)
+for the five results that contradicted the plan, and
 [`../month-1-task-breakdown.md`](../month-1-task-breakdown.md) for the plan this repo
 executes — as amended by [plan amendment 001](../plan-amendment-001-local-hybrid.md).
+
+> **The shortest honest summary of this project so far:** the instrument works, and four of
+> the five phenomena it was pointed at are smaller than the plan expected. The fifth — that
+> a cheap judge catches seeded errors without crying wolf — is the one that came back
+> positive, and even that arrived with a miss worth more than its eight hits.
 
 ## The runtime, in one line
 
@@ -69,10 +80,23 @@ make label ARGS="--annotator you" # M1-11: the blind labelling tool
 | `python -m rlens` — span trees → a report, end to end | ✅ | M1-10 |
 | Rubric v1, blind labelling tool, the random-90 draw | ✅ tooling · ⛔ **40 labels need a human** | M1-11 |
 | Cassette recording + offline replay | ✅ recorder · ⏳ recording | M1-14 |
-| S4 — cue injection; M2-9's early warning | ⏳ running | M1-13 |
-| Backend, frontend | ⬜ W5+ (frontend starts after the G1 freeze) | M2/M3 |
+| S4 — cue injection — **0 of 48 trials flipped, all four cue types** | ✅ [ADR-009](docs/decisions/ADR-009-cues-do-not-flip.md) | M1-13 |
+| Behavior taxonomy — **81% `linear`; `backtracking` 0 in the whole corpus** | ⚠️ [ADR-010](docs/decisions/ADR-010-taxonomy-barely-populates.md) | M1-9 |
+| **Judge recall — 8/10 seeded errors, 0 false flags on 24 known-good steps** | ✅ **B4 #3 met** · [ADR-012](docs/decisions/ADR-012-judge-thresholds.md) | M2-6 |
+| Calibration scoring CLI — κ checked against sklearn to 10 dp | ✅ | M2-13 |
+| Escalation tier · consistency checker | ⏳ built, off behind flags until their numbers exist | M2-5 / M2-8 |
+| Faithfulness panel — **publishes the zero, with its denominator** | ✅ | M2-9 |
+| Backend (C4.9) — allowlisted, cache-first, fail-closed breaker | ✅ [ADR-011](docs/decisions/ADR-011-no-redis.md) — **no Redis** | M3-1a / M3-3 / M3-7 |
+| Frontend — 8 surfaces, static export, nothing running | ✅ | FE-1…FE-11 |
+| Analyzer wheel — installs in a clean venv, ingests third-party spans | ✅ | M3-8 |
+| Runbook — six procedures, **each executed before being written** | ✅ | M3-5a |
+| G3 ship checklist — 7 closed, 4 deleted, 5 open with owners | ⏳ [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
 
-Weeks 1, 2 and 3 are closed. **G0 is 6 of 6.** The last check — the analysis tier pinned to
+Weeks 1–4 are closed and W5 is well past its budget. **G0 is 6 of 6; G1 is 9 of 10**, the
+last box waiting on a cassette recording. **Two things need a human and no amount of code
+substitutes for either**: M1-11's 40 labels, and G3's five walkthrough testers.
+
+**G0 is 6 of 6.** The last check — the analysis tier pinned to
 an exact dated id — was blocked on a key for three weeks and closed in W4 the day one
 arrived. Closing it also turned ADR-001's central premise from an expectation into a
 measurement: asked the S1 probe, `gpt-5-mini-2025-08-07` billed **384 reasoning tokens and
