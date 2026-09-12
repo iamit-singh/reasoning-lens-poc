@@ -38,6 +38,7 @@ import sys
 import time
 from collections import Counter
 from dataclasses import dataclass, field
+from typing import Any
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "analyzer/src"))
 
@@ -120,6 +121,30 @@ def one_run(paths: list[pathlib.Path], workers: int) -> list[TraceOutcome]:
         return list(pool.map(_classify_one, paths))
 
 
+def _write(
+    record: pathlib.Path, runs: list[list[TraceOutcome]], args: Any, paths: list[pathlib.Path]
+) -> None:
+    """Persist what has been measured so far. Called after every run."""
+    record.write_text(
+        json.dumps(
+            {
+                "recorded_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "backend": os.environ.get("ANALYZER_BACKEND", "hybrid"),
+                "model": os.environ.get("MODEL_ANALYZE", ""),
+                "chunk_size": os.environ.get("CLASSIFY_CHUNK_SIZE", "25"),
+                "prompt_bundle_version": PROMPT_BUNDLE_VERSION,
+                "runs_completed": len(runs),
+                "runs_requested": args.runs,
+                "traces_per_run": len(paths),
+                "scope": {"only": args.only, "limit": args.limit, "workers": args.workers},
+                "runs": [[vars(o) for o in run] for run in runs],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--runs", type=int, default=1, help="consecutive full passes (DoD: 20)")
@@ -148,6 +173,12 @@ def main(argv: list[str] | None = None) -> int:
 
     runs: list[list[TraceOutcome]] = []
     started = time.time()
+    OUT.mkdir(parents=True, exist_ok=True)
+    scope = (
+        "full" if not args.only and not args.limit else f"{args.only or 'all'}-{args.limit or 'n'}"
+    )
+    record = OUT / f"m1-9-reliability.{scope}.json"
+
     for i in range(args.runs):
         t = time.time()
         outcomes = one_run(paths, args.workers)
@@ -160,8 +191,27 @@ def main(argv: list[str] | None = None) -> int:
             f"  run {i + 1:2d}/{args.runs}: {calls:4d} calls, {repaired} repaired, "
             f"{failed} degraded, {hard} hard errors  [{time.time() - t:.0f}s]"
         )
+        # **Written after every run, not at the end.** The first 20-run attempt was killed
+        # at run 15 and lost thirteen runs of good data, because the record was a single
+        # write after the loop. A measurement that takes ninety minutes must not have a
+        # ninety-minute window in which an interruption costs everything.
+        _write(record, runs, args, paths)
 
-    OUT.mkdir(parents=True, exist_ok=True)
+        # **A whole run of hard errors is the environment, not the classifier.** Attempt one
+        # ran overnight, the machine slept, and run 15 came back 0 calls / 42 hard errors --
+        # then kept going, burning runs and filling the record with noise that looks like
+        # data. Transport failures on EVERY trace mean the network or the tier is gone; the
+        # right response is to stop and say so, because continuing produces a parse-failure
+        # rate computed over calls that never reached a model.
+        if hard == len(outcomes) and outcomes:
+            print(
+                f"\n  STOPPED after run {i + 1}: every trace hard-errored. That is the "
+                f"transport, not the classifier -- a rate computed over calls that never "
+                f"reached a model would be meaningless. Fix the tier and re-run.",
+                file=sys.stderr,
+            )
+            break
+
     # **A partial run must not overwrite the full run's record.** S1 had this same defect
     # -- `--only openai` rewrote a results file containing both probes -- and there it cost
     # nothing because the raw output is gitignored and the write-up is the evidence. Here
@@ -170,17 +220,6 @@ def main(argv: list[str] | None = None) -> int:
         "full" if not args.only and not args.limit else f"{args.only or 'all'}-{args.limit or 'n'}"
     )
     record = OUT / f"m1-9-reliability.{scope}.json"
-    payload = {
-        "recorded_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "backend": backend,
-        "model": model,
-        "chunk_size": chunk,
-        "prompt_bundle_version": PROMPT_BUNDLE_VERSION,
-        "scope": {"only": args.only, "limit": args.limit, "workers": args.workers},
-        "runs": [[vars(o) for o in run] for run in runs],
-    }
-    record.write_text(json.dumps(payload, indent=2) + "\n")
-
     flat = [o for run in runs for o in run]
     calls = sum(o.calls for o in flat)
     repaired = sum(o.repairs for o in flat)
