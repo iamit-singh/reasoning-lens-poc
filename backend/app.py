@@ -38,6 +38,8 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 
+from backend import breaker, cache
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BANK_DIR = ROOT / "problem-bank/items"
 REPORTS_DIR = ROOT / "out/reports"
@@ -130,14 +132,26 @@ def readyz() -> dict[str, Any]:
     start with nothing to show. `cached_reports` is the number the operator actually needs
     before walking on stage.
     """
-    reports = len(list(REPORTS_DIR.glob("*.report.json"))) if REPORTS_DIR.is_dir() else 0
+    staleness = cache.scan()
+    stale = [s for s in staleness if not s.fresh and s.error is None]
+    state = breaker.check()
+    # **Stale is `degraded`, not `ok`.** A probe that goes green over reports built by a
+    # different pipeline is a probe that lets the demo publish numbers describing a system
+    # that is not running (M3-2b, ADR-011).
     return {
-        "status": "ok" if reports else "degraded",
+        "status": "ok" if (staleness and not stale) else "degraded",
         "demo_mode": demo_mode(),
         "bank_items": len(_bank()),
-        "cached_reports": reports,
+        "cached_reports": len(staleness),
+        "stale_reports": [s.describe() for s in stale],
         "calibration": CALIBRATION.exists(),
-        "live_runs": demo_mode() != "cached",
+        "live_runs": demo_mode() != "cached" and state.allowed,
+        "breaker": {
+            "allowed": state.allowed,
+            "reason": state.reason,
+            "spent_usd": state.spent_usd,
+            "limit_usd": state.limit_usd,
+        },
     }
 
 
@@ -145,7 +159,11 @@ def readyz() -> dict[str, Any]:
 def bank() -> dict[str, Any]:
     """Bank items grouped by tag, marking which have a cached report."""
     items = _bank()
-    cached = {p.name.split(".")[0] for p in REPORTS_DIR.glob("*.report.json")} if REPORTS_DIR.is_dir() else set()
+    cached = (
+        {p.name.split(".")[0] for p in REPORTS_DIR.glob("*.report.json")}
+        if REPORTS_DIR.is_dir()
+        else set()
+    )
     by_tag: dict[str, list[str]] = {}
     for item in items.values():
         for tag in item.get("tags", []):
@@ -201,7 +219,9 @@ def calibration() -> Any:
     contain — and a grep over the frontend source could not catch it.
     """
     if not CALIBRATION.exists():
-        raise HTTPException(status_code=503, detail="no calibration results yet; run `make calibrate`")
+        raise HTTPException(
+            status_code=503, detail="no calibration results yet; run `make calibrate`"
+        )
     return json.loads(CALIBRATION.read_text())
 
 
@@ -244,6 +264,14 @@ async def create_run(request: Request) -> JSONResponse:
             status_code=503,
             detail="live runs are disabled (DEMO_MODE=cached). Cached reports are served normally.",
         )
+
+    # **The breaker is checked before the rate limit, deliberately.** A tripped breaker is
+    # a hard stop that no amount of waiting clears, and telling a caller to "try again in a
+    # minute" when the answer is "never, until someone resets the budget" wastes their time
+    # and hides the real state.
+    state = breaker.check()
+    if not state.allowed:
+        raise HTTPException(status_code=503, detail=state.reason)
 
     client = request.client.host if request.client else "unknown"
     if _rate_limited(client):

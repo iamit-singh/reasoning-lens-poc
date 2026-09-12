@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
+        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -58,7 +58,7 @@ rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt an
 calibration-page:  ## E9 -- the calibration page hard-codes no numbers
 	./scripts/check_calibration_page.sh
 
-ci: lint typecheck unit contract integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
+ci: lint typecheck unit contract backend-tests integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
@@ -70,8 +70,30 @@ calibrate:  ## M2-13 -- kappa, CIs, per-class F1, baseline. --final is C5.4-guar
 faithfulness:  ## STUB (M2-9) -- cue-injection batch job and the committed panel
 	@echo "faithfulness: not implemented (owner M2-9). See docs/spikes/S4-cues.md"; exit 2
 
-smoke:  ## STUB (M3-4) -- local acceptance: 3 items from cache, panel, calibration, download
-	@echo "smoke: not implemented (owner M3-4). Runs against localhost (ADR-003: local-only)"; exit 2
+backend-tests:  ## C4.9 route-table posture, the spend breaker, cache staleness. No server
+	$(BIN)/python -m pytest backend/tests/test_api.py -q
+
+serve-api:  ## run the API against the local cache (ADR-003: localhost, no deployment)
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	$(BIN)/python -m uvicorn backend.app:app --host 127.0.0.1 --port $${PORT:-8000}
+
+# M3-1a's DoD in one command. Starts a REAL server WITH NO PROVIDER KEY, smokes it, stops
+# it. The key is stripped rather than merely unused: "we did not call it" and "we could
+# not call it" are different claims, and only the second proves the fallback product.
+smoke:  ## M3-4/M3-1a -- acceptance against a real server, provider key REMOVED
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	unset OPENAI_API_KEY; \
+	$(BIN)/python -m uvicorn backend.app:app --host 127.0.0.1 --port 8071 >/dev/null 2>&1 & \
+	echo $$! > /tmp/rlens-smoke.pid; \
+	$(BIN)/python backend/tests/smoke.py --base-url http://127.0.0.1:8071 --no-key; \
+	status=$$?; kill $$(cat /tmp/rlens-smoke.pid) 2>/dev/null; rm -f /tmp/rlens-smoke.pid; \
+	exit $$status
+
+trip-breaker:  ## M3-3's DoD -- force the spend breaker through the real code path
+	@$(BIN)/python -c "from backend import breaker; breaker.trip('make trip-breaker'); print(breaker.check().reason)"
+
+reset-breaker:  ## clear the spend total
+	@$(BIN)/python -c "from backend import breaker; breaker.reset(); print('reset:', breaker.check().reason)"
 
 # The PIN has to come from .env, and that is worth a note rather than a silent source.
 # The pin tuple is EVIDENCE (C2.3/I3: a published number is reproducible or it is not

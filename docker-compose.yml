@@ -2,27 +2,21 @@
 #
 # The local generation model is NOT in this file on purpose. Containerised inference on
 # macOS loses Metal, so the model is served natively (`ollama serve`) and reached at
-# host.docker.internal / localhost. Redis is the only thing worth containerising.
+# host.docker.internal / localhost.
+#
+# **Redis was here and is gone (ADR-011).** One process, one operator: every job Redis had
+# -- shared cache, shared rate counter, shared spend total -- was coordination between
+# replicas that do not exist. It could not make this demo more reliable and it could
+# absolutely make it less, by being down. The cache is the filesystem and the breaker is a
+# file. So this compose file now has ONE service and no healthcheck to wait on.
 services:
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
   app:
     build: .
-    depends_on:
-      redis: { condition: service_healthy }
     environment:
       # MOCK_LLM=1 is the default here on purpose: local dev is cost-free and
       # deterministic, and the frontend can develop against cassettes (C7.1).
       MOCK_LLM: "1"
       DEMO_MODE: "cached"
-      REDIS_URL: "redis://redis:6379/0"
       ANALYZER_BACKEND: "${ANALYZER_BACKEND:-hybrid}"
       # reach the natively-served local model from inside the container
       LOCAL_BASE_URL: "http://host.docker.internal:11434/v1"
