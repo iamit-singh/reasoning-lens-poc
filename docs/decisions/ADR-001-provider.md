@@ -86,6 +86,66 @@ This is **stricter** than the hosted pin it replaces: a hosted endpoint can chan
 fixed id; a file digest cannot. The analyzer's own pin (the OpenAI model doing the
 classification) is recorded separately, because the two move independently.
 
+## Local-only, measured — 12 Sep 2026 (W5). **It does not work for classification.**
+
+This ADR promised that *"can this run entirely on a laptop with no API access?"* would
+become **a published number rather than an assumption**. Here is the number, and it is a
+negative one.
+
+`ANALYZER_BACKEND=local` was run end to end through `rlens.classify` — not S3's direct
+probe, the real code path — over six traces and 64 steps, against the same six traces from
+M1-9's hybrid measurement:
+
+| Over the same 6 traces / 64 steps | **local** `gpt-oss:20b` | **hybrid** `gpt-5-mini` |
+| --- | --- | --- |
+| `linear` | **100%** — 64 of 64 | 83.9% |
+| The other four behaviour classes | **never once** | 16.1% |
+| `unsound` verdicts | **0** | 9.6% |
+| Identical behaviour/validity confidences | **77%** | 45.9% |
+| Steps below the 0.70 escalation floor | 30% | ≈ 0 — the band is 0.75–0.95 |
+| Repeat runs | **byte-identical** ×3 | varies run to run |
+
+**The local tier does not use the taxonomy.** Every step of every trace comes back
+`linear`, and it never once says `unsound`. Both halves of C4.3's merged call — behaviour
+and triage — are inert. κ against human labels would be undefined for four of five classes
+and the judge would have a recall of zero by construction.
+
+### The two tiers fail in opposite directions, which is the useful part
+
+- **Hybrid uses the taxonomy but bunches its confidences** at 0.75–0.95, so C4.4's 0.70
+  escalation floor selects almost nothing.
+- **Local spreads its confidences across the full 0.05–0.95 range** — 30% of steps fall
+  below the floor — **but has nothing to be confident about**, because it assigned every
+  step the same label.
+
+A wide confidence distribution over a collapsed taxonomy is not a partial success. It is a
+model answering the easy half of a question it did not understand.
+
+### Note on n, and on determinism
+
+**64 steps, observed once.** Three repeat runs returned byte-identical output, which is
+what `temperature: 0` plus a pinned seed buys on this path — so the repeats prove
+*determinism*, not sample size, and it would be wrong to report n=192. That distinction is
+live: [ADR-010](ADR-010-the-taxonomy-barely-populates.md) had to be amended for reading a
+corpus property off one run of the *non-deterministic* hybrid tier, and the temptation here
+is the mirror image.
+
+The determinism is itself worth having: **the local tier is reproducible in a way the
+hybrid tier is not**, and if it ever became good enough to use, that would be a real
+advantage for a published number.
+
+### Consequences
+
+1. **Local-only is not a fallback for B4 #2 or B4 #3.** If the key fails on demo day, the
+   answer is the cached reports (`DEMO_MODE=cached`), not a local re-analysis. The runbook
+   already says this; now it is measured rather than assumed.
+2. **The `local` option stays in the code and in the config.** It works, it is cheap to
+   run, and a different local model — or this one with a tuned prompt — might do better.
+   What changes is that nobody should reach for it expecting classification to survive.
+3. **It is published.** B0 Condition #5 covers whatever the numbers are, and "the
+   laptop-only configuration answers the question by labelling everything `linear`" is a
+   number.
+
 ## Local-only as a measured configuration
 
 The analyzer's model is a config choice: **hybrid** (default) or **local-only**. Human labels

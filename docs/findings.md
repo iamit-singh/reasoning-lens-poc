@@ -15,8 +15,9 @@ and every one of them was found by measuring something before building on it.
 ## The pattern, stated once
 
 By the end of Month 1 this project had measured **four** phenomena the plan assumed would
-be present, and found all four absent or far smaller than expected. W5 added three more
-entries — one positive, one correction, one that reads as a defect and is not:
+be present, and found all four absent or far smaller than expected. W5 added four more
+entries — one positive, one correction of this project's own work, one that reads as a
+defect and is not, and one more phenomenon that turned out absent:
 
 | # | The plan assumed | Measurement said | ADR |
 | - | --- | --- | --- |
@@ -234,6 +235,58 @@ town; calling those steps unverifiable is the correct answer, and a judge that c
 > measured against a known-good baseline of 0 false flags over 24 steps in one run. Those
 > same five traces are **100% `sound` across 288 rows over twelve runs**. The baseline is
 > not a lucky draw.
+
+---
+
+## 8. The laptop-only configuration answers by labelling everything `linear`
+
+[ADR-001](decisions/ADR-001-provider.md) promised that *"can this run entirely on a laptop
+with no API access?"* would become **a published number rather than an assumption**. This
+is the number, and it is negative.
+
+`ANALYZER_BACKEND=local` run end to end through `rlens.classify` — the real code path, not
+S3's direct probe — over six traces and 64 steps, against the same six traces from M1-9's
+hybrid measurement:
+
+| Same 6 traces / 64 steps | **local** `gpt-oss:20b` | **hybrid** `gpt-5-mini` |
+| --- | --- | --- |
+| `linear` | **100%** — 64 of 64 | 83.9% |
+| The other four behaviour classes | **never once** | 16.1% |
+| `unsound` verdicts | **0** | 9.6% |
+| Identical behaviour/validity confidences | 77% | 45.9% |
+| Steps below the 0.70 escalation floor | 30% | ≈ 0 (band is 0.75–0.95) |
+| Repeat runs | **byte-identical ×3** | varies run to run |
+
+**Both halves of C4.3's merged call are inert on the local tier.** It never uses the
+taxonomy and it never says `unsound`, so κ would be undefined for four of five classes and
+judge recall would be zero by construction.
+
+### The two tiers fail in opposite directions, which is the useful part
+
+Hybrid **uses the taxonomy but bunches its confidences**, so C4.4's 0.70 escalation floor
+selects almost nothing. Local **spreads confidence across the full 0.05–0.95 range** — 30%
+of steps below the floor — **but has nothing to be confident about**, having given every
+step the same label. A wide confidence distribution over a collapsed taxonomy is not a
+partial success; it is a model answering the easy half of a question it did not understand.
+
+### On n — and the mirror image of §4's mistake
+
+**64 steps, observed once.** Three repeats returned byte-identical output, which is what
+`temperature: 0` and a pinned seed buy on this path. **The repeats prove determinism, not
+sample size**, and reporting n=192 would be the same error §4 was just amended for, arriving
+from the other side: that one read a corpus property off a single run of a *varying* system;
+this one would inflate n from repeated runs of a *fixed* one.
+
+The determinism is worth having on its own — the local tier is reproducible in a way the
+hybrid tier is not, which would matter if it were ever good enough to use.
+
+**Consequence:** if the key fails on demo day the fallback is the cached reports
+(`DEMO_MODE=cached`), **not** a local re-analysis. The runbook already said so; it is now
+measured rather than assumed. The `local` option stays in the code — it works, it is free,
+and a different model or a tuned prompt might do better — but nobody should reach for it
+expecting classification to survive.
+
+**Re-measure:** `ANALYZER_BACKEND=local make classify-reliability ARGS="--runs 1 --limit 6"`.
 
 ---
 

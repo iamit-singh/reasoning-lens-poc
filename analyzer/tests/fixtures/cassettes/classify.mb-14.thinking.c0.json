@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 811,
+  "finish_reason": "stop",
+  "latency_ms": 12043,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 985,
+  "reasoning_tokens": 320,
+  "request_digest": "232a743f738cd7bf",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States doubling rule and that going backward halves \u2014 a correct setup for solving the problem.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.95,\n      \"error_type\": null,\n      \"rationale\": \"Applies halving: day47 half, day46 quarter \u2014 correct direct inference from previous step.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:2\",\n      \"behavior\": \"verification\",\n      \"behavior_confidence\": 0.7,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": null,\n      \"rationale\": \"Rechecks the sequence and raises a minor consideration about indexing; conclusion unchanged.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Restates that day48 is whole, so day46 is quarter \u2014 a straightforward reaffirmation.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:4\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.95,\n      \"error_type\": null,\n      \"rationale\": \"Provides the final answer Day 46, consistent with the preceding correct deductions.\"\n    }\n  ]\n}"
+}

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 238,
+  "finish_reason": "stop",
+  "latency_ms": 4310,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 739,
+  "reasoning_tokens": 64,
+  "request_digest": "34db98ed43fc18a8",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-14-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.86,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Doubling backward halves each day: day48=whole, day47=1/2, day46=1/4, so the inference is correct.\"},{\"step_id\":\"react:react-mb-14-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.77,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Restates the derived result (Day 46) with no new inference; matches prior correct step.\"}]}"
+}
