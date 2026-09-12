@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-01",
+  "mutation_type": "arithmetic_slip",
+  "expected_error_type": "arithmetic",
+  "base_span_path": "out/spans/mb-07.thinking.json",
+  "mutated_step_ordinal": 2,
+  "patch": {
+    "find": "So 875 + 50 = 925. So 12500 * 0.074 = 925.",
+    "replace": "So 875 + 50 = 935. So 12500 * 0.074 = 935."
+  },
+  "note": "The two addends are shown and their stated sum is wrong. A judge that checks arithmetic it can see should catch this without any outside knowledge.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

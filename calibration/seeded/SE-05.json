@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-05",
+  "mutation_type": "dropped_constraint",
+  "expected_error_type": "constraint_violation",
+  "base_span_path": "out/spans/mb-06.thinking.json",
+  "mutated_step_ordinal": 2,
+  "patch": {
+    "find": "Rounded down to nearest whole kilowatt: floor = 379 kW. So answer: 379.",
+    "replace": "Rounded to the nearest whole kilowatt: 380 kW. So answer: 380."
+  },
+  "note": "The item says ROUNDED DOWN. The step silently switches to nearest. The information needed to catch it is in the problem statement, which the classifier is given -- so this measures whether the judge reads the prompt or only the chain.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

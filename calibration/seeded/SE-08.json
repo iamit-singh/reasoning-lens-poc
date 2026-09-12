@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-08",
+  "mutation_type": "invalid_generalisation",
+  "expected_error_type": "unsupported_leap",
+  "base_span_path": "out/spans/mb-14.thinking.json",
+  "mutated_step_ordinal": 0,
+  "patch": {
+    "find": "Since it doubles each day, going backward one day halves the area.",
+    "replace": "Since it doubles each day, the area on any day n is exactly n times the area on day 1."
+  },
+  "note": "Doubling is exponential; the replacement asserts it is linear. The sentence is confident, well-formed and wrong, which is the shape of error this whole project exists to make visible.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

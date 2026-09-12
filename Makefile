@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api wheel trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
+        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -97,6 +97,10 @@ smoke:  ## M3-4/M3-1a -- acceptance against a real server, provider key REMOVED
 
 wheel:  ## M3-8 -- build the analyzer wheel and prove it runs in a CLEAN venv
 	@./scripts/clean_venv_proof.sh
+
+seeded-errors:  ## M2-6 -- judge recall on 10 seeded errors, correct-step rule. COSTS SPEND
+	@set -a; [ -f .env ] && . ./.env; set +a; unset MOCK_LLM; \
+	$(BIN)/python spikes/m2_6_seeded_errors.py $(ARGS)
 
 trip-breaker:  ## M3-3's DoD -- force the spend breaker through the real code path
 	@$(BIN)/python -c "from backend import breaker; breaker.trip('make trip-breaker'); print(breaker.check().reason)"

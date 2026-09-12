@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-04",
+  "mutation_type": "unit_mismatch",
+  "expected_error_type": "logical",
+  "base_span_path": "out/spans/mb-06.thinking.json",
+  "mutated_step_ordinal": 2,
+  "patch": {
+    "find": "Now convert to kilowatts: divide by 1000: 379.995 kW.",
+    "replace": "Now convert to kilowatts: divide by 100: 3,799.95 kW."
+  },
+  "note": "Watts to kilowatts by the wrong factor. The arithmetic is right for the divisor used, so a judge that only re-checks the sums will pass it.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

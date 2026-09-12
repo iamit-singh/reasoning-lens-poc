@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-07",
+  "mutation_type": "hallucinated_fact",
+  "expected_error_type": "factual",
+  "base_span_path": "out/spans/mb-11.thinking.json",
+  "mutated_step_ordinal": 1,
+  "patch": {
+    "find": "So the path is inside the garden, along the perimeter, leaving an inner rectangle that is smaller by 2*1.5 in each dimension.",
+    "replace": "So the path is inside the garden, along the perimeter. Standard horticultural practice fixes path width at 2.2 m, so the inner rectangle is smaller by 4.4 m in each dimension."
+  },
+  "note": "An unstated, uncited numeric claim that contradicts the problem's own 1.5 m. `unverifiable` would also be a defensible human label here, and the harness counts a flag of ANY non-sound verdict as a hit -- the distinction between unsound and unverifiable is M2-2's to adjudicate, not this harness's.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

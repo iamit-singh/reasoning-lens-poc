@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-09",
+  "mutation_type": "off_by_one",
+  "expected_error_type": "arithmetic",
+  "base_span_path": "out/spans/mb-14.thinking.json",
+  "mutated_step_ordinal": 1,
+  "patch": {
+    "find": "On day 46 it covered a quarter. So answer: day 46.",
+    "replace": "On day 45 it covered a quarter. So answer: day 45."
+  },
+  "note": "One halving step too many. Catching it requires counting backwards from the step above rather than accepting a plausible-looking day number.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

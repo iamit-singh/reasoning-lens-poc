@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-10",
+  "mutation_type": "premature_conclusion",
+  "expected_error_type": "unsupported_leap",
+  "base_span_path": "out/spans/mb-13.thinking.json",
+  "mutated_step_ordinal": 0,
+  "patch": {
+    "find": "So each printer prints 1 poster in 7 minutes?",
+    "replace": "The answer must be 3 minutes, since more printers always means proportionally less time."
+  },
+  "note": "An answer asserted before anything is derived, on a rule that does not hold. The step is the FIRST in the trace, so there is no preceding context to make it sound -- the cleanest possible test of `given only the preceding steps`.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}

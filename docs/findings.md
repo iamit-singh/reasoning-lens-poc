@@ -118,6 +118,64 @@ discovered at G2. The target is carried unchanged; the baseline is published bes
 
 ---
 
+## 5. The judge works — and the two errors it missed are the useful part
+
+**The first B4 criterion this project has met on measurement rather than assumption.**
+Ten hand-written mutations (Appendix B) applied to five traces that answered correctly
+before anything was changed, run with the **correct-step rule**: a hit requires flagging
+*the step that was broken*, not flagging the trace somewhere.
+
+| | | |
+| --- | --- | --- |
+| **Judge recall** | **8 / 10 (80%)** | B4 #3 target ≥ 70% — **met** |
+| **False flags on the same traces, unmutated** | **0 over 24 steps** | this is what makes the 80% mean anything |
+| Collateral flags across the mutated runs | 4 | |
+
+A judge that flags freely catches seeded errors by accident. This one flagged **nothing**
+on known-good text, so the eight hits are eight detections rather than eight coincidences.
+That control is why every trace is run twice.
+
+**Re-measure:** `make seeded-errors`. Evidence: `docs/spikes/M2-6-raw/m2-6-seeded.json`,
+[ADR-012](decisions/ADR-012-judge-thresholds.md).
+
+### The miss worth quoting
+
+The mutation changed `875 + 50 = 925` to `875 + 50 = 935`. The judge returned **`sound`,
+confidence 0.95**:
+
+> *"Recomputes 12500×0.074 by splitting into 0.07 and 0.004 yielding 875+50=935
+> (correct)."*
+
+**875 + 50 is 925.** It copied the wrong total out of the step, appended the word
+*correct*, and was confident. It did not compute anything — and it then flagged **three
+other steps** in the same trace, sensing something was wrong and blaming the wrong lines.
+
+That is the failure the correct-step rule exists to expose: a recall number computed as
+*"was the trace flagged anywhere"* would have scored this as a hit. It is also C4.4's own
+premise reproduced in this repository — *arithmetic is precisely where cheap judges fail* —
+and the numeric-step escalation rule would not have fired, because it triggers below 0.85.
+
+The second miss has the same shape one layer up: a step that dropped the item's
+**rounded down** constraint was graded `sound` against the rounding rule *the step itself
+introduced*. The judge checks that each line follows from the line above; it does not check
+the line against the problem.
+
+### And a finding nobody asked for: the error types are close to noise
+
+Of the eight caught, **two named the right `error_type`**. `arithmetic` was applied to four
+of eight, including a unit conversion and a variable swap where nothing is miscomputed.
+
+**Consequence: `error_type` must never render as a measured quantity.** It is fine in the
+flagged-step panel as *the judge's description of the defect*. It is not fine anywhere that
+implies the category is reliable — and B4 has no criterion for it, a gap ADR-012
+recommends leaving open rather than inventing a target for at this n.
+
+> n = 10. Recall of 80% carries a 95% Wilson interval of roughly **49–94%**: the point
+> estimate clears the bar and the interval straddles it. M2-7 is where that becomes a
+> committed figure with its interval beside it, per C5.5.
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but

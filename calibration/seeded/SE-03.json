@@ -1,0 +1,13 @@
+{
+  "case_id": "SE-03",
+  "mutation_type": "arithmetic_slip",
+  "expected_error_type": "arithmetic",
+  "base_span_path": "out/spans/mb-06.thinking.json",
+  "mutated_step_ordinal": 1,
+  "patch": {
+    "find": "987*80 = 78,960",
+    "replace": "987*80 = 79,860"
+  },
+  "note": "Only the partial product is changed; the running sum below it is left alone, so the step is internally inconsistent. This is the easiest class of error to catch and the floor for judge recall.",
+  "source": "Appendix B \u2014 seeded-error mutation catalogue (C4.8)"
+}
