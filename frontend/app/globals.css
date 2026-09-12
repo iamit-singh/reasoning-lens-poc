@@ -168,9 +168,14 @@ footer { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--rule);
 .tag-b.none { background: transparent; color: var(--faint); border: 1px dashed var(--rule-2); }
 
 .tag-v { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; cursor: help; }
+/* FE-2b — greyscale legibility. Every tag already carries its text label, which is the
+   a11y floor. These add a SHAPE cue on top, so the three verdicts are distinguishable at a
+   glance in a greyscale print or to a colour-blind reader without reading each one:
+   sound has no rule, unsound a solid one, unverifiable a dashed one. Shape survives a
+   photocopier; a tint does not. */
 .tag-v.sound { background: var(--ok-soft); color: var(--ok); }
-.tag-v.unsound { background: var(--stop-soft); color: var(--stop); }
-.tag-v.unverifiable { background: var(--warn-soft); color: var(--warn); }
+.tag-v.unsound { background: var(--stop-soft); color: var(--stop); border-left: 3px solid currentColor; }
+.tag-v.unverifiable { background: var(--warn-soft); color: var(--warn); border-left: 3px dashed currentColor; }
 
 .step.flagged { background: var(--stop-soft); }
 .step .kindchip { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.05em; }

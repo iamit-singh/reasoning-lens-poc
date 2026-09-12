@@ -84,6 +84,41 @@ def main() -> int:
         n = sum(1 for p in pages if "/items/" in str(p))
         print(f"  [PASS] {n} item pages carry their trace text in the markup")
 
+    # ---------------------------------------------------------------- FE-2b
+    # **Every state the fixtures can produce must actually appear in the markup.** A
+    # component that renders four of five behaviour classes looks correct on the class it
+    # is being demoed with, and the fifth is discovered by whoever opens the one trace that
+    # has it. The fixtures exist precisely so that is checkable here instead.
+    all_items = " ".join(visible_text(p) for p in pages if "/items/" in str(p)).lower()
+    states = {
+        "verification": "behaviour class",
+        "backtracking": "behaviour class",
+        "subgoal setting": "behaviour class",
+        "backward chaining": "behaviour class",
+        "linear": "behaviour class",
+        "unsound": "validity verdict",
+        "unverifiable": "validity verdict",
+        "sound": "validity verdict",
+        "unannotated": "a step with no label (degraded arm)",
+        "arm failed": "a failed arm",
+    }
+    missing = [f"{s} ({what})" for s, what in states.items() if s not in all_items]
+    if missing:
+        failures.append(f"FE-2b — states no fixture renders: {missing}")
+    else:
+        print(f"  [PASS] all {len(states)} annotated-trace states render across the fixtures")
+
+    # Greyscale: a tag must never be categorisable by colour alone. Each one carries its
+    # own text, which is the floor, and the validity tags additionally carry a border
+    # shape — asserted here so a later CSS tidy cannot quietly remove it.
+    css = (ROOT / "frontend/app/globals.css").read_text()
+    for cls, cue in (("tag-v.unsound", "solid"), ("tag-v.unverifiable", "dashed")):
+        rule = next((line for line in css.splitlines() if line.startswith(f".{cls} ")), "")
+        if cue not in rule:
+            failures.append(f"FE-2b — .{cls} lost its {cue} border: greyscale cue is colour-only")
+    if not any("FE-2b — .tag-v" in f for f in failures):
+        print("  [PASS] validity tags carry a shape cue, not colour alone")
+
     for path in pages:
         markup = re.sub(r"<script.*?</script>", " ", path.read_text(), flags=re.DOTALL)
         for host in FORBIDDEN_IN_MARKUP:
