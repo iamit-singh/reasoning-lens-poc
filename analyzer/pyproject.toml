@@ -57,8 +57,17 @@ rlens = "rlens.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# **Every non-Python file the package READS AT RUNTIME must be listed here.** Missing an
+# entry does not fail any test run from a source checkout -- the file is right there on
+# disk -- and fails only when someone installs the wheel, which is the one moment nobody
+# is watching. M3-8's clean-venv proof caught exactly that: the ReasoningReport schema was
+# added by M1-10 and never added here, so `load_schema()` raised FileNotFoundError in a
+# fresh venv while the whole suite stayed green.
+#
+# The rule when adding a data file: add it here in the same commit, or the handover
+# artifact quietly stops working.
 [tool.setuptools.package-data]
-rlens = ["prompts/*.md"]
+rlens = ["prompts/*.md", "schemas/*.json"]
 
 # ---------------------------------------------------------------- mypy
 [tool.mypy]
