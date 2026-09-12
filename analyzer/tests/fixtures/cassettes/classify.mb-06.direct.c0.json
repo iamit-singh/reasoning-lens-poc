@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 501,
+  "finish_reason": "stop",
+  "latency_ms": 7270,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 891,
+  "reasoning_tokens": 256,
+  "request_digest": "ca0220db048adace",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-06-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.75,\"verdict\":\"unsound\",\"validity_confidence\":0.90,\"error_type\":\"arithmetic\",\"rationale\":\"Initial server count is correct but the subsequent multiplication is garbled and arithmetic for 987*385 is incorrect.\"},{\"step_id\":\"direct:direct-mb-06-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.90,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Correct precise computation: 987*385=379,995 W = 379.995 kW, so rounding down gives 379 kW.\"},{\"step_id\":\"direct:direct-mb-06-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.90,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Final stated answer matches the correct rounded-down total of 379 kW.\"}]}"
+}

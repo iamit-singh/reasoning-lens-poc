@@ -141,3 +141,57 @@ and labelled as real; tests assert neither can be mistaken for the other. See th
 > reason. The instrument works. The effects it was pointed at are smaller than the plan
 > expected — and *that*, stated with its numbers, is a more interesting result than the one
 > the plan hoped for.
+
+---
+
+## Amendment, 12 Sep 2026 (W5) — **the zero was one run, and one run is not stable**
+
+This ADR's headline was *"`backward_chaining` has 1 instance in the whole corpus and
+`backtracking` has 0."* That was measured over **a single full-corpus pass**. M1-9's
+reliability measurement has since run the same corpus **twelve times** —
+`docs/spikes/M1-9-raw/m1-9-reliability.full.json`, 504 trace-runs, **3,579 rows**.
+
+| Class | This ADR (1 run) | 12 runs | Share |
+| --- | --- | --- | --- |
+| `linear` | 252 | 2,944 | **82.3%** |
+| `verification` | 35 | 288 | 8.0% |
+| `subgoal_setting` | 22 | 269 | 7.5% |
+| **`backtracking`** | **0** | **71** | **2.0%** |
+| `backward_chaining` | 1 | 7 | 0.2% |
+
+**`backtracking` is rare, not absent.** Per run it fires between **1 and 15 times**
+(`[14, 3, 4, 15, 1, 3, 3, 13, 11, 2, 1, 1]`), and a run returning 0 sits comfortably inside
+that spread. This ADR read a corpus-level property off n=1 run of a **non-deterministic
+classifier**. The error was not the arithmetic; it was the inference.
+
+> **This is the same mistake this project has caught twice before, committed by this
+> project.** ADR-005 held its trap threshold rather than lowering it after a small sample.
+> ADR-006 refused the difficulty contrast on the strength of one ad-hoc probe and measured
+> it across the corpus instead. ADR-010 then did exactly what both of those refused to do.
+> **The correction cost nothing only because M1-9's DoD happened to re-run the same corpus
+> twelve times for an unrelated reason.**
+
+### What still stands, and it is most of it
+
+- **The distribution is still overwhelmingly `linear` at 82.3%**, which is the finding that
+  matters for κ: the majority-class baseline is high, and κ will read low against it however
+  good the classifier is. B4 #2's 0.60 target was set without knowing the marginal was this
+  skewed, and that remains raised.
+- **`backward_chaining` at 0.2% is still effectively absent** — 7 rows in 3,579, most runs
+  producing none. Per-class F1 for it will be unstable or undefined, and B4 #2's "lowest
+  per-class F1 ≥ 0.50" is at risk on that class alone.
+- **The corpus-side confound check is unaffected.** It used no model, and 11 of 261 thought
+  steps (4.2%) opening with a backtracking marker is still the ceiling on how often the
+  behaviour could genuinely occur. **2.0% measured against a 4.2% ceiling is *consistent*,
+  which is a stronger position than 0% against 4.2% was.**
+- **M1-11's 40 labels are still the most valuable hours left**, for the reason this ADR
+  gave: nothing in the classifier's own output says whether its 2.0% is the *right* 2.0%.
+
+### Where the rare class fires, which is informative for the labeller
+
+45 of the 71 `backtracking` rows are in `mb-08.thinking` — **the trace that loops 126 times
+over a town that does not exist**. A model repeating itself and occasionally saying
+*"actually…"* is the one place in this corpus where the behaviour has something to attach
+to. The other site is `mb-10.direct` at **25% of its rows**: a short trace and a small
+denominator, but worth a labeller's attention precisely because it is where the class looks
+common.

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 637,
+  "finish_reason": "stop",
+  "latency_ms": 9126,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 758,
+  "reasoning_tokens": 320,
+  "request_digest": "7de0deee9dc46384",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"States the objective and gives an unsupported guess (2005) without evidence, so cannot be verified from preceding info.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": null,\n      \"rationale\": \"Reiterates uncertainty and commits to the previous guess; claim remains unsupported by evidence in prior steps.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": null,\n      \"rationale\": \"Final answer repeats the earlier unsupported claim; follows prior steps but lacks external verification here.\"\n    }\n  ]\n}"
+}

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 280,
+  "finish_reason": "stop",
+  "latency_ms": 6279,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 650,
+  "reasoning_tokens": 128,
+  "request_digest": "5a41295c9ae21396",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-02-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the computed product 17\u00d74 = 68, which is correct arithmetic.\"},{\"step_id\":\"direct:direct-mb-02-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Outputs the final answer 68, matching the correct multiplication result.\"}]}"
+}

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 368,
+  "finish_reason": "stop",
+  "latency_ms": 5699,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 800,
+  "reasoning_tokens": 128,
+  "request_digest": "152934bcef004b8f",
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-05-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Correct forward calculation: 3*14*32 computed as 14*32=448 and 3*448=1344.\"},{\"step_id\":\"thinking:thinking-mb-05-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Subtracting checked-out books: 1344 - 118 = 1226 is arithmeticly correct.\"},{\"step_id\":\"thinking:thinking-mb-05-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Final answer restates the computed result 1226, consistent with prior steps.\"}]}"
+}

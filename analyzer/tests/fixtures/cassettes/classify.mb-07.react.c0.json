@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 252,
+  "finish_reason": "stop",
+  "latency_ms": 4065,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 921,
+  "reasoning_tokens": 64,
+  "request_digest": "c1efeec53caffe95",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-07-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Correct formula I=Prt used; conversion r=0.074 and t=3.5 yrs correct; arithmetic 12500*0.074=925 and 925*3.5=3237.5 is correct.\"},{\"step_id\":\"react:react-mb-07-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Final answer restates computed interest $3,237.50, matching prior correct calculation.\"}]}"
+}

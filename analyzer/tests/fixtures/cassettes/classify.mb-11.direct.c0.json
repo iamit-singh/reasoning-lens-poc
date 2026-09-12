@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 343,
+  "finish_reason": "stop",
+  "latency_ms": 7144,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 714,
+  "reasoning_tokens": 128,
+  "request_digest": "60a4ad13752783f3",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-11-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Subtract 2*1.5 from each side gives 15 and 21; area 15*21=315 is correct arithmetic.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-11-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restates the computed area 315, consistent with prior step.\"\n    }\n  ]\n}"
+}

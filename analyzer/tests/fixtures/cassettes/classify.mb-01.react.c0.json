@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 283,
+  "finish_reason": "stop",
+  "latency_ms": 5451,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 666,
+  "reasoning_tokens": 128,
+  "request_digest": "325b8792d7455306",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-01-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Identifies the question and states the correct chemical symbol for potassium (K); straightforward, no tool required.\"},{\"step_id\":\"react:react-mb-01-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Outputs the chemical symbol 'K', which correctly represents potassium.\"}]}"
+}

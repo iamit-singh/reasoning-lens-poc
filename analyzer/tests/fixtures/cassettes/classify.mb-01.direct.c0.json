@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 402,
+  "finish_reason": "stop",
+  "latency_ms": 6700,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 648,
+  "reasoning_tokens": 192,
+  "request_digest": "eef3c019b7d2e1f8",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-01-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.86,\n      \"error_type\": null,\n      \"rationale\": \"States the objective to produce the answer 'K' \u2014 an intended subgoal; no error.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-01-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Provides the chemical symbol 'K' for potassium \u2014 a direct answer, correctly stated.\"\n    }\n  ]\n}"
+}

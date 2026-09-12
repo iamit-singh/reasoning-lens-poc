@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 366,
+  "finish_reason": "stop",
+  "latency_ms": 6160,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 807,
+  "reasoning_tokens": 192,
+  "request_digest": "29f1c4bbe0b0ca98",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-06-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Correct forward calculation: 47*21=987, 987*385=379,995 W = 379.995 kW, floor to 379 kW.\"},{\"step_id\":\"react:react-mb-06-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.8,\"verdict\":\"sound\",\"validity_confidence\":0.8,\"error_type\":null,\"rationale\":\"Final answer restates the computed value 379 kW, consistent with prior step.\"}]}"
+}

@@ -15,7 +15,8 @@ and every one of them was found by measuring something before building on it.
 ## The pattern, stated once
 
 By the end of Month 1 this project had measured **four** phenomena the plan assumed would
-be present, and found all four absent or far smaller than expected:
+be present, and found all four absent or far smaller than expected. W5 added three more
+entries — one positive, one correction, one that reads as a defect and is not:
 
 | # | The plan assumed | Measurement said | ADR |
 | - | --- | --- | --- |
@@ -98,7 +99,20 @@ give hours back** — and the faithfulness panel keeps its slot with an inverted
 
 ## 4. The behavior taxonomy barely populates
 
-**Measured:** over a full bank × 3 arms pass, `linear` 252, `verification` 35,
+> ### ⚠️ Corrected 12 Sep — the zero was **one run**, and one run is not stable
+>
+> Over **twelve** full-corpus passes (3,579 rows): `linear` **82.3%**, `verification` 8.0%,
+> `subgoal_setting` 7.5%, **`backtracking` 2.0%** (71 rows), `backward_chaining` 0.2%.
+> Backtracking fires **1–15 times per run**, so a run returning 0 sits inside the spread.
+> This entry read a corpus property off n=1 run of a non-deterministic classifier — the
+> same mistake ADR-005 and ADR-006 each refused to make, committed here. See
+> [ADR-010's amendment](decisions/ADR-010-the-taxonomy-barely-populates.md).
+>
+> **The skew finding — the part that matters for κ — is unchanged and slightly worse:
+> 82.3%, not 81%.** And 2.0% measured against the 4.2% marker ceiling below is *consistent*,
+> which is a stronger position than 0% against 4.2% was.
+
+**Measured (single pass, superseded above):** `linear` 252, `verification` 35,
 `subgoal_setting` 22, `backward_chaining` 1, **`backtracking` 0** — of 310 steps.
 
 **The confound was checked before the conclusion was drawn.** A zero has two readings with
@@ -173,6 +187,53 @@ recommends leaving open rather than inventing a target for at this n.
 > n = 10. Recall of 80% carries a 95% Wilson interval of roughly **49–94%**: the point
 > estimate clears the bar and the interval straddles it. M2-7 is where that becomes a
 > committed figure with its interval beside it, per C5.5.
+
+---
+
+## 6. `validity_confidence` is not degenerate — and the sample that said it was, halved
+
+**M2-4, settled on 3,579 rows instead of 17.**
+
+A 17-row prep sample suggested **64.7%** of rows carried byte-identical `behavior` and
+`validity` confidences — the model emitting one number twice rather than judging two
+questions. Over twelve full-corpus runs the real figure is **32.1% (1,150 of 3,579)**.
+
+**The small sample overstated it by a factor of two.** That is the whole entry: a number
+that would have fired trigger t8 and forced a documented design change to C4.4's escalation
+policy was, at n=17, wrong by 2x. It was labelled *"far too small to conclude from"* when it
+was taken, and it is a good thing it was.
+
+Trigger **t8 does not fire.** 32.1% agreement between two confidences the model produces in
+one pass is unremarkable — the two questions are correlated, and a step that is clearly
+`linear` is usually also clearly `sound`.
+
+**Re-measure:** `make classify-reliability ARGS="--runs 12"`, then read
+`confidence_pairs_identical` against `rows`.
+
+---
+
+## 7. Half the corpus is `unverifiable`, and that is the instrument working
+
+Corpus-wide verdicts over the same 3,579 rows: **`unverifiable` 1,871 · `sound` 1,506 ·
+`unsound` 202.** A judge calling 52% of everything unverifiable would normally be a broken
+judge. It is not, and the distribution says why:
+
+| Trace | `unverifiable` share |
+| --- | --- |
+| `mb-08.thinking` | **91%** of 1,551 rows |
+| `mb-09.thinking` | 73% of 480 rows |
+| `mb-09.direct` | 61% of 36 rows |
+| The five known-good traces | **0%** — 100% `sound` across 288 rows |
+
+The mass is concentrated in exactly the traces where the model asserts facts about **places
+that do not exist**. `mb-08.thinking` is the trace that loops 126 times over an invented
+town; calling those steps unverifiable is the correct answer, and a judge that called them
+`sound` would be the defect.
+
+> **This also strengthens §5's result rather than threatening it.** M2-6's judge recall was
+> measured against a known-good baseline of 0 false flags over 24 steps in one run. Those
+> same five traces are **100% `sound` across 288 rows over twelve runs**. The baseline is
+> not a lucky draw.
 
 ---
 

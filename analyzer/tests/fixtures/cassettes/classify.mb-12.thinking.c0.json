@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 381,
+  "finish_reason": "stop",
+  "latency_ms": 5108,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 814,
+  "reasoning_tokens": 128,
+  "request_digest": "d991589f1e893430",
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-12-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Defines variables and equations correctly: n=p+2 and p+n=2.60; straightforward setup.\"},{\"step_id\":\"thinking:thinking-mb-12-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Algebra solves  p+(p+2)=2.60 =>2p+2=2.60 =>2p=0.60 =>p=0.30; arithmetic is correct.\"},{\"step_id\":\"thinking:thinking-mb-12-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.8,\"verdict\":\"sound\",\"validity_confidence\":0.8,\"error_type\":null,\"rationale\":\"Final answer restates result $0.30, matching the algebraic solution.\"}]}"
+}

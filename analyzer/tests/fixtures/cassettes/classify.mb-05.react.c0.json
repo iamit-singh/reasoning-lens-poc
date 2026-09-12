@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 422,
+  "finish_reason": "stop",
+  "latency_ms": 5281,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 784,
+  "reasoning_tokens": 192,
+  "request_digest": "45938abe07182421",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-05-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Computed total units (3*14=42), capacity (42*32=1344), subtracted checked-out books (1344-118=1226); arithmetic and logic are correct.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-05-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Restates the computed result 1226 as the final answer, consistent with prior correct calculation.\"\n    }\n  ]\n}"
+}

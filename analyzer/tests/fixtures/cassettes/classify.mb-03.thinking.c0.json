@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 344,
+  "finish_reason": "stop",
+  "latency_ms": 4857,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 697,
+  "reasoning_tokens": 128,
+  "request_digest": "4f26af310d87ced9",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.86,\n      \"error_type\": null,\n      \"rationale\": \"Identifies the task and states the expected answer (Red, Green, Blue); straightforward and correct given the question.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Provides the requested list: 'Red, Green, and Blue', which correctly names the additive primary colors.\"\n    }\n  ]\n}"
+}

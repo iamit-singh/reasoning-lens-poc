@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 237,
+  "finish_reason": "stop",
+  "latency_ms": 4912,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 711,
+  "reasoning_tokens": 64,
+  "request_digest": "5543af8814f5d2c3",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-12-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.86,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Defines variables and solves 2x+2=2.6 to get x=0.3; algebra is correct and follows from problem statement.\"},{\"step_id\":\"direct:direct-mb-12-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.78,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"States the computed value for the pen as $0.30, which correctly follows from the previous computation.\"}]}"
+}

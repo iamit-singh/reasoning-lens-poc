@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 293,
+  "finish_reason": "stop",
+  "latency_ms": 5277,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 711,
+  "reasoning_tokens": 128,
+  "request_digest": "368ef31d2ac47ada",
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.93,\"error_type\":null,\"rationale\":\"Correct forward computation: 0.15\u00d740=6, subtracting gives 34; concise and directly derived.\"},{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Final numeric answer restates the computed sale price $34.00, consistent with prior step.\"}]}"
+}
