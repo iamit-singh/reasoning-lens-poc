@@ -145,6 +145,90 @@ batch job** — agreement and hint-verbalisation rates are model-specific.
 `rlens.versions.analyzer_pin()` refuses to be absent *and* refuses a floating alias: a number
 pinned to an alias expires silently.
 
+## The six operating procedures (M3-5a)
+
+**Every procedure below was executed once before it was written down.** That is M3-5a's DoD
+and it is not ceremony: a runbook written from the source is a description of what the
+author believes the commands do, and the gap between that and what they *do* is exactly the
+gap an operator discovers at the worst moment. Each entry names what it produced when it
+was run, so a reader can tell whether their run matched.
+
+### P1 — Bring the demo up
+
+```
+make fe-build          # static export -> frontend/out
+make serve-api         # localhost:8000, cache-first, DEMO_MODE from .env
+```
+
+`/readyz` is the check that matters, not `/healthz`. It reports `cached_reports`,
+`stale_reports` and the breaker state. **A green `/healthz` with an empty cache is a demo
+with nothing to show**, which is why readiness reports what it is ready *for*.
+
+### P2 — Prove the demo works before an audience sees it
+
+```
+make smoke
+```
+
+Starts a real server **with `OPENAI_API_KEY` stripped**, runs 16 checks, stops it. *We did
+not call the provider* and *we could not call the provider* are different claims, and only
+the second proves the fallback product.
+
+> **Observed on first run:** 4 of 16 failed, and every failure was real — two stale
+> reports, a thin cache, and a breaker pointed at a directory. Do not treat a red smoke run
+> as flaky. It has not yet produced a false alarm.
+
+### P3 — Trip the spend breaker, and reset it
+
+```
+make trip-breaker      # writes a real over-limit total; the live route now 503s
+make reset-breaker     # clears it
+```
+
+The trip goes through the **same code path** the real limit takes rather than simulating
+it. Note the fail-closed rule: a *missing* spend file is $0 spent and allowed; an
+*unreadable* one is denied. If live runs are refused with `spend file unreadable`, the file
+is corrupt or `SPEND_FILE` points somewhere wrong — that is the breaker working.
+
+### P4 — Re-warm the cache after any pin change
+
+```
+make report            # span trees -> out/reports, one report per item
+```
+
+**Required after any change to the runner version, analyzer version, prompt bundle or
+generation pin.** The server refuses to start on a stale cache rather than serving it,
+because a report built before any of those moved is a set of numbers attributed to a system
+that is no longer running. `CACHE_STRICT=0` overrides, and choosing it is a decision to
+publish exactly that.
+
+### P5 — Rebuild the published measurements
+
+```
+make faithfulness      # faithfulness/panel.json from S4's records — no model, no network
+make calibrate         # calibration/results/latest.json
+make seeded-errors     # judge recall; COSTS SPEND
+```
+
+`make faithfulness-check` and the calibration-page grep both run in CI, so a committed
+panel cannot drift from the records behind it and no page can render a number its source
+file does not contain.
+
+### P6 — Hand the analyzer to someone else
+
+```
+make wheel
+```
+
+Builds the wheel, installs it into a venv with nothing else in it **outside the repo**, and
+ingests a third-party LangGraph capture. This is the real handover artifact.
+
+> **Observed on first run:** it failed. The JSON Schema was not packaged, so `load_schema()`
+> raised in any fresh install while the whole test suite stayed green from the source
+> checkout. **Run this after touching `analyzer/`, not before a release.**
+
+---
+
 ## Deploy
 
 **There is none.** The demo runs from a laptop ([ADR-003](decisions/ADR-003-hosting.md)): no
