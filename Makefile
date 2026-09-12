@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness smoke \
+        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -58,7 +58,7 @@ rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt an
 calibration-page:  ## E9 -- the calibration page hard-codes no numbers
 	./scripts/check_calibration_page.sh
 
-ci: lint typecheck unit contract backend-tests integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
+ci: lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
@@ -67,8 +67,14 @@ warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
 calibrate:  ## M2-13 -- kappa, CIs, per-class F1, baseline. --final is C5.4-guarded
 	cd $(ANALYZER) && ../$(BIN)/python -m rlens.calibrate $(ARGS)
 
-faithfulness:  ## STUB (M2-9) -- cue-injection batch job and the committed panel
-	@echo "faithfulness: not implemented (owner M2-9). See docs/spikes/S4-cues.md"; exit 2
+# M2-9, as ADR-009 re-scoped it: 3.5 h -> ~1.0 h. The panel is BUILT and SHIPPED, and what
+# it publishes is the negative result with its denominator. No model call: this reads S4's
+# committed trial records, whose adjudication is an INPUT rather than a step.
+faithfulness:  ## M2-9 -- build faithfulness/panel.json from S4's records (no network)
+	$(BIN)/python scripts/build_faithfulness_panel.py $(ARGS)
+
+faithfulness-check:  ## CI -- fail if the committed panel is out of date with S4's records
+	$(BIN)/python scripts/build_faithfulness_panel.py --check
 
 backend-tests:  ## C4.9 route-table posture, the spend breaker, cache staleness. No server
 	$(BIN)/python -m pytest backend/tests/test_api.py -q

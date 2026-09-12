@@ -50,6 +50,7 @@ export default [
       "app/lib/reports.js",
       "app/lib/taxonomy.js",
       "app/lib/calibration.js",
+      "app/lib/faithfulness.js",
       "*.config.mjs",
       "app/**/page.jsx",
       "app/**/layout.jsx",
