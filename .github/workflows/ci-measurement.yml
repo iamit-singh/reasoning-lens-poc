@@ -1,40 +1,148 @@
-# C7.2 measurement triggers. These cost LLM spend (~$10-15/month total, inside B7.2's
-# dev/calibration line) and need CI_API_KEY: a restricted key with its own low spend
-# cap, separate from the production key.
+# C7.2 measurement triggers — M2-11.
 #
-# DISABLED until M2-1 exists. Enabling before then would run a scorer that does not
-# exist against labels that do not exist. The file is committed now so the trigger
-# shape, the gate thresholds and the key requirement are all agreed in W1.
+# These cost LLM spend and need `OPENAI_API_KEY` plus `MODEL_ANALYZE`: a restricted key
+# with its own low cap, separate from the one on the Lead's machine.
+#
+# **The secret used to be named `ANTHROPIC_API_KEY`.** That is a provider this project does
+# not use and never did — ADR-001 makes generation local and analysis OpenAI. The name was
+# written in W1 against the plan's original assumption and survived because nothing ever
+# ran these jobs. A workflow nobody runs is a workflow nobody proofreads, which is the
+# argument for the change below: **the jobs are enabled.**
+#
+# Why enabled rather than `if: false` until the labels exist
+# ----------------------------------------------------------
+# The previous version gated every job behind `if: false` with a comment saying "remove
+# with M2-1". A job that cannot run cannot rot visibly — it rots silently, and three
+# separate things in it were already wrong by W5 (the provider, the make targets, the
+# artifact paths). `make calibrate` runs on **zero labels without crashing** by design
+# (M2-13), so these jobs now run for real and report *not yet measured*, which is a true
+# statement that stays true and starts being interesting the moment a label is written.
 name: measurement
 
 on:
   workflow_dispatch:
-  # Uncomment with M2-1:
-  # pull_request:
-  #   paths: ["analyzer/**", "analyzer/src/rlens/prompts/**"]
-  # schedule:
-  #   - cron: "0 2 * * *"   # nightly on main
+    inputs:
+      final:
+        description: "Run M2-17's --final held-out scoring. Reads the sealed set. ONCE."
+        type: boolean
+        default: false
+  pull_request:
+    # A prompt edit changes PROMPT_BUNDLE_VERSION, which invalidates the cache and changes
+    # what κ is measuring. That is the change this gate exists for.
+    paths:
+      - "analyzer/src/rlens/prompts/**"
+      - "analyzer/src/rlens/classify.py"
+      - "analyzer/src/rlens/judge.py"
+      - "analyzer/src/rlens/consistency.py"
+      - "calibration/rubric.md"
+  schedule:
+    - cron: "0 2 * * *" # nightly on main
+
+permissions:
+  contents: read
+  pull-requests: write # the κ comment
 
 jobs:
   calibrate-dev:
-    name: calibrate --dev (kappa_dev >= 0.60, no per-class F1 regression > 0.05)
-    if: false # remove with M2-1
+    name: calibrate --dev (κ_dev, per-class F1, no regression > 0.05)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e "./analyzer[dev]"
-      - run: make calibrate ARGS="--dev"
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.CI_API_KEY }}
-      # Gate: kappa_dev >= 0.60 AND no per-class F1 regression > 0.05 vs main.
-      # Results posted as a PR comment (C7.2).
 
-  nightly-full:
-    name: calibrate --final + seeded recall + pooled precision + consistency FP
-    if: false # remove with M2-3
+      # **Dev set only, and that is enforced by the CLI rather than by this file.**
+      # `--final` is the only way to read the held-out 50 and it refuses unless the prompt
+      # bundle is frozen (C5.4). A workflow that could open the sealed set by passing one
+      # more flag would make "opened once" a promise a YAML file has to keep.
+      - name: calibrate against the dev set
+        id: cal
+        run: make calibrate ARGS="--dev --json" | tee calibration-dev.json
+        env:
+          OPENAI_API_KEY: ${{ secrets.CI_API_KEY }}
+          MODEL_ANALYZE: ${{ vars.MODEL_ANALYZE }}
+          ANALYZER_BACKEND: hybrid
+
+      - name: post the κ comment
+        if: github.event_name == 'pull_request'
+        run: python scripts/kappa_comment.py calibration-dev.json --pr "${{ github.event.number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calibration-dev
+          path: calibration-dev.json
+
+  seeded-recall:
+    name: seeded-error recall (B4 #3, correct-step rule)
+    # Nightly and on demand, not on every prompt PR: it costs ~15 analysis calls and its
+    # signal moves slowly. The dev κ above is the fast gate.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Failure opens an issue; it does not block (C7.2).
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - name: replay span trees from cassettes
+        run: make spans
+      - name: seeded errors
+        run: make seeded-errors
+        env:
+          OPENAI_API_KEY: ${{ secrets.CI_API_KEY }}
+          MODEL_ANALYZE: ${{ vars.MODEL_ANALYZE }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seeded-errors
+          path: docs/spikes/M2-6-raw/
+
+  # C7.2: a nightly failure opens an issue, it does not block. The distinction is the point
+  # — a measurement that blocks the branch on a bad night teaches people to disable it.
+  nightly-issue:
+    name: open an issue if the nightly measurement failed
+    needs: [calibrate-dev, seeded-recall]
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          gh issue create \
+            --title "Nightly measurement failed — $(date -u +%Y-%m-%d)" \
+            --body "The nightly calibration or seeded-error run failed. Run ${{ github.run_id }}. This does not block main (C7.2); it is a signal that a measured number moved or a tier changed."
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  # ----------------------------------------------------------------- pre-release
+  # **Defined, and deliberately manual.** M2-17's `--final` run reads the sealed held-out
+  # set exactly once, at a frozen bundle. Putting that on a trigger — any trigger — means a
+  # re-run of a workflow silently becomes a second read, and P3 ("held-out read exactly
+  # once") stops being checkable. A human dispatches this, once, and the G2 report records
+  # the command line and the pin.
+  final-heldout:
+    name: "PRE-RELEASE: the single --final held-out run (M2-17)"
+    if: github.event_name == 'workflow_dispatch' && inputs.final == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - name: refuse unless the prompt bundle is tagged frozen
+        run: |
+          git fetch --tags
+          git describe --tags --exact-match HEAD | grep -q '^prompts-frozen' || {
+            echo "HEAD is not at a prompts-frozen tag. M2-17 runs at a frozen bundle or not at all (C5.4, P4)."
+            exit 1
+          }
+      - run: make calibrate ARGS="--final"
+        env:
+          OPENAI_API_KEY: ${{ secrets.CI_API_KEY }}
+          MODEL_ANALYZE: ${{ vars.MODEL_ANALYZE }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calibration-final
+          path: calibration/results/latest.json
