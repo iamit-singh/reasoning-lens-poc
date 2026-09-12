@@ -5,7 +5,7 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — 7 closed, 4 deleted by ADR-003, 5 open |
+| **Status** | ⏳ **in progress** — 9 closed, 4 deleted by ADR-003, 3 open |
 | **Last executed** | 12 Sep 2026 (W5, ahead of W12) |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
@@ -20,14 +20,14 @@ branches ship, and G3 has no failure outcome.
 
 | # | Criterion | State | Evidence |
 | - | --- | --- | --- |
-| **E1** | Read-only endpoints serve with **zero LLM calls**, key removed | ⏳ **partial** | `make smoke` starts a real server with `OPENAI_API_KEY` stripped and runs 16 checks; `test_the_cached_read_path_makes_no_model_call` replaces both provider entry points with something that raises. **Not green**: the cache holds 2 of 42 reports and both are stale. Closes with E4 |
+| **E1** | Read-only endpoints serve with **zero LLM calls**, key removed | ✅ **closed** | `make smoke` starts a real server with `OPENAI_API_KEY` stripped and runs 18 checks; `test_the_cached_read_path_makes_no_model_call` replaces both provider entry points with something that raises. **18/18 green, 12 Sep**, against a real server with `OPENAI_API_KEY` stripped |
 | **E2** | Live re-run end to end, SSE, every degraded branch reachable | ❌ **not built** | `POST /api/runs` exists, allowlisted, rate-limited and breaker-checked. **There is no SSE and there will not be** — ADR-003 made this a static export with no server to stream from, and M3-1b is marked droppable. Every *degraded branch* is reachable and rendered (FE-8, seven states). See the deviation below |
 | **E3** | Redis reachable, and the breaker fails closed without it | ✅ **closed, restated** | [ADR-011](decisions/ADR-011-no-redis.md): there is no Redis, because one process has nothing to coordinate with. The fail-closed *principle* is implemented literally and tested — an unreadable spend file **denies**, a missing one allows. 5 parametrised cases incl. `{"usd": true}` |
-| **E4** | Cache warmed **once**, at the shipping pin; every report's `versions` matches the running service | ⏳ **open** | The startup assertion exists and **works** — `assert_fresh` refuses to start on a stale cache and names which version moved; `/readyz` reports `stale_reports`. The warm run itself is queued behind the M1-9 measurement (same tier). **This is one of the two rows that carry the month** |
+| **E4** | Cache warmed **once**, at the shipping pin; every report's `versions` matches the running service | ✅ **closed** | The startup assertion exists and **works** — `assert_fresh` refuses to start on a stale cache and names which version moved; `/readyz` reports `stale_reports`. **14 reports, 0 stale.** The run also exposed that an *unconfigured* pin read as a *changed* one — fixed, since re-warming would have cost 14 items of spend to repair a missing env var. **This is one of the two rows that carry the month** |
 | **E5** | Spend breaker verified by a **forced trip**, reset procedure in the runbook | ✅ **closed** | `make trip-breaker` / `make reset-breaker` go through the real code path. Runbook procedure **P3**. Test: `test_a_forced_trip_denies_the_live_route` |
 | **E6** | Auto-rollback demonstrated by a deliberately failed smoke test | ⛔ **deleted** | ADR-003: nothing is deployed, so there is nothing to roll back to. ~0.7 h released |
 | **E7** | Live at the custom domain over TLS, incognito + phone | ⛔ **deleted** | ADR-003: no public hostname, no cloud service. The DNS ticket was drafted and correctly never filed |
-| **E8** | B4 #8 measured, **both halves**, with n | ⏳ **open** | The cached half has a floor asserted in smoke (every report under 5 s, measured per request). The live half needs E2, which is not being built — so this closes as **cached-half only, with the other half named as not-applicable**, not as a pass |
+| **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **cached half closed; live half not applicable** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. The live half needs E2, which ADR-003 deleted. Recorded as **half a measurement**, not as a pass |
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. Every metric currently renders *not yet measured*, which is correct |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. I3 holds |
@@ -62,6 +62,22 @@ B4 #8 has two halves and only one has a system to measure. Reporting a cached p9
 leaving the live number blank is correct; reporting "B4 #8 met" on the strength of the half
 that exists would be the exact failure this project has spent three months refusing.
 
+**The cached half, measured 12 Sep:** p50 **0.9 ms**, p90 **1.0 ms**, p99 **1.3 ms**, max
+1.4 ms, over **n = 140** requests across all 14 items. The budget is 5,000 ms.
+
+> **Two caveats, because a number 4,800× inside its budget invites the wrong reading.**
+> This is the *server-side* path — a `GET` that resolves an allowlisted id to a dict entry
+> and returns a file already in the page cache, measured over loopback. It is not what a
+> viewer experiences, which also includes loading the static export. And it is fast for a
+> structural reason rather than an optimisation: **C4.9 forbids a `GET` from triggering a
+> model call**, so there is nothing on this path that *can* be slow. The number is
+> evidence that the rule holds, not that the service is fast under load — nobody has put
+> it under load, and with one operator nobody will.
+
+**The live half is `null`, and stays null.** Not "pending": the system that would produce
+it was deleted by ADR-003. A reader should see an explicit not-applicable with a reason,
+not an empty cell that looks like an unfinished job.
+
 ### E12 and E13 — the two rows no amount of code closes
 
 Both need a human who is not the Lead. Amendment 001 already converted G1's check 10 from
@@ -82,8 +98,8 @@ dropping the criterion or lowering it until it passes.
 
 | Row | Owner | Needs | By |
 | --- | --- | --- | --- |
-| E1, E4 | Lead | One `make report` pass at the shipping pin, then `make smoke` green | Queued behind the M1-9 measurement |
-| E8 | Lead | The cached p90 with n from a warmed smoke run; the live half recorded as n/a with its reason | With E4 |
+| ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, 18/18 smoke with the key stripped | done |
+| E8 | Lead | The cached p90 with n over more than 3 samples; the live half recorded as n/a with its reason | Next |
 | **E12** | **Tech lead** | **Five walkthrough testers booked** | **No default exists** |
 | **E13** | **Tech lead** | **One peer named for the runbook dry-run** | **No default exists** |
 | E15 | Lead | Fallback video — an unedited screen recording (L4) | Before any live demo |
