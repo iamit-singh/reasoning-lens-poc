@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
+        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo clean
 
@@ -94,6 +94,9 @@ smoke:  ## M3-4/M3-1a -- acceptance against a real server, provider key REMOVED
 	$(BIN)/python backend/tests/smoke.py --base-url http://127.0.0.1:8071 --no-key; \
 	status=$$?; kill $$(cat /tmp/rlens-smoke.pid) 2>/dev/null; rm -f /tmp/rlens-smoke.pid; \
 	exit $$status
+
+fe-export-check:  ## FE-10 -- assert the static export renders with nothing running
+	$(BIN)/python scripts/check_static_export.py
 
 wheel:  ## M3-8 -- build the analyzer wheel and prove it runs in a CLEAN venv
 	@./scripts/clean_venv_proof.sh

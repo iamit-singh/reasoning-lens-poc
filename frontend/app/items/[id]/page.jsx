@@ -6,6 +6,7 @@ import Trace from "../../components/Trace";
 import Scoreboard from "../../components/Scoreboard";
 import FlaggedPanel from "../../components/FlaggedPanel";
 import Download from "../../components/Download";
+import Banners from "../../components/Banners";
 import { taxonomy } from "../../lib/taxonomy";
 
 /**
@@ -41,6 +42,10 @@ export default async function ItemPage({ params }) {
       <Link className="backlink" href="/">
         ← every item
       </Link>
+
+      {/* FE-8. Run-level, and ABOVE the report: a reader needs to know how much to
+          discount before they read, not after they have scrolled past it. */}
+      <Banners report={report} arms={arms} />
 
       <section className="featured" style={{ marginTop: 14 }}>
         <header>
