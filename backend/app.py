@@ -97,6 +97,29 @@ def demo_mode() -> str:
     return os.environ.get("DEMO_MODE", "cached")
 
 
+def analysis_ready() -> tuple[bool, str]:
+    """Can the ANALYSIS tier actually run? Generation being fine is not the same question.
+
+    **This is the asymmetry ADR-001 created and nothing was checking.** Generation is local,
+    so it needs no key and works offline. Classification is OpenAI. A live re-run with no
+    `OPENAI_API_KEY` therefore generates three traces perfectly well, spends real local
+    compute doing it, and *then* fails — halfway, with a half-built report and nothing
+    having warned anybody.
+
+    Found by `make smoke --no-key`, which strips the key and got a **202** back from the
+    live route. Every read path was correctly green; the write path promised work it could
+    not finish.
+    """
+    backend = os.environ.get("ANALYZER_BACKEND", "hybrid")
+    if backend == "local":
+        return True, "local analyzer tier; no key required"
+    if not os.environ.get("OPENAI_API_KEY"):
+        return False, "OPENAI_API_KEY is unset, so a live run could generate but not classify"
+    if not os.environ.get("MODEL_ANALYZE"):
+        return False, "MODEL_ANALYZE is unset (ADR-001: an exact dated id, never an alias)"
+    return True, "ok"
+
+
 # ------------------------------------------------------------------ rate limit (C9)
 _HITS: dict[str, list[float]] = {}
 
@@ -145,7 +168,8 @@ def readyz() -> dict[str, Any]:
         "cached_reports": len(staleness),
         "stale_reports": [s.describe() for s in stale],
         "calibration": CALIBRATION.exists(),
-        "live_runs": demo_mode() != "cached" and state.allowed,
+        "live_runs": demo_mode() != "cached" and state.allowed and analysis_ready()[0],
+        "analysis_tier": {"ready": analysis_ready()[0], "reason": analysis_ready()[1]},
         "breaker": {
             "allowed": state.allowed,
             "reason": state.reason,
@@ -272,6 +296,14 @@ async def create_run(request: Request) -> JSONResponse:
     state = breaker.check()
     if not state.allowed:
         raise HTTPException(status_code=503, detail=state.reason)
+
+    # Refuse up front rather than halfway. See `analysis_ready`.
+    ready, why = analysis_ready()
+    if not ready:
+        raise HTTPException(
+            status_code=503,
+            detail=f"live runs unavailable: {why}. Cached reports are served normally.",
+        )
 
     client = request.client.host if request.client else "unknown"
     if _rate_limited(client):

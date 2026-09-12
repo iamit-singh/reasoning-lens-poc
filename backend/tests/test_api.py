@@ -187,9 +187,28 @@ def test_demo_mode_cached_disables_live_runs_outright(client, monkeypatch):
     assert resp.status_code == 503 and "disabled" in resp.json()["detail"]
 
 
+def test_a_live_run_is_refused_when_the_analysis_tier_is_unconfigured(client, monkeypatch):
+    """**Generation is local; classification is not.** ADR-001's asymmetry, enforced.
+
+    Without a key a live run would generate three traces perfectly well, spend the local
+    compute, and fail at classification — halfway, with a half-built report. Found by
+    `make smoke --no-key`, which got a 202 back from a server that could not finish the job.
+    """
+    monkeypatch.setenv("DEMO_MODE", "live")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    breaker.reset()
+    resp = client.post("/api/runs", json={"item_id": "mb-01"})
+    assert resp.status_code == 503
+    assert "could generate but not classify" in resp.json()["detail"]
+    # And readiness must agree with the route rather than contradicting it.
+    assert client.get("/readyz").json()["live_runs"] is False
+
+
 def test_the_run_route_ignores_every_key_but_item_id(client, monkeypatch):
     """No prompt, no model, no parameters reach anything (C4.9)."""
     monkeypatch.setenv("DEMO_MODE", "live")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.setenv("MODEL_ANALYZE", "gpt-5-mini-2025-08-07")
     breaker.reset()
     resp = client.post(
         "/api/runs",
@@ -202,18 +221,53 @@ def test_the_run_route_ignores_every_key_but_item_id(client, monkeypatch):
 
 
 # ------------------------------------------------------------------ staleness (M3-2b)
-def test_a_report_from_a_different_pipeline_reads_as_stale():
+@pytest.fixture
+def pinned(monkeypatch):
+    """A configured generation pin.
+
+    The staleness tests are about *drift*, and drift is only meaningful once there is
+    something to drift from. Without this the suite exercises the unconfigured-pin branch
+    instead and silently stops testing what it claims to — which is the same class of
+    mistake as a docstring citing a test that does not exist.
+    """
+    for key, value in (
+        ("LOCAL_MODEL", "test-model"),
+        ("LOCAL_MODEL_DIGEST", "sha256:test"),
+        ("LOCAL_QUANTIZATION", "TEST"),
+        ("LOCAL_RUNTIME", "test 0.0"),
+    ):
+        monkeypatch.setenv(key, value)
+
+
+def test_an_unconfigured_pin_says_so_instead_of_claiming_staleness(monkeypatch):
+    """**A configuration problem must not read as a stale cache.**
+
+    A server started without `.env` computes a fingerprint over empty strings, so every
+    report "drifts" on `model_pin` and the refusal sends the operator to `make warm-cache`
+    when the repair is `source .env`. Found by running the scan in a shell that had not
+    sourced it: 14 of 14 reports stale, 0 of 14 once it had.
+    """
+    for key in ("LOCAL_MODEL", "LOCAL_MODEL_DIGEST", "LOCAL_QUANTIZATION", "LOCAL_RUNTIME"):
+        monkeypatch.delenv(key, raising=False)
+    result = cache.check_report("mb-01", {"versions": cache.current_versions()})
+    assert not result.fresh
+    assert "no generation pin" in (result.error or "")
+    # And it must NOT be reported as drift, which is what `assert_fresh` refuses on.
+    assert result.drifted == ()
+
+
+def test_a_report_from_a_different_pipeline_reads_as_stale(pinned):
     stale = cache.check_report("mb-01", {"versions": {"prompts": "not-the-current-bundle"}})
     assert not stale.fresh
     assert any("prompts" in d for d in stale.drifted)
 
 
-def test_a_report_matching_the_running_versions_reads_as_fresh():
+def test_a_report_matching_the_running_versions_reads_as_fresh(pinned):
     fresh = cache.check_report("mb-01", {"versions": cache.current_versions()})
     assert fresh.fresh, fresh.describe()
 
 
-def test_assert_fresh_refuses_rather_than_serving(tmp_path, monkeypatch):
+def test_assert_fresh_refuses_rather_than_serving(tmp_path, monkeypatch, pinned):
     """A stale cache stops the process. It does not produce a warning nobody reads."""
     monkeypatch.setattr(cache, "REPORTS_DIR", tmp_path)
     (tmp_path / "mb-01.report.json").write_text(json.dumps({"versions": {"prompts": "old"}}))

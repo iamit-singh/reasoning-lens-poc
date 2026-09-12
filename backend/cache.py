@@ -97,6 +97,24 @@ def check(item_id: str) -> Staleness:
 
 
 def check_report(item_id: str, report: dict[str, Any]) -> Staleness:
+    # **An unconfigured pin is not a changed pin, and conflating them sends the operator
+    # to the wrong fix.** A server started without `.env` computes a fingerprint over empty
+    # strings, every report "drifts" on `model_pin`, and the refusal reads as *re-warm the
+    # cache* when the actual repair is *load your environment*. Found by running the
+    # staleness scan in a shell that had not sourced `.env`: 14 of 14 reports stale,
+    # 0 of 14 once it had.
+    missing = generation_pin().unpinned_fields()
+    if missing:
+        return Staleness(
+            item_id,
+            (),
+            error=(
+                f"the RUNNING process has no generation pin ({', '.join(missing)} unset), "
+                f"so nothing can be compared against it. This is a configuration problem, "
+                f"not a stale cache — source your .env or run `make pin-local`."
+            ),
+        )
+
     have = report.get("versions") or {}
     want = current_versions()
     drifted = tuple(

@@ -173,10 +173,14 @@ def main(argv: list[str] | None = None) -> int:
     detail = str(body.get("detail", ""))
     # Either the kill switch is on (cached) or the breaker answered. Both are green; a 200
     # or a 500 is not. Catches a live path that is open when it should not be.
+    # **Under --no-key a 202 is a FAIL, not a pass.** Generation is local and needs no key,
+    # so a server without one will happily start a run and fail at classification — after
+    # spending the compute. "Guarded" has to mean refused up front.
+    allowed = (503, 429) if args.no_key else (503, 202, 429)
     r.check(
-        status in (503, 202, 429),
-        "live-run path is guarded",
-        f"status {status}: {detail[:60]}",
+        status in allowed,
+        "live-run path is guarded" + (" (refused without a key)" if args.no_key else ""),
+        f"status {status}: {detail[:70]}",
     )
 
     status, body = post(base, "/api/runs", {"item_id": "../../etc/passwd"})
