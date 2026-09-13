@@ -290,6 +290,63 @@ expecting classification to survive.
 
 ---
 
+## 9. The enriched half of the calibration frame comes up **31 of 60**
+
+**M2-14, and it fires trigger t13.**
+
+C5.1's frame has two parts: a uniform **random-90** that carries the published κ, and an
+**enriched-60** over-sampled from the rare classes so per-class F1 has instances to compute
+over at all. The enriched half is drawn from the pool *remaining* after the random-90 —
+179 of the corpus's 269 labellable steps — taking up to 15 per rare class from what the
+**v0** classifier predicted.
+
+| Rare class | Candidates in the remaining pool | Selected | Short |
+| --- | --- | --- | --- |
+| `verification` | 25 | **15** | — |
+| `subgoal_setting` | 16 | **15** | — |
+| `backtracking` | **1** | **1** | −14 |
+| `backward_chaining` | **0** | **0** | −15 |
+| **Total** | | **31 of 60** | **−29** |
+
+Enrichment is **4.26×** on the non-linear classes as a group: they are 23.5% of the
+remaining pool and 100% of the draw.
+
+**Two consequences, and the second is the one that matters at G2.**
+
+**`dev-100` cannot contain 100 rows.** C5.1 defines dev as the first 40 of the random-90
+plus the enriched half, which is **40 + 31 = 71**. The file keeps its name and the G2
+report must quote 71; a file named for a number it does not contain is exactly the kind of
+flattering artifact this project has spent three months refusing.
+
+**B4 #2's *"lowest per-class F1 ≥ 0.50"* is now at serious risk on two classes rather than
+one.** `backward_chaining` has no instances in the enriched half at all, so its F1 will be
+undefined; `backtracking` has one. This is not a statement about the classifier's quality —
+it cannot be, at n = 0 and n = 1.
+
+**The shortfall is partly the sampler, not only the corpus — and that is stated rather than
+buried.** These predictions are **one pass** of a **non-deterministic** classifier. §4's
+amendment measured `backtracking` at 0 on one pass and **2.0% over twelve**, firing between
+1 and 15 times per run, with 45 of its 71 rows inside `mb-08.thinking`. So a single pass is
+a weak instrument for *finding* rare-class candidates, and a multi-pass union would find
+more.
+
+**That option was deliberately not taken here.** The plan's pre-decided action for a class
+that cannot reach its target is t13 — *label what exists, publish the actual n with a wide
+interval, and never backfill from the random pool* — and changing how the enriched half is
+selected is a change to the sampling frame, which is the reviewer's call rather than the
+script's. It is recorded in `calibration/sampling.json` under `single_pass_caveat` so the
+choice is visible instead of implicit.
+
+**Backfilling is refused in code, not by memory.** `analyzer/tests/test_sampling.py` fails
+if the two halves overlap, if any class takes more rows than it had candidates, if a
+shortfall is dropped from the record, or if t13 reads *not fired* while a class is short.
+All five refusals were negative-tested.
+
+**Re-run:** `make draw-enriched ARGS="--force"` — reproducible from seed `20261014` at
+bundle `97667881c779`.
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but

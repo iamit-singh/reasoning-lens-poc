@@ -162,15 +162,26 @@ def main(argv: list[str] | None = None) -> int:
     # calibration/labels/, where everything downstream treats a row as ground truth. A
     # deleted fake is fine; an undeleted one is a label nobody wrote being counted as one.
     ap.add_argument("--dry-run", action="store_true", help="render and prompt, write nothing")
+    # C5.1's frame has two halves drawn by two different tasks, and they are labelled in a
+    # fixed order: the random-90 first. The first 40 of it are M1-11's pass and they carry
+    # the published kappa, so starting on the enriched half would put the easiest-to-find
+    # rare classes into the dev set before the number that has to be independent exists.
+    ap.add_argument(
+        "--part",
+        choices=("random", "enriched"),
+        default="random",
+        help="which half of the sampling frame to serve (default: random-90)",
+    )
     args = ap.parse_args(argv)
 
     record = json.loads(SAMPLING.read_text())
-    draw = record.get("draw", {})
+    draw = record.get("draw", {}) if args.part == "random" else record.get("enriched", {})
     queue: list[str] = draw.get("ordered_step_ids") or []
     if not queue:
+        target = "make draw-sample" if args.part == "random" else "make draw-enriched"
         print(
-            "no draw in calibration/sampling.json. Run `make draw-sample` first -- the seed "
-            "and the ordered id list are committed BEFORE the first label (Hazard 2).",
+            f"no {args.part} draw in calibration/sampling.json. Run `{target}` first -- the "
+            f"seed and the ordered id list are committed BEFORE the first label (Hazard 2).",
             file=sys.stderr,
         )
         return 2

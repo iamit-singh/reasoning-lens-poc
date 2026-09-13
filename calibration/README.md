@@ -6,8 +6,8 @@ something if the procedure is fixed *before* the numbers are seen.
 | Path | What | Owner |
 | --- | --- | --- |
 | `rubric.md` | 5 definitions verbatim from the classifier prompt, the precedence rule, 5 worked examples, 5 adjudicated hard cases, soundness definitions | M1-11 (W4) |
-| `sampling.json` | The seed **and the ordered id list**, committed *before the first label is written* | M1-11 (W4) |
-| `labels/dev-100.jsonl` | 100 dev steps — what prompt iteration tunes against | M1-11 → M2-1 |
+| `sampling.json` | Both halves of C5.1's frame: the **random-90** (seed + ordered id list, committed *before the first label*) and the **enriched-31** drawn from the v0 predictions, each with its seed, bundle version, per-class counts and enrichment factor | M1-11 (W4) · M2-14 (W5) |
+| `labels/dev-100.jsonl` | Dev steps — what prompt iteration tunes against. **C5.1 intends 100 (random 1–40 + enriched 60); the corpus yields 71**, because two rare classes could not reach their enrichment target — see [finding 9](../docs/findings.md) and `sampling.json.enriched` | M1-11 → M2-14 → M2-1 |
 | `labels/heldout-50.jsonl` | 50 double-labeled steps carrying the **published headline κ**. Opened **once**, after the prompt bundle is frozen | M2-1 |
 | `annotator-2.md` | who the second annotator is, when they labeled, and confirmation they were **not** briefed | M2-1 |
 | `labels/HELDOUT_FREEZE` | The freeze commit sha. Absent until M2-1; once present, `scripts/check_heldout_freeze.sh` fails any PR that edits the held-out labels | M2-1 |

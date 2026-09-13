@@ -133,6 +133,9 @@ spans:  ## regenerate out/spans from the committed cassettes -- no GPU, no netwo
 draw-sample:  ## M1-11 -- draw the random-90. Runs ONCE, before the first label (Hazard 2)
 	$(BIN)/python scripts/draw_sample.py $(ARGS)
 
+draw-enriched:  ## M2-14 -- draw the enriched-60 from the v0 predictions. Runs ONCE
+	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/draw_enriched.py $(ARGS)
+
 label:  ## M1-11 -- the BLIND labelling tool. Two labels per step, one pass (C5.2)
 	$(BIN)/python scripts/label.py $(ARGS)
 

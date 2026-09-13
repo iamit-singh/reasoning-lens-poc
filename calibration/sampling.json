@@ -118,5 +118,87 @@
       "thinking:thinking-mb-08-root-llm-0:45",
       "thinking:thinking-mb-09-root-llm-0:33"
     ]
+  },
+  "enriched": {
+    "owner": "M2-14 (W5)",
+    "seed": 20261014,
+    "drawn_utc": "2026-09-13T07:48:29Z",
+    "commit": "e5f38f2347ae608c484b36b1e509071ee5abffa9",
+    "prompt_bundle_version": "97667881c779",
+    "classifier": "v0 -- UN-TUNED, deliberately (M2-14). Enriching from the tuned classifier would couple the rare-class evaluation set to the tuned model's own error structure: it would be scored on precisely the steps it had learned to call non-linear.",
+    "method": "For each of verification/subgoal_setting/backtracking/backward_chaining: take every step in the pool REMAINING after the random-90 whose v0 prediction is that class, sort by step_id, shuffle with random.Random(20261014), take up to 15. Sorted before the shuffle so the result depends on the seed alone.",
+    "population_size": 269,
+    "remaining_pool_size": 179,
+    "target": 60,
+    "selected_total": 31,
+    "short_of_target_total": 29,
+    "classes_that_could_not_reach_target": [
+      "backtracking",
+      "backward_chaining"
+    ],
+    "per_class": {
+      "verification": {
+        "candidates_in_remaining_pool": 25,
+        "selected": 15,
+        "short_of_target": 0,
+        "base_rate_in_remaining_pool": 0.1397
+      },
+      "subgoal_setting": {
+        "candidates_in_remaining_pool": 16,
+        "selected": 15,
+        "short_of_target": 0,
+        "base_rate_in_remaining_pool": 0.0894
+      },
+      "backtracking": {
+        "candidates_in_remaining_pool": 1,
+        "selected": 1,
+        "short_of_target": 14,
+        "base_rate_in_remaining_pool": 0.0056
+      },
+      "backward_chaining": {
+        "candidates_in_remaining_pool": 0,
+        "selected": 0,
+        "short_of_target": 15,
+        "base_rate_in_remaining_pool": 0.0
+      }
+    },
+    "enrichment_factor": 4.26,
+    "enrichment_factor_note": "Non-linear steps are 23.5% of the remaining pool; the enriched draw is 100% non-linear by construction, so the enrichment is 4.26x on the non-linear classes as a group.",
+    "trigger_t13": "FIRED. backtracking reached 1 of 15, backward_chaining reached 0 of 15. Pre-decided action: label what exists and publish the actual n with a wide interval. NEVER backfill from the random pool -- that would take steps out of the half that carries the published kappa to prop up the half that does not.",
+    "single_pass_caveat": "These predictions are ONE PASS of a NON-DETERMINISTIC classifier. ADR-010's amendment measured `backtracking` at 0 on one pass and 2.0% over twelve, firing 1-15 times per run. So a shortfall here is partly a property of the sampler and not only of the corpus. A multi-pass union would find more candidates; it is a change to the sampling frame and is the reviewer's call.",
+    "excluded_from": "the random-90, and therefore from the published held-out kappa. These ids join dev-100 (C5.1: dev = random 1-40 + enriched 60).",
+    "ordered_step_ids": [
+      "thinking:thinking-mb-08-root-llm-0:62",
+      "thinking:thinking-mb-14-root-llm-0:2",
+      "thinking:thinking-mb-08-root-llm-0:68",
+      "react:react-mb-09-root-llm-1:3",
+      "thinking:thinking-mb-07-root-llm-0:2",
+      "thinking:thinking-mb-10-root-llm-0:11",
+      "thinking:thinking-mb-08-root-llm-0:51",
+      "thinking:thinking-mb-08-root-llm-0:58",
+      "thinking:thinking-mb-10-root-llm-0:12",
+      "thinking:thinking-mb-08-root-llm-0:56",
+      "thinking:thinking-mb-08-root-llm-0:69",
+      "thinking:thinking-mb-08-root-llm-0:50",
+      "thinking:thinking-mb-08-root-llm-0:71",
+      "thinking:thinking-mb-08-root-llm-0:59",
+      "thinking:thinking-mb-10-root-llm-0:3",
+      "direct:direct-mb-08-root-llm-0:0",
+      "thinking:thinking-mb-08-root-llm-0:24",
+      "direct:direct-mb-01-root-llm-0:0",
+      "direct:direct-mb-03-root-llm-0:0",
+      "react:react-mb-10-root-llm-0:0",
+      "direct:direct-mb-09-root-llm-0:0",
+      "thinking:thinking-mb-08-root-llm-0:15",
+      "react:react-mb-08-root-llm-0:0",
+      "react:react-mb-08-root-llm-1:3",
+      "react:react-mb-09-root-llm-0:0",
+      "thinking:thinking-mb-07-root-llm-0:0",
+      "thinking:thinking-mb-08-root-llm-0:5",
+      "thinking:thinking-mb-08-root-llm-0:16",
+      "thinking:thinking-mb-01-root-llm-0:0",
+      "thinking:thinking-mb-10-root-llm-0:10",
+      "thinking:thinking-mb-09-root-llm-0:24"
+    ]
   }
 }
