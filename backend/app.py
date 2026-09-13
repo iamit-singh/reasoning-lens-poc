@@ -168,6 +168,12 @@ def readyz() -> dict[str, Any]:
         "cached_reports": len(staleness),
         "stale_reports": [s.describe() for s in stale],
         "calibration": CALIBRATION.exists(),
+        # The operator's pre-flight question is "will a visitor see the site or a JSON
+        # 404?", and the answer is import-time state they cannot otherwise inspect: the
+        # mount below is resolved once, so a frontend built after the server started is
+        # not served until it restarts. Reporting it here makes that checkable from the
+        # probe the runbook already tells them to curl (P2).
+        "frontend_mounted": any(r.path == "" for r in app.routes if hasattr(r, "path")),
         "live_runs": demo_mode() != "cached" and state.allowed and analysis_ready()[0],
         "analysis_tier": {"ready": analysis_ready()[0], "reason": analysis_ready()[1]},
         "breaker": {
@@ -323,3 +329,35 @@ async def create_run(request: Request) -> JSONResponse:
 
     run_id = f"run-{int(time.time() * 1000):x}"
     return JSONResponse({"run_id": run_id, "item_id": item_id}, status_code=202)
+
+
+# ---------------------------------------------------------------- the static mount (FE-9)
+#
+# **The README has claimed since it was written that "`frontend/` is a static export mounted
+# by the backend", and until now it was not.** `FRONTEND_OUT` was defined and never read.
+# That is the same defect class as `app.py` citing a `test_api.py` that did not exist: a
+# claim a reader cannot check is worse than no claim, because it stops them checking.
+#
+# **Why same-origin matters here and is not deployment tidiness.** ADR-003 deleted the
+# hosted service, so the demo is one laptop serving one origin. If the page were opened from
+# `file://` while the API answered on `http://127.0.0.1:8000`, every fetch would be
+# cross-origin and the honest fix would be CORS — widening the surface of a backend whose
+# entire security posture is "the only visitor-controlled input is an item id validated
+# against a static allowlist". Serving both from one origin means that surface stays shut.
+#
+# **Registered last, deliberately.** Starlette matches routes in registration order, so a
+# mount at "/" declared here cannot shadow `/api/*`, `/healthz` or `/readyz` above it. That
+# ordering is asserted in `test_api.py` rather than left to a reader to infer from position.
+#
+# **Mounted only if the export exists**, because `make backend-tests`, CI and a fresh
+# checkout all run with no `frontend/out`, and a backend that refused to start without a
+# frontend build would make the API's own tests depend on the toolchain the API does not
+# need. The consequence is stated rather than hidden: the mount is resolved at import time,
+# so building the frontend while the server is running requires a restart -- runbook P1.
+if FRONTEND_OUT.is_dir():
+    from fastapi.staticfiles import StaticFiles
+
+    # `html=True` resolves `items/mb-01/` to `items/mb-01/index.html`, which is the layout
+    # `trailingSlash: true` produces, and serves `404.html` for an unknown path so a
+    # mistyped URL gets the site's own page rather than a bare JSON error.
+    app.mount("/", StaticFiles(directory=FRONTEND_OUT, html=True), name="frontend")

@@ -41,12 +41,46 @@ function readFixtures() {
 
 let cache = null;
 
-/** Every report available to this build, newest source wins, sorted by item id. */
+/**
+ * Every report available to this build, sorted by item id.
+ *
+ * **Measured mode keeps the authored fixtures, and FE-9 is why.** The obvious version of
+ * this preferred measured reports and dropped the fixtures entirely — and that quietly
+ * broke the shipping build, because **the measured corpus is healthy**. All 42 arms
+ * succeeded and every step got a label, so `unannotated` and `arm failed` occur nowhere in
+ * it. The demo that actually ships could not show a degraded state at all, and FE-8's seven
+ * banners and FE-2b's ten trace states were unreachable in the only artifact a visitor
+ * sees. `make fe-export-check` caught it on the measured build, having passed on fixtures.
+ *
+ * This is the mirror image of the note in FE-2b's commit: a check built only on *measured*
+ * reports passes while a state is unrenderable, and a build that keeps only measured
+ * reports renders a site that cannot show its own failure modes. **`report_degraded.json`
+ * was committed at G1 for exactly this** — states the pipeline cannot produce on demand —
+ * and dropping it from the shipping build throws away what the gate bought.
+ *
+ * Keeping both is safe because the ids cannot collide (`fx-` authored, `mb-` measured) and
+ * because `Provenance` is loud on every page that shows a number: an authored report reads
+ * *"Illustrative fixture — these numbers were authored, not measured."* **Measured wins any
+ * collision**, so `report_measured.json` never shadows the real `mb-13`.
+ *
+ * Fixture mode is unchanged — fixtures only — because CI and local dev depend on it being
+ * deterministic and independent of whatever `out/reports` happens to hold (C7.1).
+ */
 export function allReports() {
   if (cache) return cache;
   const run = readRunReports();
-  const reports = run.length ? run : readFixtures();
-  cache = reports.sort((a, b) => a.item.id.localeCompare(b.item.id));
+  const measured = new Set(run.map((r) => r.item.id));
+  const reports = run.length
+    ? [...run, ...readFixtures().filter((f) => !measured.has(f.item.id))]
+    : readFixtures();
+  // **Measured first, then authored, each by id.** Sorting on id alone put `fx-01` above
+  // `mb-01`, so the first three rows a reviewer met in the picker were hand-authored
+  // illustrations. They are labelled, but leading with them buries fourteen real runs
+  // underneath three invented ones -- the same "better story over the true one" trade the
+  // featured-slot ranking already refuses one section below.
+  cache = reports.sort(
+    (a, b) => isAuthored(a) - isAuthored(b) || a.item.id.localeCompare(b.item.id)
+  );
   return cache;
 }
 

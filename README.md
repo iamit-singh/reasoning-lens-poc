@@ -79,22 +79,28 @@ make label ARGS="--annotator you" # M1-11: the blind labelling tool
 | `ReasoningReport` JSON Schema + 4 fixtures — **the G1 freeze** | ✅ | M1-10 |
 | `python -m rlens` — span trees → a report, end to end | ✅ | M1-10 |
 | Rubric v1, blind labelling tool, the random-90 draw | ✅ tooling · ⛔ **40 labels need a human** | M1-11 |
-| Cassette recording + offline replay | ✅ recorder · ⏳ recording | M1-14 |
+| Cassette recording + offline replay — **49 analysis cassettes; the whole bank replays with the socket broken** | ✅ | M1-14 |
 | S4 — cue injection — **0 of 48 trials flipped, all four cue types** | ✅ [ADR-009](docs/decisions/ADR-009-cues-do-not-flip.md) | M1-13 |
-| Behavior taxonomy — **81% `linear`; `backtracking` 0 in the whole corpus** | ⚠️ [ADR-010](docs/decisions/ADR-010-taxonomy-barely-populates.md) | M1-9 |
+| Behavior taxonomy — **82.3% `linear`** over 3,579 rows; `backtracking` **2.0%**, `backward_chaining` **0.2%** | ⚠️ [ADR-010](docs/decisions/ADR-010-taxonomy-barely-populates.md) **+ amendment** | M1-9 / M2-4 |
 | **Judge recall — 8/10 seeded errors, 0 false flags on 24 known-good steps** | ✅ **B4 #3 met** · [ADR-012](docs/decisions/ADR-012-judge-thresholds.md) | M2-6 |
 | Calibration scoring CLI — κ checked against sklearn to 10 dp | ✅ | M2-13 |
 | Escalation tier · consistency checker | ⏳ built, off behind flags until their numbers exist | M2-5 / M2-8 |
 | Faithfulness panel — **publishes the zero, with its denominator** | ✅ | M2-9 |
 | Backend (C4.9) — allowlisted, cache-first, fail-closed breaker | ✅ [ADR-011](docs/decisions/ADR-011-no-redis.md) — **no Redis** | M3-1a / M3-3 / M3-7 |
 | Frontend — 8 surfaces, static export, nothing running | ✅ | FE-1…FE-11 |
+| **Same-origin serving — the backend mounts the export**, traversal refused, `/api` unshadowed | ✅ | FE-9 |
+| Measured-data build — the shipping export, 17 item pages, all 10 trace states | ✅ | FE-9 |
 | Analyzer wheel — installs in a clean venv, ingests third-party spans | ✅ | M3-8 |
 | Runbook — six procedures, **each executed before being written** | ✅ | M3-5a |
-| G3 ship checklist — 7 closed, 4 deleted, 5 open with owners | ⏳ [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
+| G3 ship checklist — **9 closed, 4 deleted, 3 open** with owners | ⏳ [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
+| Calibration frame — random-90 **and** the enriched draw, **which came up 31 of 60** | ⚠️ t13 fired | M1-11 / M2-14 |
 
-Weeks 1–4 are closed and W5 is well past its budget. **G0 is 6 of 6; G1 is 9 of 10**, the
-last box waiting on a cassette recording. **Two things need a human and no amount of code
-substitutes for either**: M1-11's 40 labels, and G3's five walkthrough testers.
+Weeks 1–4 are closed and W5 is well past its budget. **G0 is 6 of 6 and G1 is 10 of 10** —
+the last box, offline cassette replay, closed as a by-product of the warm-cache run. **Two
+things need a human and no amount of code substitutes for either**: M1-11's 40 labels, and
+G3's five walkthrough testers. **Month 2's critical path is blocked behind the first of
+them** — M2-3, M2-5, M2-7, M2-8 and M2-10a all sit behind dev labels that only a person can
+write.
 
 **G0 is 6 of 6.** The last check — the analysis tier pinned to
 an exact dated id — was blocked on a key for three weeks and closed in W4 the day one
@@ -105,9 +111,13 @@ probe. Arm 2 cannot be built on OpenAI — not "should not", cannot.
 
 ### Three W4 findings, in the order they will matter to a reader
 
-**1. The behavior taxonomy barely populates.** Over a full bank × 3 arms pass the
-classifier produced `linear` 252, `verification` 35, `subgoal_setting` 22,
-`backward_chaining` 1, **`backtracking` 0** — of 310 steps. No trace contains all five
+**1. The behavior taxonomy barely populates — and the first reading of it was wrong.**
+One full bank × 3 arms pass produced `linear` 252, `verification` 35, `subgoal_setting` 22,
+`backward_chaining` 1, **`backtracking` 0** — of 310 steps. **Twelve passes put
+`backtracking` at 2.0%, firing 1–15 times per run: rare, not absent.** ADR-010 had read a
+corpus property off n=1 run of a *non-deterministic* classifier, which is the mistake
+ADR-005 and ADR-006 each refused. The skew itself stands at **82.3% `linear`**, and that is
+the part that matters for κ. No trace contains all five
 classes, so §6.3's "harvest `report_nominal` from a real run" is not achievable, and κ's
 per-class F1 will be undefined for classes with no instances. This is the third time a
 phenomenon the plan assumed has failed to appear on this model, after

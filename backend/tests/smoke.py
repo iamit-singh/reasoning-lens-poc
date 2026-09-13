@@ -186,6 +186,41 @@ def main(argv: list[str] | None = None) -> int:
     status, body = post(base, "/api/runs", {"item_id": "../../etc/passwd"})
     r.check(status != 202, "run route rejects a traversal id", f"status {status}")
 
+    # ---------------------------------------------------------------- the static mount (FE-9)
+    # The whole demo is "one laptop, one origin". These run against a REAL server rather
+    # than a TestClient because the failure they catch -- a mount resolved at import time
+    # against a directory that was not built yet -- cannot happen in-process, where the
+    # fixture always imports after the build.
+    status, body = get(base, "/")
+    served = status == 200 and isinstance(body, bytes) and b"Reasoning Lens" in body
+    _, ready = get(base, "/readyz")
+    mounted = isinstance(ready, dict) and ready.get("frontend_mounted") is True
+    if not mounted:
+        # Not a failure: `make smoke` is the API's acceptance test and must pass on a
+        # checkout that has never run the frontend toolchain. Saying so beats a green tick
+        # over a page nobody served.
+        r.check(True, "frontend mount SKIPPED (no frontend/out)", "run `make fe-build-measured`")
+    else:
+        r.check(served, "the built site is served from the API's own origin", f"status {status}")
+        status, _ = get(base, "/items/mb-01/")
+        r.check(status == 200, "an item page resolves through the mount", f"status {status}")
+        # The mount is the first route on this service that takes a path from a visitor.
+        status, body = get(base, "/../.env")
+        leaked = isinstance(body, bytes) and b"OPENAI_API_KEY" in body
+        r.check(
+            status != 200 and not leaked,
+            "traversal out of the export is refused",
+            f"status {status}",
+        )
+        # Registration order, from the outside: if the mount had shadowed the API this
+        # would come back as the site's 404 page instead of JSON.
+        status, body = get(base, "/api/bank")
+        r.check(
+            status == 200 and isinstance(body, dict),
+            "the mount does not shadow /api",
+            f"status {status}, {type(body).__name__}",
+        )
+
     # ---------------------------------------------------------------- the no-key claim
     if args.no_key:
         # Every check above is a read path. If they are green and the server has no key,

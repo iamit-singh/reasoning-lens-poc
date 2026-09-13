@@ -276,3 +276,116 @@ def test_assert_fresh_refuses_rather_than_serving(tmp_path, monkeypatch, pinned)
     assert "prompts" in str(exc.value)
     # And the escape hatch names what taking it means, rather than being a quiet flag.
     assert cache.assert_fresh(strict=False)
+
+
+# ---------------------------------------------------------------- the static mount (FE-9)
+
+
+class TestTheStaticMount:
+    """FE-9's same-origin half, which is the only half ADR-003 left standing.
+
+    C10.4 wrote FE-9 against a hosted service: real SSE ordering, reconnection, loading
+    states that fixtures never exercise because fixtures are instant. **ADR-003 deleted the
+    service and the frontend is a static export whose data is read at build time**, so
+    there is no runtime fetch to integrate, no SSE to order and no loading state to show.
+    What remains real is that one origin serves both the page and the API -- and that is
+    worth testing precisely because the alternative (page on `file://`, API on
+    `127.0.0.1`) would make every call cross-origin and invite CORS onto a backend whose
+    whole posture is that it accepts almost nothing.
+    """
+
+    def test_the_api_is_not_shadowed_by_the_mount(self, client: TestClient) -> None:
+        """**The failure this guards against is silent and total.**
+
+        A mount at "/" registered before the API routes would swallow `/api/bank` and
+        return the site's 404 page -- HTML, status 404, from a server that looks healthy.
+        Route order is the only thing preventing it, and route order is invisible at a
+        glance, so it is asserted rather than trusted.
+        """
+        for path in ("/api/bank", "/healthz", "/readyz"):
+            response = client.get(path)
+            assert response.status_code == 200, f"{path} was shadowed by the static mount"
+            assert response.headers["content-type"].startswith("application/json"), (
+                f"{path} returned {response.headers['content-type']} -- the mount won"
+            )
+
+    def test_the_mount_is_registered_last(self, client: TestClient) -> None:
+        """The property the test above depends on, named directly.
+
+        Asserted on the route table rather than on behaviour so that adding a route
+        *after* the mount fails here, with a message saying why, instead of failing as a
+        mysterious 404 on the new route.
+        """
+        from backend.app import FRONTEND_OUT, app
+
+        if not FRONTEND_OUT.is_dir():
+            pytest.skip("no frontend/out -- run `make fe-build-measured`")
+        paths = [r.path for r in app.routes if hasattr(r, "path")]
+        assert paths[-1] == "", (
+            "the static mount is no longer last in the route table. Everything registered "
+            f"after it is unreachable. Order: {paths[-3:]}"
+        )
+
+    def test_the_export_is_served_and_is_the_real_page(self, client: TestClient) -> None:
+        """Serving *something* at `/` is not the claim; serving the built site is.
+
+        A mount pointed at the wrong directory still returns 200 for `/` if any
+        `index.html` is there, so this checks for text only the real landing page has.
+        """
+        from backend.app import FRONTEND_OUT
+
+        if not FRONTEND_OUT.is_dir():
+            pytest.skip("no frontend/out -- run `make fe-build-measured`")
+        response = client.get("/")
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/html")
+        assert "Reasoning Lens" in response.text
+
+    def test_a_trailing_slash_route_resolves_to_its_index(self, client: TestClient) -> None:
+        """`trailingSlash: true` emits `items/mb-01/index.html`, so the mount needs
+        `html=True`. Without it every item page is a 404 while the landing page works --
+        the kind of break that survives a casual click-through of the home page."""
+        from backend.app import FRONTEND_OUT
+
+        if not (FRONTEND_OUT / "items").is_dir():
+            pytest.skip("no exported item pages -- run `make fe-build-measured`")
+        response = client.get("/items/mb-01/")
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/html")
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "/../.env",
+            "/../../.env",
+            "/..%2f.env",
+            "/%2e%2e/.env",
+            "/_next/../../.env",
+            "/../backend/app.py",
+            "/../../calibration/sampling.json",
+        ],
+    )
+    def test_traversal_out_of_the_export_is_refused(self, client: TestClient, path: str) -> None:
+        """**A static mount is the first route on this service that takes a path from a
+        visitor**, which makes it the first thing that could widen "the only input is an
+        allowlisted item id". Starlette resolves and confines the path; that is asserted
+        here rather than assumed from the dependency, because the claim being defended is
+        about this service and not about a library's reputation.
+
+        The repo root sits directly above `frontend/out` and contains `.env`.
+        """
+        response = client.get(path)
+        assert response.status_code in (403, 404), f"{path} returned {response.status_code}"
+        body = response.content
+        for secret in (b"OPENAI_API_KEY", b"LOCAL_MODEL_DIGEST", b"FRONTEND_OUT"):
+            assert secret not in body, f"{path} leaked {secret!r} out of the repo"
+
+    def test_readyz_reports_whether_the_frontend_is_mounted(self, client: TestClient) -> None:
+        """The mount is resolved at import time, so a frontend built while the server runs
+        is not served until it restarts. That is a footgun an operator meets on stage, so
+        the probe the runbook tells them to curl has to answer it."""
+        from backend.app import FRONTEND_OUT
+
+        body = client.get("/readyz").json()
+        assert "frontend_mounted" in body
+        assert body["frontend_mounted"] is FRONTEND_OUT.is_dir()
