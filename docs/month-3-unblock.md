@@ -138,6 +138,15 @@ needs no other person, and it is the single highest-value hour left in the proje
 
     make label ARGS="--annotator <name>"
 
+**The session is interruptible, and that was verified rather than assumed.** Every label is
+appended and flushed the moment you press the key, a `[q]` or a Ctrl-C prints *"everything
+labelled so far is already written"*, and a second run skips what is done with no
+duplicates. Proven by running the real code path against a redirected output directory —
+three labels survived an abrupt kill mid-session and resume picked up cleanly, with
+`calibration/labels/` untouched. **So it does not need to be one sitting**, which matters
+because this project has twice lost work to a harness that wrote its record only at the
+end (M1-9 lost 13 runs that way).
+
 It cannot be delegated to the implementer, and the reason is not squeamishness. The labels
 are what the classifier is *measured against*; a set produced by the same system being
 measured would make every downstream number circular. The tool is blind by construction —
