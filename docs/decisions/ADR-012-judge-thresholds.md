@@ -124,3 +124,46 @@ n = 10, one pin, one analyzer tier, five traces, all from one arm. Recall of 80%
 Wilson interval of roughly **49–94%** — the point estimate clears the bar and the interval
 straddles it. C5.5 requires that interval to be published beside the number, and M2-7 is
 where it becomes a committed figure rather than a line in an ADR.
+
+---
+
+## Amendment, 14 Sep 2026 — **the per-type table is less stable than it reads**
+
+M2-6's mutated reports were built for the replay surface, which meant running the same ten
+cases **twice more** at the same bundle through a different code path.
+
+| | run 1 (this ADR) | run 2 | run 3 |
+| --- | --- | --- | --- |
+| Recall | 8 / 10 | 8 / 10 | **9 / 10** |
+
+**B4 #3 is met on all three (80%, 80%, 90% against ≥ 70%), and nothing here weakens that.**
+What moves is which cases are missed, and it is confined to one mutation type:
+
+| Outcome across 3 runs | Cases |
+| --- | --- |
+| Stable hit | SE-02, SE-04, SE-06, SE-07, SE-08, SE-09, SE-10 |
+| **Stable miss** | **SE-05** `dropped_constraint` |
+| **Unstable** | **SE-01, SE-03** — both `arithmetic_slip` |
+
+**SE-01 can no longer carry the weight this ADR put on it.** The observation stands — the
+judge copied a wrong total, appended *"correct"*, and flagged three other steps — and it is
+still the clearest illustration of *what* a cheap judge does wrong on arithmetic. But it was
+the worked example for **lever 1** (*escalate every explicit equality between numbers*), and
+the same judge caught it unaided on both later runs. **Lever 1 keeps its rationale and loses
+its evidence.** It stays unimplemented, which is now the better call rather than the merely
+cautious one.
+
+**SE-05 is the finding that survives** — missed three times from three. **Lever 2** (*put
+the item's constraints in front of the judge as constraints*) is the one with evidence
+behind it, and M2-3 is where it belongs.
+
+**Consequence for the published table.** The `arithmetic_slip` cell has n = 2 and has read
+**0/2, 1/2 and 2/2** across three honest runs. Per-type cells must be published **as
+hit/miss with n stated, never as percentages** — M2-6's DoD already said so, and it is now
+measured rather than anticipated.
+
+**§5.4's threshold rows are unaffected.** Those were chosen off the confidence
+*distribution*, not off per-case outcomes, and that distribution is a corpus-level property
+measured over 3,579 rows.
+
+See [findings §10](../findings.md).

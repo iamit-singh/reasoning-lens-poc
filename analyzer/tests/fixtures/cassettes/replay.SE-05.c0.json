@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 697,
+  "finish_reason": "stop",
+  "latency_ms": 13467,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 961,
+  "reasoning_tokens": 256,
+  "request_digest": "ac9e722205b431d8",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Correctly computes servers (47*21=987) and total watts via 1000*385\u221213*385 = 379,995 W.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Breakdown multiplication (987*(300+80+5)) yields 296,100+78,960+4,935 = 379,995 W, matching prior.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Converts 379,995 W to 379.995 kW and correctly rounds to nearest whole kW = 380 kW.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:3\",\n      \"behavior\": \"backtracking\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": \"logical\",\n      \"rationale\": \"Final answer 379 contradicts prior correct computation and rounding (should be 380).\"\n    }\n  ]\n}"
+}

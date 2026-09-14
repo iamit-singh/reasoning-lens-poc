@@ -105,6 +105,13 @@ seeded-errors:  ## M2-6 -- judge recall on 10 seeded errors, correct-step rule. 
 	@set -a; [ -f .env ] && . ./.env; set +a; unset MOCK_LLM; \
 	$(BIN)/python spikes/m2_6_seeded_errors.py $(ARGS)
 
+# Defaults to a LIVE build because that is the only way to create these. Rebuild them
+# offline from the recorded cassettes with `make replay-reports REPLAY_MOCK=1` -- the
+# assignment has to come AFTER sourcing .env, which exports MOCK_LLM=1 as the local default.
+REPLAY_MOCK ?= 0
+replay-reports:  ## M2-6's last clause -- the mutated reports the replay surface serves. COSTS SPEND
+	@set -a; [ -f .env ] && . ./.env; set +a; MOCK_LLM=$(REPLAY_MOCK) $(BIN)/python scripts/build_replay_reports.py $(ARGS)
+
 trip-breaker:  ## M3-3's DoD -- force the spend breaker through the real code path
 	@$(BIN)/python -c "from backend import breaker; breaker.trip('make trip-breaker'); print(breaker.check().reason)"
 

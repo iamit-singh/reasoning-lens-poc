@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 828,
+  "finish_reason": "stop",
+  "latency_ms": 12194,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 964,
+  "reasoning_tokens": 384,
+  "request_digest": "44f2d42db260fc52",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Correctly computed 47*21=987 and set up 987*385 then computed 385000-5005=379,995; arithmetic is correct.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Detailed multiplication 987*(300+80+5)=296,100+78,960+4,935=379,995; matches prior total watts.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:2\",\n      \"behavior\": \"verification\",\n      \"behavior_confidence\": 0.78,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Converted watts to kW incorrectly by dividing by 100 (should divide by 1000); resulting numbers and floor are wrong.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.75,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Final numeric answer (379) follows from the incorrect conversion in the previous step, so it is incorrect.\"\n    }\n  ]\n}"
+}

@@ -389,3 +389,47 @@ class TestTheStaticMount:
         body = client.get("/readyz").json()
         assert "frontend_mounted" in body
         assert body["frontend_mounted"] is FRONTEND_OUT.is_dir()
+
+
+class TestTheReplayPayload:
+    """M2-6's mutated reports, and the one property that must never slip.
+
+    A replay report is a **third provenance category** this project had not needed a name
+    for: not an authored fixture (a real model really produced these labels, on the pinned
+    tier) and not a clean measurement (the text it judged was deliberately edited by us).
+    `illustrative: true` is the only thing that says so, and it lives on the payload rather
+    than in the page, because a report travels into a download, a cache and a screenshot.
+    """
+
+    def test_the_replay_payload_is_always_marked_illustrative(self, client: TestClient) -> None:
+        response = client.get("/api/replay/SE-01")
+        assert response.status_code == 200
+        assert response.json()["illustrative"] is True
+
+    def test_a_built_replay_report_is_served_with_its_case(self, client: TestClient) -> None:
+        from backend.app import REPLAY_REPORTS
+
+        if not (REPLAY_REPORTS / "SE-01.report.json").is_file():
+            pytest.skip("no built replay reports -- run `make replay-reports`")
+        body = client.get("/api/replay/SE-01").json()
+        assert body["replay"]["case_id"] == "SE-01"
+        assert body["replay"]["report"]["arms"], "the replay report carries no arm"
+        assert body["replay"]["mutated_step_id"]
+
+    def test_a_mutated_report_is_never_served_from_the_ordinary_report_path(
+        self, client: TestClient
+    ) -> None:
+        """**The assertion that matters.** `/api/report/{id}` is the clean-measurement
+        path and its payload carries no `illustrative` flag, so a mutated report reachable
+        through it would be a deliberately broken trace presented as a real run.
+
+        Case ids are not in the bank allowlist, which is what makes this hold -- but the
+        allowlist is a property of `_bank()` and could be widened by an unrelated change,
+        so it is asserted rather than reasoned about.
+        """
+        for case_id in ("SE-01", "SE-05", "SE-10"):
+            response = client.get(f"/api/report/{case_id}")
+            assert response.status_code == 404, (
+                f"{case_id} is reachable through the clean-measurement path, where nothing "
+                f"marks it as a planted error"
+            )

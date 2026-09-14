@@ -347,6 +347,66 @@ bundle `97667881c779`.
 
 ---
 
+## 10. The judge clears B4 #3 on every run. **Which cases it misses moves.**
+
+**M2-6's last clause, and it audits M2-6's own headline.** Building the mutated reports
+meant running the ten seeded cases twice more, at the same bundle, through a different code
+path. Three runs now exist.
+
+| | run 1 (M2-6) | run 2 | run 3 |
+| --- | --- | --- | --- |
+| **Recall** | 8 / 10 | 8 / 10 | **9 / 10** |
+
+**B4 #3 is met on all three — 80%, 80%, 90% against a ≥ 70% bar.** The criterion is robust;
+that is the first thing to say, and it is the thing that matters at G2.
+
+**What is not robust is the per-case detail**, and it is confined to one place:
+
+| Outcome across 3 runs | Cases | |
+| --- | --- | --- |
+| **Stable hit** | SE-02, SE-04, SE-06, SE-07, SE-08, SE-09, SE-10 | 7 |
+| **Stable miss** | **SE-05** `dropped_constraint` | 1 |
+| **Unstable** | **SE-01, SE-03** — *both* `arithmetic_slip` | 2 |
+
+Eight of ten cases return the same answer every time. **All of the movement is in the two
+`arithmetic_slip` cases**, which flip independently — SE-01 went miss→hit→hit, SE-03 went
+hit→miss→hit — and that is what moved the aggregate from 8 to 9.
+
+**Consequence for the published per-type table.** [ADR-012](decisions/ADR-012-judge-thresholds.md)
+publishes hits per mutation type, and most cells have n = 1 or n = 2. The
+`arithmetic_slip` cell has n = 2 and has genuinely read **0/2, 1/2 and 2/2** across three
+honest runs of the same judge on the same text. **A per-type cell at this n is a coin-flip;
+the aggregate is a measurement.** M2-6's DoD already required per-type cells as *hit/miss
+with n stated, never bare percentages* — that is now measured rather than anticipated, and
+should be read as a hard rule.
+
+**SE-01 can no longer carry the weight ADR-012 put on it.** It is the case where the judge
+copied a wrong total and appended *"correct"* — `"yielding 875+50=935 (correct)"` — then
+flagged three other steps. As an illustration of *what* a cheap judge does wrong on
+arithmetic it stands. As evidence of *how often*, it does not: the same judge caught it on
+both later runs.
+
+**SE-05 is the finding that survives.** Missed three times out of three, and it is the more
+interesting failure anyway: a constraint the step itself introduced, dropped, and then
+graded sound against the rule it had just stated. **The judge checks each line against the
+line above, not against the problem.** That is a claim about the judge's shape rather than
+its luck, and it is the one per-case result with enough stability to publish.
+
+**This is the third time non-determinism has moved a conclusion here**, after §4's
+`backtracking` zero (one run) and §6's confidence pairs (17 rows). Those moved *negative*
+results. **This one lands on the single positive result the project has** — which is
+exactly where the discipline is hardest to keep.
+
+> It also caught a smaller version of the same error one paragraph deep in this file: the
+> two-run version of this finding said the aggregate *"reproduced exactly"*. Run 3 returned
+> 9. **Two points looked like a constant.**
+
+**Re-run:** `make replay-reports` (costs spend) or `make replay-reports REPLAY_MOCK=1`
+(offline, from the recorded cassettes), then compare
+`calibration/seeded/reports/*.report.json` against `docs/spikes/M2-6-raw/m2-6-seeded.json`.
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but

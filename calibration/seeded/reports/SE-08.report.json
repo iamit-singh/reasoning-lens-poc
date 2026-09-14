@@ -1,0 +1,201 @@
+{
+  "_README": "M2-6's mutated report, for the replay surface. The TEXT WAS DELIBERATELY EDITED before the judge saw it -- this is neither an authored fixture nor a clean measurement, and it must only ever be served through /api/replay/{case_id}, which marks it illustrative. Rebuild offline with MOCK_LLM=1 make replay-reports.",
+  "case_id": "SE-08",
+  "mutation_type": "invalid_generalisation",
+  "mutated_step_id": "thinking:thinking-mb-14-root-llm-0:0",
+  "expected_error_type": "unsupported_leap",
+  "judge_flagged_the_mutated_step": true,
+  "judge_flagged_steps": [
+    "thinking:thinking-mb-14-root-llm-0:0"
+  ],
+  "prompt_bundle_version": "97667881c779",
+  "built_utc": "2026-09-14T11:55:01Z",
+  "report": {
+    "schema_version": "1.0",
+    "item": {
+      "id": "mb-14",
+      "prompt": "A patch of algae in a pond doubles in area every day. It covers the whole pond on day 48. On which day did it cover a quarter of the pond?",
+      "tags": [
+        "logic"
+      ],
+      "known_answer": "46",
+      "checker": "exact",
+      "tolerance": null,
+      "is_trap": false,
+      "trap_note": null,
+      "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten. Declared a trap in M1-4; claim withdrawn by ADR-005"
+    },
+    "generated_at": "2026-09-14T11:55:01Z",
+    "versions": {
+      "runner": "0.1.0",
+      "analyzer": "0.1.0",
+      "prompts": "97667881c779",
+      "model_pin": "5aa89afe54c45fd0",
+      "model_pin_fields": {
+        "model": "gpt-oss:20b",
+        "digest": "sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+        "quantization": "MXFP4",
+        "runtime": "ollama 0.33.3",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "seed": 20260910,
+        "reasoning_effort": "medium"
+      },
+      "judge_triage_pin": null,
+      "judge_escalate_pin": null,
+      "analyzer_backend": null
+    },
+    "arms": [
+      {
+        "strategy": "thinking",
+        "status": "ok",
+        "trace_quality": "full",
+        "final_answer": "Day\u202f46.",
+        "correct": true,
+        "steps": [
+          {
+            "step_id": "thinking:thinking-mb-14-root-llm-0:0",
+            "kind": "thought",
+            "text": "We have a patch of algae that doubles in area each day. It covers the whole pond on day 48. We need to find the day when it covered a quarter of the pond. Since it doubles each day, the area on any day n is exactly n times the area on day 1.",
+            "char_range": [
+              0,
+              221
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.75
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.88,
+              "error_type": "logical",
+              "escalated": false,
+              "rationale": "Incorrectly models doubling as linear growth: 'area on day n = n\u00d7area on day1' is false."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-14-root-llm-0:1",
+            "kind": "thought",
+            "text": "So if it covers the whole pond on day 48, then on day 47 it covered half the pond. On day 46 it covered a quarter. So answer: day 46.",
+            "char_range": [
+              222,
+              355
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.92,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Working backward from full on day 48: day 47 half, day 46 quarter follows from doubling."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-14-root-llm-0:2",
+            "kind": "thought",
+            "text": "But check: The question: \"On which day did it cover a quarter of the pond?\" If day 48 is whole pond, day 47 half, day 46 quarter. So answer: day 46. That seems straightforward. But maybe they consider day 1 as first day?",
+            "char_range": [
+              356,
+              576
+            ],
+            "behavior": {
+              "label": "verification",
+              "confidence": 0.8
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Rechecks the backward reasoning; correctly concludes day 46 is quarter (notes minor concern about day numbering)."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-14-root-llm-0:3",
+            "kind": "thought",
+            "text": "But the question: \"covers the whole pond on day 48.\" So day 48 is whole. So day 46 is quarter. So answer: 46. No trick. So final answer: 46.",
+            "char_range": [
+              577,
+              717
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.85
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Affirms day 48 is whole so day 46 is quarter; no additional assumptions introduced."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-14-root-llm-0:4",
+            "kind": "answer",
+            "text": "Day\u202f46.",
+            "char_range": [
+              0,
+              7
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Final answer given as Day 46, consistent with earlier correct backward steps."
+            }
+          }
+        ],
+        "consistency": null,
+        "metrics": {
+          "output_tokens": 208,
+          "reasoning_tokens": 194,
+          "answer_tokens": 4,
+          "input_tokens": 135,
+          "est_cost_usd": null,
+          "latency_ms": null,
+          "turns": 1,
+          "pattern_profile": {
+            "verification": 0.2,
+            "backtracking": 0.0,
+            "subgoal_setting": 0.0,
+            "backward_chaining": 0.0,
+            "linear": 0.8
+          },
+          "soundness_score": 0.8,
+          "flagged_step_count": 1,
+          "classifier_calls": 1,
+          "classifier_repairs": 0
+        },
+        "degraded": null,
+        "escalation_capped": false,
+        "budget_bound": false
+      }
+    ],
+    "scoreboard": {
+      "verdict_line": null,
+      "cost_of_thought_ratio": null,
+      "accuracy_delta_pp": null
+    },
+    "measurement_context": {
+      "classifier_kappa_heldout": null,
+      "classifier_kappa_dev": null,
+      "majority_class_baseline": null,
+      "per_class_f1": null,
+      "judge_precision": null,
+      "judge_recall": null,
+      "consistency_fp_rate": null,
+      "n_heldout": null,
+      "n_dev": null,
+      "calibration_run_id": null
+    }
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "_README": "M2-6's mutated report, for the replay surface. The TEXT WAS DELIBERATELY EDITED before the judge saw it -- this is neither an authored fixture nor a clean measurement, and it must only ever be served through /api/replay/{case_id}, which marks it illustrative. Rebuild offline with MOCK_LLM=1 make replay-reports.",
+  "case_id": "SE-07",
+  "mutation_type": "hallucinated_fact",
+  "mutated_step_id": "thinking:thinking-mb-11-root-llm-0:1",
+  "expected_error_type": "factual",
+  "judge_flagged_the_mutated_step": true,
+  "judge_flagged_steps": [
+    "thinking:thinking-mb-11-root-llm-0:1"
+  ],
+  "prompt_bundle_version": "97667881c779",
+  "built_utc": "2026-09-14T11:55:01Z",
+  "report": {
+    "schema_version": "1.0",
+    "item": {
+      "id": "mb-11",
+      "prompt": "A rectangular garden measures 18 m by 24 m. A path 1.5 m wide runs around the inside edge of the garden. What is the area of the remaining inner rectangle, in square metres?",
+      "tags": [
+        "multi_step",
+        "geometry"
+      ],
+      "known_answer": "315",
+      "checker": "exact",
+      "tolerance": null,
+      "is_trap": false,
+      "trap_note": null,
+      "source": "authored for this bank, M1-4 (2026-09-11). Declared a trap in M1-4; claim withdrawn by ADR-005"
+    },
+    "generated_at": "2026-09-14T11:55:00Z",
+    "versions": {
+      "runner": "0.1.0",
+      "analyzer": "0.1.0",
+      "prompts": "97667881c779",
+      "model_pin": "5aa89afe54c45fd0",
+      "model_pin_fields": {
+        "model": "gpt-oss:20b",
+        "digest": "sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+        "quantization": "MXFP4",
+        "runtime": "ollama 0.33.3",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "seed": 20260910,
+        "reasoning_effort": "medium"
+      },
+      "judge_triage_pin": null,
+      "judge_escalate_pin": null,
+      "analyzer_backend": null
+    },
+    "arms": [
+      {
+        "strategy": "thinking",
+        "status": "ok",
+        "trace_quality": "full",
+        "final_answer": "315",
+        "correct": true,
+        "steps": [
+          {
+            "step_id": "thinking:thinking-mb-11-root-llm-0:0",
+            "kind": "thought",
+            "text": "We have a rectangular garden 18 m by 24 m. A path 1.5 m wide runs around the inside edge of the garden.",
+            "char_range": [
+              0,
+              103
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.78
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.88,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Restates given garden dimensions and path location; directly follows problem statement."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-11-root-llm-0:1",
+            "kind": "thought",
+            "text": "So the path is inside the garden, along the perimeter. Standard horticultural practice fixes path width at 2.2 m, so the inner rectangle is smaller by 4.4 m in each dimension.",
+            "char_range": [
+              104,
+              229
+            ],
+            "behavior": {
+              "label": "backtracking",
+              "confidence": 0.63
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.72,
+              "error_type": "unsupported_leap",
+              "escalated": false,
+              "rationale": "Introduces an irrelevant claim about horticultural practice (2.2 m) not in problem and contradicts given 1.5 m width."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-11-root-llm-0:2",
+            "kind": "thought",
+            "text": "So inner rectangle dimensions: 18 - 2*1.5 = 18 - 3 = 15 m; 24 - 2*1.5 = 24 - 3 = 21 m. Area = 15 * 21 = 315 m^2. So answer: 315.",
+            "char_range": [
+              230,
+              358
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.85
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Correctly subtracts twice the 1.5 m path from each side and multiplies: (18-3)=15, (24-3)=21, area 315."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-11-root-llm-0:3",
+            "kind": "answer",
+            "text": "315",
+            "char_range": [
+              0,
+              3
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.8
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Final answer restates the computed area 315 m^2 from previous step."
+            }
+          }
+        ],
+        "consistency": null,
+        "metrics": {
+          "output_tokens": 136,
+          "reasoning_tokens": 125,
+          "answer_tokens": 1,
+          "input_tokens": 143,
+          "est_cost_usd": null,
+          "latency_ms": null,
+          "turns": 1,
+          "pattern_profile": {
+            "verification": 0.0,
+            "backtracking": 0.25,
+            "subgoal_setting": 0.0,
+            "backward_chaining": 0.0,
+            "linear": 0.75
+          },
+          "soundness_score": 0.75,
+          "flagged_step_count": 1,
+          "classifier_calls": 1,
+          "classifier_repairs": 0
+        },
+        "degraded": null,
+        "escalation_capped": false,
+        "budget_bound": false
+      }
+    ],
+    "scoreboard": {
+      "verdict_line": null,
+      "cost_of_thought_ratio": null,
+      "accuracy_delta_pp": null
+    },
+    "measurement_context": {
+      "classifier_kappa_heldout": null,
+      "classifier_kappa_dev": null,
+      "majority_class_baseline": null,
+      "per_class_f1": null,
+      "judge_precision": null,
+      "judge_recall": null,
+      "consistency_fp_rate": null,
+      "n_heldout": null,
+      "n_dev": null,
+      "calibration_run_id": null
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "_README": "M2-6's mutated report, for the replay surface. The TEXT WAS DELIBERATELY EDITED before the judge saw it -- this is neither an authored fixture nor a clean measurement, and it must only ever be served through /api/replay/{case_id}, which marks it illustrative. Rebuild offline with MOCK_LLM=1 make replay-reports.",
+  "case_id": "SE-03",
+  "mutation_type": "arithmetic_slip",
+  "mutated_step_id": "thinking:thinking-mb-06-root-llm-0:1",
+  "expected_error_type": "arithmetic",
+  "judge_flagged_the_mutated_step": true,
+  "judge_flagged_steps": [
+    "thinking:thinking-mb-06-root-llm-0:1"
+  ],
+  "prompt_bundle_version": "97667881c779",
+  "built_utc": "2026-09-14T11:55:00Z",
+  "report": {
+    "schema_version": "1.0",
+    "item": {
+      "id": "mb-06",
+      "prompt": "A data centre has 47 racks. Each rack holds 21 servers, and each server draws 385 watts. What is the total draw in kilowatts, rounded down to the nearest whole kilowatt?",
+      "tags": [
+        "multi_step",
+        "arithmetic",
+        "tool_required"
+      ],
+      "known_answer": "379",
+      "checker": "exact",
+      "tolerance": null,
+      "is_trap": false,
+      "trap_note": null,
+      "source": "authored for this bank, M1-4 (2026-09-11)"
+    },
+    "generated_at": "2026-09-14T11:55:00Z",
+    "versions": {
+      "runner": "0.1.0",
+      "analyzer": "0.1.0",
+      "prompts": "97667881c779",
+      "model_pin": "5aa89afe54c45fd0",
+      "model_pin_fields": {
+        "model": "gpt-oss:20b",
+        "digest": "sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+        "quantization": "MXFP4",
+        "runtime": "ollama 0.33.3",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "seed": 20260910,
+        "reasoning_effort": "medium"
+      },
+      "judge_triage_pin": null,
+      "judge_escalate_pin": null,
+      "analyzer_backend": null
+    },
+    "arms": [
+      {
+        "strategy": "thinking",
+        "status": "ok",
+        "trace_quality": "full",
+        "final_answer": "379",
+        "correct": true,
+        "steps": [
+          {
+            "step_id": "thinking:thinking-mb-06-root-llm-0:0",
+            "kind": "thought",
+            "text": "We need to compute total draw: 47 racks * 21 servers per rack = 47*21 = 987 servers. Each server draws 385 watts. Total watts = 987 * 385. Compute: 1000*385 = 385,000. Subtract 13*385 = 5005? Wait 13*385 = 5005. So 385,000 - 5,005 = 379,995 watts. Alternatively compute precisely: 987*385.",
+            "char_range": [
+              0,
+              289
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.92
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.92,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Correctly computes servers (47*21=987) and total watts (987*385=379,995) using valid arithmetic."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-06-root-llm-0:1",
+            "kind": "thought",
+            "text": "Let's do multiplication: 987*300 = 296,100; 987*80 = 79,860; 987*5 = 4,935. Sum = 296,100 + 78,960 = 375,060; +4,935 = 379,995. Yes.",
+            "char_range": [
+              290,
+              422
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.8
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.8,
+              "error_type": "arithmetic",
+              "escalated": false,
+              "rationale": "Contains a mistaken intermediate write '987*80 = 79,860' though final sum uses 78,960; inconsistent arithmetic."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-06-root-llm-0:2",
+            "kind": "thought",
+            "text": "Now convert to kilowatts: divide by 1000: 379.995 kW. Rounded down to nearest whole kilowatt: floor = 379 kW. So answer: 379.",
+            "char_range": [
+              424,
+              549
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Converts 379,995 W to 379.995 kW and floors to 379 kW; correct arithmetic and rounding down."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-06-root-llm-0:3",
+            "kind": "answer",
+            "text": "379",
+            "char_range": [
+              0,
+              3
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Final answer 379 matches the computed floored kilowatt value."
+            }
+          }
+        ],
+        "consistency": null,
+        "metrics": {
+          "output_tokens": 217,
+          "reasoning_tokens": 206,
+          "answer_tokens": 1,
+          "input_tokens": 142,
+          "est_cost_usd": null,
+          "latency_ms": null,
+          "turns": 1,
+          "pattern_profile": {
+            "verification": 0.0,
+            "backtracking": 0.0,
+            "subgoal_setting": 0.0,
+            "backward_chaining": 0.0,
+            "linear": 1.0
+          },
+          "soundness_score": 0.75,
+          "flagged_step_count": 1,
+          "classifier_calls": 1,
+          "classifier_repairs": 0
+        },
+        "degraded": null,
+        "escalation_capped": false,
+        "budget_bound": false
+      }
+    ],
+    "scoreboard": {
+      "verdict_line": null,
+      "cost_of_thought_ratio": null,
+      "accuracy_delta_pp": null
+    },
+    "measurement_context": {
+      "classifier_kappa_heldout": null,
+      "classifier_kappa_dev": null,
+      "majority_class_baseline": null,
+      "per_class_f1": null,
+      "judge_precision": null,
+      "judge_recall": null,
+      "consistency_fp_rate": null,
+      "n_heldout": null,
+      "n_dev": null,
+      "calibration_run_id": null
+    }
+  }
+}

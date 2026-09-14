@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 808,
+  "finish_reason": "stop",
+  "latency_ms": 11844,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 963,
+  "reasoning_tokens": 384,
+  "request_digest": "0cf0d73ad39671cd",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"Correctly computes servers (47*21=987) and total watts (987*385=379,995) using valid arithmetic.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.80,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.80,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Contains a mistaken intermediate write '987*80 = 79,860' though final sum uses 78,960; inconsistent arithmetic.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.90,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.90,\n      \"error_type\": null,\n      \"rationale\": \"Converts 379,995 W to 379.995 kW and floors to 379 kW; correct arithmetic and rounding down.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-06-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.90,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.90,\n      \"error_type\": null,\n      \"rationale\": \"Final answer 379 matches the computed floored kilowatt value.\"\n    }\n  ]\n}"
+}

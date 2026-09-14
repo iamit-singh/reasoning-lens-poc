@@ -1,0 +1,204 @@
+{
+  "_README": "M2-6's mutated report, for the replay surface. The TEXT WAS DELIBERATELY EDITED before the judge saw it -- this is neither an authored fixture nor a clean measurement, and it must only ever be served through /api/replay/{case_id}, which marks it illustrative. Rebuild offline with MOCK_LLM=1 make replay-reports.",
+  "case_id": "SE-01",
+  "mutation_type": "arithmetic_slip",
+  "mutated_step_id": "thinking:thinking-mb-07-root-llm-0:2",
+  "expected_error_type": "arithmetic",
+  "judge_flagged_the_mutated_step": true,
+  "judge_flagged_steps": [
+    "thinking:thinking-mb-07-root-llm-0:2",
+    "thinking:thinking-mb-07-root-llm-0:3"
+  ],
+  "prompt_bundle_version": "97667881c779",
+  "built_utc": "2026-09-14T11:55:00Z",
+  "report": {
+    "schema_version": "1.0",
+    "item": {
+      "id": "mb-07",
+      "prompt": "A loan of $12,500 accrues simple interest at 7.4% per year for 3 years and 6 months. What is the total interest, in dollars?",
+      "tags": [
+        "multi_step",
+        "arithmetic",
+        "tool_required"
+      ],
+      "known_answer": "3237.50",
+      "checker": "numeric_tol",
+      "tolerance": 0.01,
+      "is_trap": false,
+      "trap_note": null,
+      "source": "authored for this bank, M1-4 (2026-09-11)"
+    },
+    "generated_at": "2026-09-14T11:55:00Z",
+    "versions": {
+      "runner": "0.1.0",
+      "analyzer": "0.1.0",
+      "prompts": "97667881c779",
+      "model_pin": "5aa89afe54c45fd0",
+      "model_pin_fields": {
+        "model": "gpt-oss:20b",
+        "digest": "sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+        "quantization": "MXFP4",
+        "runtime": "ollama 0.33.3",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "seed": 20260910,
+        "reasoning_effort": "medium"
+      },
+      "judge_triage_pin": null,
+      "judge_escalate_pin": null,
+      "analyzer_backend": null
+    },
+    "arms": [
+      {
+        "strategy": "thinking",
+        "status": "ok",
+        "trace_quality": "full",
+        "final_answer": "So the total interest accrued is **\\$3,237.50**.",
+        "correct": true,
+        "steps": [
+          {
+            "step_id": "thinking:thinking-mb-07-root-llm-0:0",
+            "kind": "thought",
+            "text": "We need to compute simple interest: I = P * r * t. P = 12,500. r = 7.4% per year = 0.074. t = 3 years and 6 months = 3.5 years.",
+            "char_range": [
+              0,
+              127
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.92
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Sets correct simple-interest formula and converts rate and time correctly (0.074, 3.5 years)."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-07-root-llm-0:1",
+            "kind": "thought",
+            "text": "So I = 12500 * 0.074 * 3.5. Compute: 12500 * 0.074 = 12500 * 74/1000 = 12500 * 0.074 = 925?",
+            "char_range": [
+              128,
+              219
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.88
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.86,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "States the multiplication to compute interest and suggests product 12500*0.074; result 925 is correct."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-07-root-llm-0:2",
+            "kind": "thought",
+            "text": "Let's compute precisely: 12500 * 0.07 = 875. 12500 * 0.004 = 50. So 875 + 50 = 935. So 12500 * 0.074 = 935.",
+            "char_range": [
+              220,
+              327
+            ],
+            "behavior": {
+              "label": "verification",
+              "confidence": 0.85
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.82,
+              "error_type": "arithmetic",
+              "escalated": false,
+              "rationale": "Arithmetic error: 12500*0.07=875 and 12500*0.004=50 so sum is 925, not 935 as stated."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-07-root-llm-0:3",
+            "kind": "thought",
+            "text": "Then times 3.5: 925 * 3.5 = 925 * 3 + 925 * 0.5 = 2775 + 462.5 = 3237.5. So interest = $3,237.50. So answer: 3237.50. Probably they want $3,237.50.",
+            "char_range": [
+              328,
+              475
+            ],
+            "behavior": {
+              "label": "backtracking",
+              "confidence": 0.8
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.78,
+              "error_type": "logical",
+              "escalated": false,
+              "rationale": "Reverts to using 925 (contradicting the immediate prior incorrect 935); arithmetic of 925*3.5=3237.5 is correct but contradicts step 3."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-07-root-llm-0:4",
+            "kind": "answer",
+            "text": "The simple interest is  \n\n\\[\nI = P \\times r \\times t = 12{,}500 \\times 0.074 \\times 3.5\n\\]\n\n\\[\n12{,}500 \\times 0.074 = 925\n\\]\n\n\\[\n925 \\times 3.5 = 3{,}237.5\n\\]\n\nSo the total interest accrued is **\\$3,237.50**.",
+            "char_range": [
+              0,
+              209
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.93
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.9,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Summarizes calculation using 12500*0.074=925 and 925*3.5=3237.5; consistent with steps 1,2,4 and gives final interest."
+            }
+          }
+        ],
+        "consistency": null,
+        "metrics": {
+          "output_tokens": 330,
+          "reasoning_tokens": 227,
+          "answer_tokens": 93,
+          "input_tokens": 137,
+          "est_cost_usd": null,
+          "latency_ms": null,
+          "turns": 1,
+          "pattern_profile": {
+            "verification": 0.2,
+            "backtracking": 0.2,
+            "subgoal_setting": 0.0,
+            "backward_chaining": 0.0,
+            "linear": 0.6
+          },
+          "soundness_score": 0.6,
+          "flagged_step_count": 2,
+          "classifier_calls": 1,
+          "classifier_repairs": 0
+        },
+        "degraded": null,
+        "escalation_capped": false,
+        "budget_bound": false
+      }
+    ],
+    "scoreboard": {
+      "verdict_line": null,
+      "cost_of_thought_ratio": null,
+      "accuracy_delta_pp": null
+    },
+    "measurement_context": {
+      "classifier_kappa_heldout": null,
+      "classifier_kappa_dev": null,
+      "majority_class_baseline": null,
+      "per_class_f1": null,
+      "judge_precision": null,
+      "judge_recall": null,
+      "consistency_fp_rate": null,
+      "n_heldout": null,
+      "n_dev": null,
+      "calibration_run_id": null
+    }
+  }
+}

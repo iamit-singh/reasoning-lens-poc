@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 755,
+  "finish_reason": "stop",
+  "latency_ms": 11210,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 985,
+  "reasoning_tokens": 256,
+  "request_digest": "499de1e4a35c9e6c",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States doubling each day and that going back halves the area \u2014 correct and follows from the problem.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": \"logical\",\n      \"rationale\": \"Correctly gets day47 = half but then incorrectly jumps to day45 = quarter (skips day46).\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:2\",\n      \"behavior\": \"verification\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Checks prior result and correctly concludes day46 (one more back from half) is quarter.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States final conclusion day46 follows from day48 = whole and daily doubling; consistent with previous correction.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-14-root-llm-0:4\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Presents the final answer Day 46, matching the corrected reasoning.\"\n    }\n  ]\n}"
+}

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 601,
+  "finish_reason": "stop",
+  "latency_ms": 9784,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 883,
+  "reasoning_tokens": 192,
+  "request_digest": "12bfe88f10b84cd8",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Restates the problem setup correctly: garden size and a 1.5 m path inside the perimeter.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.87,\n      \"error_type\": null,\n      \"rationale\": \"Correct observation: path reduces each dimension by twice the width (both sides).\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.82,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.93,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Arithmetic error: 18-3=15 (not 21); they swapped results for the two dimensions.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.80,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Final numeric answer follows from the mistaken calculation in the prior step, so it is incorrect.\"\n    }\n  ]\n}"
+}

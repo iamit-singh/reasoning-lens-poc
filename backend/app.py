@@ -46,6 +46,7 @@ REPORTS_DIR = ROOT / "out/reports"
 CALIBRATION = ROOT / "calibration/results/latest.json"
 FAITHFULNESS = ROOT / "faithfulness/panel.json"
 SEEDED_DIR = ROOT / "calibration/seeded"
+REPLAY_REPORTS = ROOT / "calibration/seeded/reports"
 FRONTEND_OUT = ROOT / "frontend/out"
 
 #: C9. A visitor cannot raise this and a run cannot lower it.
@@ -275,7 +276,16 @@ def replay(case_id: str) -> Any:
     path = cases.get(case_id)
     if path is None:
         raise HTTPException(status_code=404, detail="unknown replay case")
-    return {"illustrative": True, "case": json.loads(path.read_text())}
+    payload: dict[str, Any] = {"illustrative": True, "case": json.loads(path.read_text())}
+    # M2-6's mutated report, if it has been built. **Served only from here**, never from
+    # `/api/report/{id}`: the text this judge saw was deliberately edited, so it is neither
+    # an authored fixture nor a clean measurement, and the `illustrative` flag above is the
+    # only thing that says so. Routing it through the ordinary report path would strip that
+    # distinction at exactly the moment it matters -- a download, a cache, a screenshot.
+    built = REPLAY_REPORTS / f"{case_id}.report.json"
+    if built.is_file():
+        payload["replay"] = json.loads(built.read_text())
+    return payload
 
 
 @app.post("/api/runs")

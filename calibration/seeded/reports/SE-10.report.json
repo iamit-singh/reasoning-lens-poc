@@ -1,0 +1,222 @@
+{
+  "_README": "M2-6's mutated report, for the replay surface. The TEXT WAS DELIBERATELY EDITED before the judge saw it -- this is neither an authored fixture nor a clean measurement, and it must only ever be served through /api/replay/{case_id}, which marks it illustrative. Rebuild offline with MOCK_LLM=1 make replay-reports.",
+  "case_id": "SE-10",
+  "mutation_type": "premature_conclusion",
+  "mutated_step_id": "thinking:thinking-mb-13-root-llm-0:0",
+  "expected_error_type": "unsupported_leap",
+  "judge_flagged_the_mutated_step": true,
+  "judge_flagged_steps": [
+    "thinking:thinking-mb-13-root-llm-0:0"
+  ],
+  "prompt_bundle_version": "97667881c779",
+  "built_utc": "2026-09-14T11:55:01Z",
+  "report": {
+    "schema_version": "1.0",
+    "item": {
+      "id": "mb-13",
+      "prompt": "If 7 printers take 7 minutes to print 7 posters, how many minutes would 21 printers take to print 21 posters?",
+      "tags": [
+        "multi_step",
+        "logic"
+      ],
+      "known_answer": "7",
+      "checker": "exact",
+      "tolerance": null,
+      "is_trap": false,
+      "trap_note": null,
+      "source": "authored for this bank, M1-4 (2026-09-11); archetype from the cognitive-reflection literature, surface rewritten. Declared a trap in M1-4; claim withdrawn by ADR-005"
+    },
+    "generated_at": "2026-09-14T11:55:01Z",
+    "versions": {
+      "runner": "0.1.0",
+      "analyzer": "0.1.0",
+      "prompts": "97667881c779",
+      "model_pin": "5aa89afe54c45fd0",
+      "model_pin_fields": {
+        "model": "gpt-oss:20b",
+        "digest": "sha256:e7b273f9636059a689e3ddcab3716e4f65abe0143ac978e46673ad0e52d09efb",
+        "quantization": "MXFP4",
+        "runtime": "ollama 0.33.3",
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "seed": 20260910,
+        "reasoning_effort": "medium"
+      },
+      "judge_triage_pin": null,
+      "judge_escalate_pin": null,
+      "analyzer_backend": null
+    },
+    "arms": [
+      {
+        "strategy": "thinking",
+        "status": "ok",
+        "trace_quality": "full",
+        "final_answer": "7 minutes",
+        "correct": true,
+        "steps": [
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:0",
+            "kind": "thought",
+            "text": "We have a classic rate problem. 7 printers take 7 minutes to print 7 posters. The answer must be 3 minutes, since more printers always means proportionally less time.",
+            "char_range": [
+              0,
+              123
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.65
+            },
+            "validity": {
+              "verdict": "unsound",
+              "confidence": 0.9,
+              "error_type": "logical",
+              "escalated": false,
+              "rationale": "Asserts an answer (3 min) without justification and incorrectly reasons 'more printers => proportionally less time' for this specific numbers set."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:1",
+            "kind": "thought",
+            "text": "Let's analyze: If 7 printers produce 7 posters in 7 minutes, that means total printing capacity: 7 printers * 7 minutes = 49 printer-minutes produce 7 posters. So each poster requires 49/7 = 7 printer-minutes. So each printer prints 1 poster in 7 minutes.",
+            "char_range": [
+              124,
+              379
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Computes 7 printers * 7 minutes = 49 printer-minutes; 49/7 = 7 printer-minutes per poster, so one printer takes 7 minutes per poster."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:2",
+            "kind": "thought",
+            "text": "So 21 printers produce 21 posters: each printer prints 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.",
+            "char_range": [
+              380,
+              527
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "From per-poster time, 21 printers each can print one poster in 7 minutes, so 21 printers make 21 posters in 7 minutes."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:3",
+            "kind": "thought",
+            "text": "But maybe there's nuance: If printers are identical and each prints at same rate. So 7 printers produce 7 posters in 7 minutes. So each printer prints 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.",
+            "char_range": [
+              529,
+              772
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Restates assumption of identical printers and repeats conclusion that time remains 7 minutes for 21 posters with 21 printers."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:4",
+            "kind": "thought",
+            "text": "But maybe they want to trick: 7 printers produce 7 posters in 7 minutes. So 1 printer produces 1 poster in 7 minutes. So 21 printers produce 21 posters in 7 minutes. So answer: 7 minutes.\n\nThus answer: 7 minutes.",
+            "char_range": [
+              774,
+              986
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Again restates 1 printer => 1 poster in 7 minutes and infers 21 printers => 21 posters in 7 minutes; consistent with prior calculation."
+            }
+          },
+          {
+            "step_id": "thinking:thinking-mb-13-root-llm-0:5",
+            "kind": "answer",
+            "text": "7 minutes",
+            "char_range": [
+              0,
+              9
+            ],
+            "behavior": {
+              "label": "linear",
+              "confidence": 0.9
+            },
+            "validity": {
+              "verdict": "sound",
+              "confidence": 0.95,
+              "error_type": null,
+              "escalated": false,
+              "rationale": "Final answer given as 7 minutes, which follows from the computed per-poster printer-minutes."
+            }
+          }
+        ],
+        "consistency": null,
+        "metrics": {
+          "output_tokens": 271,
+          "reasoning_tokens": 259,
+          "answer_tokens": 2,
+          "input_tokens": 128,
+          "est_cost_usd": null,
+          "latency_ms": null,
+          "turns": 1,
+          "pattern_profile": {
+            "verification": 0.0,
+            "backtracking": 0.0,
+            "subgoal_setting": 0.0,
+            "backward_chaining": 0.0,
+            "linear": 1.0
+          },
+          "soundness_score": 0.8333,
+          "flagged_step_count": 1,
+          "classifier_calls": 1,
+          "classifier_repairs": 0
+        },
+        "degraded": null,
+        "escalation_capped": false,
+        "budget_bound": false
+      }
+    ],
+    "scoreboard": {
+      "verdict_line": null,
+      "cost_of_thought_ratio": null,
+      "accuracy_delta_pp": null
+    },
+    "measurement_context": {
+      "classifier_kappa_heldout": null,
+      "classifier_kappa_dev": null,
+      "majority_class_baseline": null,
+      "per_class_f1": null,
+      "judge_precision": null,
+      "judge_recall": null,
+      "consistency_fp_rate": null,
+      "n_heldout": null,
+      "n_dev": null,
+      "calibration_run_id": null
+    }
+  }
+}
