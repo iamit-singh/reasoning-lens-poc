@@ -84,7 +84,7 @@ earlier and by considerably more:
 
 | | |
 | --- | --- |
-| Lead hours to date | **91.5 h** ([`ledger.md`](ledger.md)) |
+| Lead hours to date | **92.0 h** ([`ledger.md`](ledger.md)) |
 | B9 allocation | **12.0 h** |
 | Planned across M1+M2 | 55.3 h |
 
