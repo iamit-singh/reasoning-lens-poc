@@ -9,7 +9,7 @@ something if the procedure is fixed *before* the numbers are seen.
 | `sampling.json` | Both halves of C5.1's frame: the **random-90** (seed + ordered id list, committed *before the first label*) and the **enriched-31** drawn from the v0 predictions, each with its seed, bundle version, per-class counts and enrichment factor | M1-11 (W4) · M2-14 (W5) |
 | `labels/dev-100.jsonl` | Dev steps — what prompt iteration tunes against. **C5.1 intends 100 (random 1–40 + enriched 60); the corpus yields 71**, because two rare classes could not reach their enrichment target — see [finding 9](../docs/findings.md) and `sampling.json.enriched` | M1-11 → M2-14 → M2-1 |
 | `labels/heldout-50.jsonl` | 50 double-labeled steps carrying the **published headline κ**. Opened **once**, after the prompt bundle is frozen | M2-1 |
-| `annotator-2.md` | who the second annotator is, when they labeled, and confirmation they were **not** briefed | M2-1 |
+| `annotator-2.md` | who the second annotator is, when they labeled, and confirmation they were **not** briefed. **Written and blank**, with the verbatim brief to send so the annotator cannot be accidentally coached — coaching is the one thing that invalidates B4 #1 | M2-2 |
 | `labels/HELDOUT_FREEZE` | The freeze commit sha. Absent until M2-1; once present, `scripts/check_heldout_freeze.sh` fails any PR that edits the held-out labels | M2-1 |
 | `seeded/` | Mutation definitions + expected flaw step ids | M2-6 |
 | `results/latest.json` | The published metrics, served by the calibration page | M2-8 |
