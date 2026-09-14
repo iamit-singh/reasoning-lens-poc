@@ -1,4 +1,4 @@
-import { allReports, armsOf, featured, isAuthored, tagIndex, ARM_LABEL } from "./lib/reports";
+import { allReports, armsOf, featured, isAuthored, replayEntries, tagIndex, ARM_LABEL } from "./lib/reports";
 import ArmPanes from "./components/ArmPanes";
 import Provenance from "./components/Provenance";
 import ItemPicker from "./components/ItemPicker";
@@ -56,19 +56,38 @@ export default function Home() {
 
       <ItemPicker
         tags={tagIndex()}
-        items={reports.map((r) => ({
-          id: r.item.id,
-          prompt: r.item.prompt,
-          tags: r.item.tags ?? [],
-          authored: isAuthored(r),
-          arms: armsOf(r).map((a) => ({
-            strategy: a.strategy,
-            label: ARM_LABEL[a.strategy] ?? a.strategy,
-            correct: a.correct,
-            degraded: Boolean(a.degraded),
-            failed: a.status === "failed",
+        items={[
+          ...reports.map((r) => ({
+            id: r.item.id,
+            prompt: r.item.prompt,
+            tags: r.item.tags ?? [],
+            authored: isAuthored(r),
+            arms: armsOf(r).map((a) => ({
+              strategy: a.strategy,
+              label: ARM_LABEL[a.strategy] ?? a.strategy,
+              correct: a.correct,
+              degraded: Boolean(a.degraded),
+              failed: a.status === "failed",
+            })),
           })),
-        }))}
+          // FE-11 / L3: replay entries sit in the picker as ordinary rows, LAST, and
+          // carry `planted` so the chip says what they are. They are listed after the real
+          // corpus for the same reason authored fixtures are -- a reviewer should meet the
+          // measured work first, not three illustrations of it.
+          ...replayEntries().map((e) => ({
+            id: e.case_id,
+            prompt: e.report.item.prompt,
+            tags: e.report.item.tags ?? [],
+            planted: true,
+            arms: armsOf(e.report).map((a) => ({
+              strategy: a.strategy,
+              label: ARM_LABEL[a.strategy] ?? a.strategy,
+              correct: a.correct,
+              degraded: Boolean(a.degraded),
+              failed: a.status === "failed",
+            })),
+          })),
+        ]}
       />
 
       <footer>

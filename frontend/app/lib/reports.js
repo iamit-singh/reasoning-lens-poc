@@ -189,3 +189,44 @@ export function featured() {
   );
   return scored[0];
 }
+
+/**
+ * The seeded-error replay entries (FE-11, L3).
+ *
+ * **A planted-error trace is a third provenance category**, and the project needed a name
+ * for it only once M2-6's mutated reports existed. It is not an authored fixture — a real
+ * model really produced these labels, on the pinned tier. It is not a clean measurement
+ * either — the text it judged was **deliberately edited by us** before it saw it.
+ *
+ * **The metadata is deliberately kept OUT of the report object.** `Download` promises the
+ * downloaded blob is "the `ReasoningReport` itself, unmodified ... it validates against the
+ * committed JSON Schema", and the schema sets `additionalProperties: false` at every level
+ * — so hanging a `__replay` marker on the report would quietly break that promise and the
+ * download with it. The marker lives on the wrapper; the report stays pristine and still
+ * validates.
+ *
+ * Under **L3** these are *labeled bank entries*, not a separate UI mode: they appear in the
+ * picker beside everything else, they are served from committed JSON with no live call
+ * (C4.8 — this is the surface that survives a provider outage), and they carry a banner
+ * that **cannot be dismissed**. A planted error presented without its label is the one
+ * thing on this site that would be actively misleading.
+ */
+const REPLAY_DIR = path.join(process.cwd(), "..", "calibration", "seeded", "reports");
+
+let replayCache = null;
+
+export function replayEntries() {
+  if (replayCache) return replayCache;
+  if (!fs.existsSync(REPLAY_DIR)) return (replayCache = []);
+  replayCache = fs
+    .readdirSync(REPLAY_DIR)
+    .filter((f) => f.endsWith(".report.json"))
+    .map((f) => JSON.parse(fs.readFileSync(path.join(REPLAY_DIR, f), "utf8")))
+    .sort((a, b) => a.case_id.localeCompare(b.case_id));
+  return replayCache;
+}
+
+/** The replay entry for a route id, or null if this id is an ordinary report. */
+export function replayFor(caseId) {
+  return replayEntries().find((e) => e.case_id === caseId) ?? null;
+}

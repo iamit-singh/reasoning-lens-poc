@@ -49,6 +49,7 @@ export default function ItemPicker({ tags, items }) {
             <div className="q">{item.prompt}</div>
             <div className="meta">
               {item.authored ? <span className="chip unknown">illustrative</span> : null}
+              {item.planted ? <span className="chip bad">planted error</span> : null}
               {item.arms.map((arm) => (
                 <span
                   key={arm.strategy}

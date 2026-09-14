@@ -119,6 +119,42 @@ def main() -> int:
     if not any("FE-2b — .tag-v" in f for f in failures):
         print("  [PASS] validity tags carry a shape cue, not colour alone")
 
+    # ---------------------------------------------------------------- FE-11 (L3)
+    # **The replay banner is the one label on this site that cannot be optional.** A
+    # planted error rendered without it is a deliberately broken trace presented as a real
+    # one, so it is asserted in the EXPORTED MARKUP with every script stripped -- if it
+    # lived only in the JS payload, a reader with no JavaScript would get the trace and not
+    # the label, which is the exact failure mode inverted.
+    replay_pages = sorted((OUT / "items").glob("SE-*/index.html"))
+    if not replay_pages:
+        print("  [SKIP] no replay pages exported -- run `make replay-reports`")
+    else:
+        missing = []
+        for path in replay_pages:
+            markup = re.sub(r"<script.*?</script>", " ", path.read_text(), flags=re.DOTALL)
+            if "deliberately planted" not in markup:
+                missing.append(path.parent.name)
+        if missing:
+            failures.append(
+                f"FE-11 -- {len(missing)} replay page(s) render no planted-error banner in "
+                f"script-free markup: {missing[:4]}"
+            )
+        else:
+            print(f"  [PASS] all {len(replay_pages)} replay pages carry the planted-error banner")
+        # Non-dismissible is a property of there being nothing to press, so it is checked
+        # as the absence of an affordance rather than as the presence of a word.
+        dismissible = [
+            p.parent.name
+            for p in replay_pages
+            if re.search(r"notice planted[^\"]*\"[^<]*<button", p.read_text())
+        ]
+        if dismissible:
+            failures.append(
+                f"FE-11 -- the planted-error banner gained a dismiss control: {dismissible}"
+            )
+        else:
+            print("  [PASS] the planted-error banner has no dismiss control")
+
     for path in pages:
         markup = re.sub(r"<script.*?</script>", " ", path.read_text(), flags=re.DOTALL)
         for host in FORBIDDEN_IN_MARKUP:

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { allReports, armsOf, reportFor } from "../../lib/reports";
+import { allReports, armsOf, reportFor, replayEntries, replayFor } from "../../lib/reports";
 import ArmPanes from "../../components/ArmPanes";
 import Provenance from "../../components/Provenance";
 import Trace from "../../components/Trace";
@@ -17,12 +17,22 @@ import { taxonomy } from "../../lib/taxonomy";
  * ADR-003 leaves standing when one laptop is the whole deployment.
  */
 export function generateStaticParams() {
-  return allReports().map((report) => ({ id: report.item.id }));
+  return [
+    ...allReports().map((report) => ({ id: report.item.id })),
+    // FE-11 / L3: the seeded-error replays are **labeled bank entries**, not a separate UI
+    // mode, so they get ordinary item routes keyed by case id. Pre-rendered like everything
+    // else, which is what makes this the surface that still works during a provider outage.
+    ...replayEntries().map((entry) => ({ id: entry.case_id })),
+  ];
 }
 
 export default async function ItemPage({ params }) {
   const { id } = await params;
-  const report = reportFor(id);
+  // A replay id (`SE-01`) never collides with a bank id (`mb-*`) or a fixture id (`fx-*`).
+  // The entry is the wrapper; `entry.report` is the untouched `ReasoningReport`, which is
+  // what every component below — including the download — receives.
+  const replay = replayFor(id);
+  const report = replay ? replay.report : reportFor(id);
 
   if (!report) {
     return (
@@ -42,6 +52,28 @@ export default async function ItemPage({ params }) {
       <Link className="backlink" href="/">
         ← every item
       </Link>
+
+      {/* FE-11 / L3. **Non-dismissible, and first.** A planted error presented without its
+          label is the one thing on this site that would be actively misleading, so this
+          cannot be a toast, cannot be closed, and sits above everything a reader would take
+          as a finding. It is plain markup with no handler — there is nothing to dismiss. */}
+      {replay ? (
+        <div className="notice planted" role="note">
+          <b>Illustrative: an error was deliberately planted in this trace.</b> This is not a
+          measured failure. The step{" "}
+          <code>{replay.mutated_step_id}</code> was edited by hand before the judge saw it —
+          mutation type <code>{replay.mutation_type.replace(/_/g, " ")}</code> — to show what
+          the instrument does when something is wrong.{" "}
+          {replay.judge_flagged_the_mutated_step ? (
+            <>The judge <b>caught it</b>.</>
+          ) : (
+            <>
+              The judge <b>missed it</b>, and that is shown rather than hidden.
+            </>
+          )}{" "}
+          Everything else in the trace is the model&rsquo;s own work.
+        </div>
+      ) : null}
 
       {/* FE-8. Run-level, and ABOVE the report: a reader needs to know how much to
           discount before they read, not after they have scrolled past it. */}
