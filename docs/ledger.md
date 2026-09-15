@@ -101,6 +101,7 @@ keep it honest, including when it is unflattering.
 | 2026-09-15 | W5 | M2-1a | 1.4 | **DoD MET — the held-out 50, labelled in W5, the week the plan books them.** Positions 41–90 in seeded order, same blind tool, both labels. 50 × 1.66 min at the measured rate. **M2-1a's overrun trigger does NOT fire** — the naïve wall-clock reading of the file (3.1 h) would have fired it, and it would have been wrong: it is measuring batched entry, not labelling. **C10.3's 3.0 h labelling line is the first estimate in this project to survive contact with the thing it estimated.** `c7e070c` |
 | 2026-09-15 | W5 | M2-1a | 0.8 | **The pass's own outputs, which are not the labels.** (1) The two files the plan names — `dev-100.jsonl` at 40 and `heldout-50.jsonl` at 50 — split out of the single `<annotator>.jsonl` the tool actually wrote, verified as a partition with no row rewritten. (2) `calibration/adjudication-queue.md`: **the 14 rubric questions the pass could not answer**, each with the reading actually applied, the step ids, and the labels a reversal would invalidate. **None was resolved mid-pass** — M1-11's own rule, and the reason v1's 90 labels are internally consistent even where they may be wrong. It is M2-2's agenda and it **must never be sent to the second annotator**, being the author's reasoning about exactly the cases being measured. (3) The provenance record above. `c7e070c` |
 | 2026-09-15 | W5 | M2-13 | 0.9 | **C5.4's held-out guard was keyed on a FILENAME, and the labelling exposed it.** `make calibrate`'s default — what M2-3's loop runs every cycle — excluded `heldout-50.jsonl` by name and nothing else, while the tool writes `<annotator>.jsonl`; so both halves sat in one file and **every dev number would have silently included the 50 steps the published claim depends on never being tuned against**. **The same hole was waiting for W6 no matter how the labelling had gone**: `annotator-2.md` sends Ankit to `labels/<annotator>.jsonl` and he labels *nothing but* the held-out 50. Now keyed on the draw (`sampling.json`'s random-90, split at 40) with the filename rule kept as a redundant second check, and `label.py` gets `--part {dev,heldout,enriched}` so a pass cannot walk across the boundary on its own — which is how these two ran together. **Two regression tests, both watched to FAIL before being trusted to pass.** Then the first real `make calibrate`: **soundness κ 0.761, behavior κ 0.126** — findings 11 and 12. 421 tests green. `c7e070c` |
+| 2026-09-15 | W5 | M2-2 | 1.2 | **B4 #1 IS MEASURED — behavior κ 0.867, soundness κ 0.935, n=50** — and `make calibrate` could not compute it. The IAA lives on the held-out 50, the only half both annotators labelled; C5.4's exclusion correctly drops every one of them, so the command `annotator-2.md` printed under *"IAA on the 50 double-labelled steps"* reported **NOT COMPUTABLE, one annotator** with 100 labels from two people on disk. **The dangerous repair was one flag away** — `--final` does read that set, and scores the classifier against it before the freeze. Added `--iaa`, which widens *only* what human-vs-human reads: classifier join stays on dev, `classifier_kappa_heldout` stays null, no freeze needed, and `--iaa --final` is refused so "opened once" stays auditable. **Four tests, the three that matter watched to FAIL first**; one asserts the `--iaa` run produces byte-identical classifier numbers to the dev run. **Ankit split on 2 of 50, and both are questions `adjudication-queue.md` had already raised — one of which it named in advance, by step id, as *"most likely to be decided against v1"*. It was.** Findings 13 and 14. 231 unit tests green, lint/typecheck/rubric-drift clean. **Not closed:** the adjudication is *by discussion* and the confirmation is unsigned. `356786c` |
 
 ## Month-1 planned-vs-actual
 
@@ -123,8 +124,8 @@ quietly carried.
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | ---- | ---- | ---- | ---- | ------ |
-| W5 | 9.0 | **47.9 to date** | **+38.9** | **M1-11 + M2-1a — the 90 labels, 3.3 h** · M2-13 3.2/1.5 · FE-1 3.2/1.5 · FE-2a 1.4/2.0 · FE-3+FE-4 1.8/3.5 · FE-6 1.2/1.0 · FE-7 0.4/0.5 · M2-5 2.1/2.0 *(part)* · M2-8 1.6/3.0 *(part)* · **M2-4 2.0/2.0 — prep 0.7 + the full-corpus pass 1.3**. **The week splits 19.5 M2 · 12.7 FE · 10.2 M3 · 5.5 M1**, and only the first two are this month's work. M1 spill: ADR-010 + its amendment 1.3, M1-9's harness fixes 0.6 and its DoD 0.8, ADR-001's local-only measurement 0.8, M1-14's cassettes 0.5, the labelling guard 0.2, **M1-11's 40 labels 1.1**. M3 pulled forward: the backend tier (M3-1a 1.9, M3-3 2.2, M3-2a 0.9, M3-7 0.6), M3-8 0.8, M3-5a 1.1, M3-9 1.1, M3-2b 0.7 |
-| **Month 2 total** | **~34** | **47.9 to date** | | **W5 alone has now outrun the whole month's plan by 5.3x.** **15.7 h of the 47.9 is Month-1 and Month-3 work** carried here rather than hidden — Month 2's own share is 32.2 h against a 9.0 h week. **M2-1a is the first Month-2 task to land inside its estimate** |
+| W5 | 9.0 | **49.1 to date** | **+40.1** | **M1-11 + M2-1a — the 90 labels, 3.3 h** · M2-13 3.2/1.5 · FE-1 3.2/1.5 · FE-2a 1.4/2.0 · FE-3+FE-4 1.8/3.5 · FE-6 1.2/1.0 · FE-7 0.4/0.5 · M2-5 2.1/2.0 *(part)* · M2-8 1.6/3.0 *(part)* · **M2-4 2.0/2.0 — prep 0.7 + the full-corpus pass 1.3**. **The week splits 19.5 M2 · 12.7 FE · 10.2 M3 · 5.5 M1**, and only the first two are this month's work. M1 spill: ADR-010 + its amendment 1.3, M1-9's harness fixes 0.6 and its DoD 0.8, ADR-001's local-only measurement 0.8, M1-14's cassettes 0.5, the labelling guard 0.2, **M1-11's 40 labels 1.1**. M3 pulled forward: the backend tier (M3-1a 1.9, M3-3 2.2, M3-2a 0.9, M3-7 0.6), M3-8 0.8, M3-5a 1.1, M3-9 1.1, M3-2b 0.7 |
+| **Month 2 total** | **~34** | **49.1 to date** | | **W5 alone has now outrun the whole month's plan by 5.3x.** **15.7 h of the 47.9 is Month-1 and Month-3 work** carried here rather than hidden — Month 2's own share is 32.2 h against a 9.0 h week. **M2-1a is the first Month-2 task to land inside its estimate**, and **M2-2 is the second — 1.2 of its 1.5 h box, with the adjudication still to come out of the remaining 0.3** |
 
 > **Six of the eight frontend surfaces came in 1.9 h *under* their combined estimate**, and
 > that is the first sustained underrun in this project. The reason is worth writing down
@@ -808,19 +809,98 @@ clean sample is the 30 individually-stamped rows. **The pattern and the annotato
 confirmation are written into `calibration/README.md`** rather than left for an auditor to
 find and misread — the same discipline the file asks of everything else.
 
-**Cumulative: 96.2 h against a 12 h Lead allocation.** The C10.1 bet was lost in W3 and every
+**Cumulative: 97.4 h against a 12 h Lead allocation.** The C10.1 bet was lost in W3 and every
 week since has said so louder.
+
+## W5 — Ankit's pass lands, B4 #1 is measured, and the tool could not compute it
+
+**behavior κ 0.867 · soundness κ 0.935 · n = 50.** Both clear B4 #1's 0.70 bar, so C5.3's
+revision round is not triggered and the classification claim keeps the word *agreement*. Two
+people, a written rubric, no discussion, **98 of 100 label decisions the same**. This is the
+one criterion in the project that measures whether the rubric works for somebody who did not
+write it, and it is the last of the three human-dependent rows that have been on the board
+since W1.
+
+### The number could not be computed by the command that exists to compute it
+
+`annotator-2.md` printed, under the heading *"After the labels: the ordering control"*:
+
+    make calibrate                     # IAA on the 50 double-labelled steps
+
+It does not, and it never could. B4 #1 lives on the **held-out 50** — the only half both
+annotators labelled, because the brief sends the second annotator there and nowhere else — and
+C5.4's exclusion correctly drops every held-out step from the default run. So the tool reported
+*NOT COMPUTABLE, one annotator* with 100 labels from two people sitting in the file.
+
+**This is the same class of defect as last entry's filename guard, arriving from the opposite
+direction.** That one was a guard that did not guard. This one is a guard working exactly as
+designed and taking a measurement with it. And **the repair that presents itself is the
+dangerous one**: `--final` does read the held-out set — it is one flag, it is already
+documented, and someone who wants a human-vs-human number under time pressure could reach for
+the invocation that scores the classifier against the published set before the freeze exists.
+
+`--iaa` widens **only** the label set human-vs-human reads. The classifier join stays on dev,
+`classifier_kappa_heldout` stays null, no freeze is required — human-vs-human touches no
+classifier output, which is §8.1's own reasoning — and `--iaa --final` together is refused, so
+C5.4's *"opened once"* stays a count somebody can audit rather than an argument. One of the
+four tests asserts the `--iaa` run's classifier block is **byte-identical** to the dev run's;
+three of the four were watched to fail first.
+
+### The adjudication queue predicted one of the two disagreements, by step id
+
+Ankit split on **2 of 50**, and both land on questions
+[`adjudication-queue.md`](../calibration/adjudication-queue.md) had already raised. One of
+them it named in advance — `thinking:thinking-mb-03-root-llm-0:0`, expanding *RGB* where the
+prompt supplies the acronym — as *"the sharpest case"* and question A2 as *"the question most
+likely to be decided against v1."* Written before anyone else had seen the corpus. **A cold
+reader decided it against v1.**
+
+A queue of self-identified rubric gaps that predicts which one an independent reader will trip
+on is a queue worth working. It raises the prior on the other twelve — **which this draw did
+not test**, and that is the finding underneath the headline.
+
+### The κ is 0.867 and the draw is 46/50 one class
+
+The behavior CI is **[0.495, 1.000]** — its lower bound below the bar it just cleared. The
+held-out 50 is **27 steps from `mb-08` alone**, 15 of them the same repeated sentence, and
+**four non-`linear` steps carry the entire behavior κ**. The number is largely agreement about
+a degenerate loop.
+
+**That matters ahead, not behind:** M2-17 computes the published classifier κ on these same 50
+steps, against a 0.92 majority-class baseline. Whatever comes back must be published with its
+n, its CI **and its composition**. Finding 13.
+
+### Two controls were not met, and neither is repairable by re-running anything
+
+**P1 has already failed.** §8.1 requires M2-2's κ to predate the first classifier κ in commit
+order; `c7e070c` committed the dev κ with `inter_annotator` null. P1 is one of the two checks
+the breakdown says *"can only be reported"*, so it is reported, and it goes to G2 as a stated
+limitation. It does not compromise the pass — Ankit labelled blind, both label sets were frozen
+before the κ was computed, and neither disputed step is in the dev 40. **What it does expose is
+still ahead**: the classifier's call on both disputed steps is in committed reports, it agrees
+with a *different annotator on each*, and both are in the held-out 50 that carries the published
+κ. Finding 14 says what to do about that before the adjudication session, because afterwards
+the honest version and the steered version are indistinguishable.
+
+**And `calibration/README.md`'s own line about this pass was crossed.** Having excused batched
+entry for the first pass, it said the second annotator's pass *"must be typed, one step at a
+time, in the annotator's own sitting"* — because batching removes the only timing evidence the
+pass happened as described. All 50 of Ankit's rows carry one `labeled_at`. Not evidence of
+anything wrong; evidence of **nothing** — which puts the entire procedural half of B4 #1's
+claim on the signed confirmation in `annotator-2.md`, and that is blank.
 
 ### Next
 
-**Two human-dependent rows, and they are the last of them** — see
-[`month-3-unblock.md`](month-3-unblock.md):
+**M2-2 is measured but not closed**, and what remains of it is two conversations, not two tasks
+— see [`month-3-unblock.md`](month-3-unblock.md):
 
-1. **M2-2 — Ankit's independent pass**, ~2 h in W6. No substitute, no default; B4 #1 is not
-   computable without it, and it gates classifier scoring. The agenda for the adjudication
-   that follows is already written: [`adjudication-queue.md`](../calibration/adjudication-queue.md),
-   14 questions with the reading actually applied and the labels a reversal would invalidate.
-2. **M2-1b — the enriched 31**, ~50 min, needs nobody. Sequenced *after* M2-2 by its own card,
-   so the adjudicated hard cases are in the rubric before the largest labelling block.
+1. **The adjudication — 2 disagreements, ~20 min with Ankit.** M2-2's card says *by discussion*,
+   and settling A2 alone would be the rubric's author overruling the only independent reading it
+   has ever had. The adjudicated labels become ground truth and each is appended to `rubric.md`
+   as a hard case. **Read finding 14 first.**
+2. **The signature — ~2 min.** `annotator-2.md`'s confirmation, plus the three fields the record
+   cannot fill from the file: his role, the date the rubric was sent, and how long it took.
 
-Then M2-3's box, against a rubric that has been argued rather than assumed.
+Then **M2-1b — the enriched 31**, ~50 min, needs nobody, and sequenced after the adjudicated
+hard cases are in the rubric. Then M2-3's box, against a rubric that has been argued rather
+than assumed.
