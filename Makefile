@@ -64,7 +64,7 @@ ci: lint typecheck unit contract backend-tests faithfulness-check integration-mo
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
 	@echo "warm-cache: not implemented (owner M3-2). CACHE_KEY inputs: see analyzer/src/rlens/versions.py"; exit 2
 
-calibrate:  ## M2-13 -- kappa, CIs, per-class F1, baseline. --final is C5.4-guarded
+calibrate:  ## M2-13 -- kappa, CIs, per-class F1, baseline. --iaa adds B4 #1; --final is C5.4-guarded
 	cd $(ANALYZER) && ../$(BIN)/python -m rlens.calibrate $(ARGS)
 
 # M2-9, as ADR-009 re-scoped it: 3.5 h -> ~1.0 h. The panel is BUILT and SHIPPED, and what

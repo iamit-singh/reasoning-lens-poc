@@ -1,6 +1,7 @@
 """`make calibrate` — the numbers the public page renders verbatim. C5.5, M2-13.
 
     make calibrate                 # dev set only. Safe, and the default
+    make calibrate ARGS="--iaa"    # + B4 #1, the human-vs-human kappa on the double labels
     make calibrate ARGS="--final"  # reads the held-out 50. Refuses unless frozen
     make calibrate ARGS="--json"   # the report on stdout
 
@@ -24,6 +25,22 @@ Human labels live in `calibration/labels/*.jsonl`; classifier predictions live i
 reports under `out/reports/`. They are joined on `step_id`, which is the reason M1-10 had
 to fix `step_id` uniqueness before any of this could work: the join silently collapsed 310
 steps into 155 keys, and a κ computed over that would have looked entirely normal.
+
+Why `--iaa` is a third mode rather than a corner of the other two
+----------------------------------------------------------------
+B4 #1 is computed on the 50 **held-out** steps, because that is the only half both
+annotators labelled — `annotator-2.md` sends the second annotator there and nowhere else.
+So the C5.4 exclusion, which is correct, removes every step the agreement is computed from,
+and the default run reports it NOT COMPUTABLE with both passes sitting in the file. `--final`
+would see them, but `--final` is the held-out *scoring* read: it needs M2-16's freeze, and
+it produces the published classifier kappa — the one number M2-2's ordering control says
+must not exist yet.
+
+`--iaa` is the narrow thing in between: it widens **only** the label set that human-vs-human
+reads. The classifier join keeps the dev set, `classifier_kappa_heldout` stays null, and no
+freeze is required, because human-vs-human touches no classifier output — §8.1 P1's own
+wording, and the reason the breakdown lists M2-2 as reading the held-out labels without
+counting as the C5.4 read.
 
 **It runs on partial label files.** In W5 there are 40 of 100 dev labels, and a tool that
 crashed or refused until the set was complete would be unavailable during the only weeks
@@ -196,9 +213,16 @@ def inter_annotator(labels: list[dict[str, Any]], field: str) -> Agreement | Non
     return agreement(a_labels, b_labels, classes)
 
 
-def build_results(*, final: bool) -> dict[str, Any]:
-    """Everything C5.5 asks for, over whatever labels exist today."""
+def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
+    """Everything C5.5 asks for, over whatever labels exist today.
+
+    Two label sets, deliberately not one. `labels` is what the classifier is scored
+    against and stays under C5.4's exclusion; `iaa_labels` is what human-vs-human reads.
+    Keeping them as separate names is the guard — `_paired` is only ever handed `labels`,
+    so widening the agreement set cannot widen the scoring set by accident.
+    """
     labels = load_labels(include_heldout=final)
+    iaa_labels = load_labels(include_heldout=True) if (final or iaa_heldout) else labels
     predictions = load_predictions()
 
     behavior_h, behavior_m, _ = _paired(labels, predictions, "behavior_label", "behavior")
@@ -208,10 +232,10 @@ def build_results(*, final: bool) -> dict[str, Any]:
         agreement(behavior_h, behavior_m, BEHAVIOR_CLASSES) if behavior_h else None
     )
     classifier_soundness = agreement(sound_h, sound_m, SOUNDNESS_CLASSES) if sound_h else None
-    iaa_behavior = inter_annotator(labels, "behavior_label")
-    iaa_soundness = inter_annotator(labels, "soundness_label")
+    iaa_behavior = inter_annotator(iaa_labels, "behavior_label")
+    iaa_soundness = inter_annotator(iaa_labels, "soundness_label")
 
-    annotators = sorted({row.get("annotator", "?") for row in labels})
+    annotators = sorted({row.get("annotator", "?") for row in iaa_labels})
     skipped = sum(1 for row in labels if row.get("skipped"))
 
     return {
@@ -222,12 +246,15 @@ def build_results(*, final: bool) -> dict[str, Any]:
         ),
         "run": {
             "generated_at": dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "mode": "final" if final else "dev",
+            "mode": "final" if final else ("dev+iaa" if iaa_heldout else "dev"),
             "analyzer_version": ANALYZER_VERSION,
             "prompt_bundle_version": PROMPT_BUNDLE_VERSION,
             "analyzer_backend": os.environ.get("ANALYZER_BACKEND", "hybrid"),
             "judge_triage_pin": os.environ.get("MODEL_ANALYZE") or None,
-            "labels_loaded": len(labels),
+            "labels_loaded": len(iaa_labels),
+            # What the classifier numbers were computed against. It differs from
+            # `labels_loaded` only in `--iaa`, and that difference is the point of the mode.
+            "labels_scored": len(labels),
             "labels_skipped_by_annotator": skipped,
             "annotators": annotators,
             "predictions_loaded": len(predictions),
@@ -261,10 +288,14 @@ def build_results(*, final: bool) -> dict[str, Any]:
         "inter_annotator": {
             "behavior": iaa_behavior.as_dict() if iaa_behavior else None,
             "soundness": iaa_soundness.as_dict() if iaa_soundness else None,
+            "annotators": annotators,
+            "source": "heldout-50" if (final or iaa_heldout) else "dev",
             "note": (
                 "Human vs human. NOT COMPUTABLE with a single annotator -- not harder, not "
                 "noisier: not computable. A null here means the second annotator has not "
-                "labelled yet, and the headline claim cannot be made until they have."
+                "labelled yet, and the headline claim cannot be made until they have. "
+                "Computed on the double-labelled steps only; it reads no classifier output, "
+                "which is why it does not wait on the held-out freeze."
             ),
         },
         "classifier_vs_human": {
@@ -340,9 +371,25 @@ def _render(results: dict[str, Any]) -> str:
         for label, score in cvh["per_class"].items():
             f1 = f"{score['f1']:.3f}" if score["f1"] is not None else "  n/a"
             lines.append(f"  {label:20s} {f1:>8s} {score['support']:8d} {score['predicted']:10d}")
-    iaa = results["inter_annotator"]["behavior"]
-    iaa_value = iaa["kappa"]["value"] if iaa else "NOT COMPUTABLE -- one annotator"
-    lines += ["", f"  inter-annotator kappa {iaa_value}"]
+    block = results["inter_annotator"]
+    lines.append("")
+    if not block["behavior"]:
+        # **Naming the reason matters.** The same null covers "nobody else has labelled"
+        # and "they have, on steps this mode cannot see", and those want opposite actions.
+        why = (
+            "one annotator"
+            if len(block["annotators"]) < 2
+            else "the double labels are held-out; re-run with --iaa"
+        )
+        lines.append(f"  inter-annotator kappa NOT COMPUTABLE -- {why}")
+    else:
+        for field in ("behavior", "soundness"):
+            kappa = block[field]["kappa"]
+            lines.append(
+                f"  inter-annotator kappa · {field:9s} {kappa['value']:.3f}  "
+                f"[{kappa['ci_low']:.3f}, {kappa['ci_high']:.3f}]  n={kappa['n']}  "
+                f"({', '.join(block['annotators'])}, {block['source']})"
+            )
     return "\n".join(lines)
 
 
@@ -350,9 +397,23 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="rlens-calibrate", description=__doc__)
     ap.add_argument("--final", action="store_true", help="read the held-out 50 (C5.4 guarded)")
     ap.add_argument("--dev", action="store_true", help="dev set only (the default)")
+    ap.add_argument(
+        "--iaa",
+        action="store_true",
+        help="also compute B4 #1 on the double-labelled held-out steps (human vs human only)",
+    )
     ap.add_argument("--json", action="store_true", help="print the results instead of a summary")
     ap.add_argument("--out", default=str(RESULTS_DIR / "latest.json"))
     args = ap.parse_args(sys.argv[1:] if argv is None else argv)
+
+    if args.iaa and args.final:
+        sys.stderr.write(
+            "--iaa and --final together is refused. --final already reads the held-out set "
+            "and scores the classifier against it; --iaa reads it for human-vs-human only. "
+            "Asking for both leaves it ambiguous which read this was, and C5.4's "
+            "'opened once' is a count somebody has to be able to audit afterwards.\n"
+        )
+        return 2
 
     if args.final:
         try:
@@ -361,7 +422,7 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(f"{exc}\n")
             return 2
 
-    results = build_results(final=args.final)
+    results = build_results(final=args.final, iaa_heldout=args.iaa)
     body = json.dumps(results, indent=2, sort_keys=True) + "\n"
 
     if args.json:

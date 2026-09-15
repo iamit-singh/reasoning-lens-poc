@@ -512,6 +512,94 @@ text.
 
 ---
 
+## 13. B4 #1 clears its bar — and the draw that measured it is mostly one repeated sentence
+
+**behavior κ 0.867 · soundness κ 0.935 · n = 50 · amit vs ankit, rubric v1, no discussion.**
+Both clear B4 #1's 0.70 target on the point estimate, so C5.3's revision round is not
+triggered. Two people working from the same written rubric reproduced **98 of 100** label
+decisions. The criterion that separates a measurement from one person asserting their own
+labels are correct is met.
+
+**And the behavior interval is [0.495, 1.000].** Its lower bound is below the bar it just
+cleared, and that is not a quibble about bootstrap width — it is what κ does on a sample this
+lopsided:
+
+| | |
+| --- | --- |
+| `linear` | **46 of 50** (majority-class baseline **0.92**) |
+| Steps from `mb-08` alone | **27 of 50** |
+| …of those, the *same repeated sentence* | **15** |
+| Non-`linear` steps carrying the whole behavior κ | **4** |
+
+**The held-out half of the random-90 is a poor instrument for measuring rubric agreement**,
+and that is the finding — not the 0.867. The draw is dominated by a degenerate repetition
+loop on which any two readers agree trivially, so the number is largely *agreement about a
+loop*. [`adjudication-queue.md`](../calibration/adjudication-queue.md) holds 14 open rubric
+questions; this pass put an independent reader in front of two of them.
+
+**This matters beyond B4 #1, because M2-17 computes the published classifier κ on these same
+50 steps.** A held-out set that is 92% one class will give the classifier the same easy ride
+it gave the annotators — and the dev κ already tells us what happens when `linear` dominates
+(finding 11: behavior κ 0.126 against a 0.85 baseline). Whatever κ_heldout comes back, it must
+be published with its n, its CI **and its composition**, or it will be read as far stronger
+than it is.
+
+### The queue called one of the two disagreements in advance, by step id
+
+Of the two disagreements, `thinking:thinking-mb-03-root-llm-0:0` — expanding *RGB* where the
+prompt itself supplies the acronym — is the step the adjudication queue had already named as
+*"the sharpest case"* under question A2, *"the question most likely to be decided against
+v1"*. That was written before anyone else had seen the corpus. **Ankit, cold, decided it
+against v1.** The other (`direct:direct-mb-06-root-llm-0:1`, `verification` vs `backtracking`)
+is queue question B2, also already logged, and ankit's note resolves it by explicitly invoking
+the precedence rule — which means the rubric is ambiguous rather than that either reader was
+careless.
+
+A queue of self-identified rubric gaps that predicts, blind, which one an independent reader
+will trip on is a queue worth working through. **It raises the prior on the other twelve**,
+which this draw did not test.
+
+**Re-run:** `make calibrate ARGS="--iaa"`, then read `inter_annotator` in
+`calibration/results/latest.json`.
+
+---
+
+## 14. P1 has already failed, it cannot be repaired, and the live exposure is the adjudication
+
+§8.1 P1: *"Inter-annotator κ was computed before any classifier scoring — commit order in
+git: M2-2's κ predates the first classifier κ."* It does not. The first classifier κ was
+committed at **`c7e070c`** (15 Sep) with `inter_annotator` null; the IAA κ follows it.
+
+P1 is one of the two checks the breakdown says *"can only be reported"*. So it is reported
+here, and it goes in the G2 report as a stated limitation.
+
+**What it does not compromise.** The second annotator's pass is untouched by this: Ankit
+labelled from the rubric with no access to any classifier output, and both his labels and
+amit's were fixed on disk before the κ was computed. Knowing the dev κ cannot change a
+function of two frozen label sets. Neither disagreeing step is in the dev 40, so **no
+classifier number computed to date depends on either adjudication.**
+
+**What is genuinely exposed, and it is still ahead of us.** Adjudication has not happened, and
+the classifier's call on both disputed steps is sitting in committed reports:
+
+| Step | amit | ankit | **classifier** |
+| --- | --- | --- | --- |
+| `direct:direct-mb-06-root-llm-0:1` | `verification` | `backtracking` | **`verification`** |
+| `thinking:thinking-mb-03-root-llm-0:0` | `unverifiable` | `sound` | **`sound`** |
+
+**The classifier agrees with amit on one and with ankit on the other, and both steps are in
+the held-out 50 that carries the published κ.** So each adjudication moves the headline number
+in a direction that is now *knowable in advance* — which is precisely the influence P1 exists
+to make impossible. It cannot be made impossible any more. It can be made visible, so:
+
+> **Neither adjudicator should look at `out/reports/` for these two steps before the session,
+> and the adjudicated call should be written down with its reasoning before the classifier's
+> prediction is consulted.** Stated here rather than trusted to memory, because the
+> reasoning-shaped version of this failure — deciding on the merits and happening to land on
+> the number that helps — is indistinguishable from the honest version afterwards.
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but
@@ -528,6 +616,8 @@ each one would have surfaced later as a wrong number, so they belong in the same
 | `ANALYSIS_DEADLINE_S` never enforced — **a 969 s call against a 110 s budget** | a hung demo request in Month 3, with a deadline that looked set |
 | Two CI jobs that would have gone green over nothing | G1 check 7 passing on a job that had never run |
 | **C5.4's held-out guard keyed on a *filename*** — the labelling tool writes `<annotator>.jsonl`, so 50 held-out labels sat in a file the default `make calibrate` counted as dev | the published κ tuned against the held-out set, with every guard reporting green |
+| **`make calibrate` could not compute B4 #1 at all** — the IAA κ lives on the held-out 50, which the C5.4 exclusion correctly drops, so the command `annotator-2.md` told you to run reported *NOT COMPUTABLE* with both passes on disk | M2-2 blocked, or "unblocked" by running `--final` — scoring the held-out set against the classifier, before the freeze, to obtain a human-vs-human number |
+| **The brief in `annotator-2.md` named the wrong labelling command** — `make label ARGS="--annotator <name>"` defaults to `--part dev` | the second annotator labelling the dev 40 instead of the held-out 50, and B4 #1 measured on the wrong half of the frame |
 
 **The held-out one is the worst of these and deserves its sentence.** `make calibrate`'s
 default is the *safe* invocation — it is what M2-3's iteration loop runs, every cycle. It
@@ -541,6 +631,18 @@ would have leaked the entire set on its own. The guard is now keyed on the **dra
 (`sampling.json`'s random-90, split at 40), which is where the held-out set is actually
 defined; the filename rule is kept as a redundant second check. Both regression tests were
 watched to fail before being trusted to pass.
+
+**And the one this session found has the opposite shape — a guard that was entirely correct
+and still cost a measurement.** The draw-keyed held-out exclusion did exactly its job: it
+dropped every held-out step from the default run. B4 #1 is computed on the held-out 50,
+because that is the only half both annotators labelled. So `make calibrate` — the command
+`annotator-2.md` printed under the heading *"IAA on the 50 double-labelled steps"* — reported
+*NOT COMPUTABLE, one annotator* with 100 labels from two people sitting in the file. **The
+dangerous repair was one flag away**: `--final` does read the held-out set, and someone under
+time pressure, wanting a human-vs-human number, could have reached for the invocation that
+scores the classifier against the published set before the freeze. The fix instead widens
+*only* the set human-vs-human reads (`--iaa`), keeps the classifier join on dev, and refuses
+`--iaa --final` together so that C5.4's "opened once" stays a count somebody can audit.
 
 **Three of these share one shape** — *we could not read it* being reported as *it was
 wrong*. It appeared in the answer checker (M1-5), in `trace_quality` (M1-8), and again in

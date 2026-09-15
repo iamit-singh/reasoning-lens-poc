@@ -302,3 +302,90 @@ def test_a_dev_run_never_populates_the_heldout_kappa(workspace) -> None:
     assert results["measurement_context"]["classifier_kappa_heldout"] is None
     assert results["measurement_context"]["classifier_kappa_dev"] is not None
     assert results["measurement_context"]["n_heldout"] is None
+
+
+# ------------------------------------------------- B4 #1 lives on the HELD-OUT 50 (M2-2)
+def _double_labelled_heldout(labels: pathlib.Path) -> list[str]:
+    """W6's real shape: 40 dev steps, and 4 held-out steps that BOTH annotators labelled.
+
+    This is not a contrived arrangement. `annotator-2.md` sends the second annotator to the
+    held-out 50 and to nothing else, so every step B4 #1 is computed from is a step C5.4
+    excludes from the default run.
+    """
+    dev_ids = [f"thinking:a:{i}" for i in range(C.HELDOUT_SPLIT_AT)]
+    held_ids = [f"thinking:a:{90 + i}" for i in range(4)]
+    _draw(*dev_ids, *held_ids)
+    (labels / "amit.jsonl").write_text(
+        "".join(json.dumps(_label(sid, "linear")) + "\n" for sid in dev_ids)
+    )
+    (labels / "heldout-50.jsonl").write_text(
+        "".join(json.dumps(_label(sid, "linear", "amit")) + "\n" for sid in held_ids)
+        + "".join(
+            json.dumps(_label(sid, b, "ankit")) + "\n"
+            for sid, b in zip(held_ids, ["linear", "linear", "verification", "linear"], strict=True)
+        )
+    )
+    return held_ids
+
+
+def test_the_default_run_cannot_compute_the_agreement_it_is_told_to_compute(workspace) -> None:
+    """**The defect M2-2 exposed.** `annotator-2.md` says: *"make calibrate — IAA on the 50
+    double-labelled steps"*. It does not, and it never could: the C5.4 exclusion drops every
+    held-out step, both passes sit entirely inside the held-out 50, and the run reports
+    NOT COMPUTABLE with 100 labels from two people on disk.
+
+    A null that means "not measured yet" is honest. A null that means "measured, then
+    discarded by a guard aimed at something else" is a number going missing.
+    """
+    labels, _ = workspace
+    _double_labelled_heldout(labels)
+    assert C.build_results(final=False)["inter_annotator"]["behavior"] is None
+
+
+def test_iaa_computes_the_heldout_agreement_and_does_not_need_the_freeze(workspace) -> None:
+    """B4 #1 is human-vs-human and touches no classifier output, so it is not the C5.4 read
+    and must not wait on M2-16's freeze. The ordering control requires the opposite: the IAA
+    κ has to be computable, and committed, *before* anything scores the classifier."""
+    labels, _ = workspace
+    _double_labelled_heldout(labels)
+
+    results = C.build_results(final=False, iaa_heldout=True)
+    block = results["inter_annotator"]["behavior"]
+    assert block is not None, "the double labels are on disk; B4 #1 is computable"
+    assert block["n"] == 4
+    assert results["inter_annotator"]["soundness"] is not None
+    assert results["inter_annotator"]["annotators"] == ["amit", "ankit"]
+    assert results["run"]["mode"] == "dev+iaa"
+
+
+def test_iaa_never_scores_the_classifier_against_a_heldout_step(workspace) -> None:
+    """**The whole risk of this mode in one test.**
+
+    `--iaa` widens the label set human-vs-human reads. If that same widened set reached the
+    classifier join, the held-out 50 would be scored against the classifier in a run that
+    needs no freeze and takes no deliberate act — which is precisely what C5.4 forbids and
+    exactly how the filename-keyed guard failed before it.
+    """
+    labels, reports = workspace
+    held_ids = _double_labelled_heldout(labels)
+    dev_ids = [f"thinking:a:{i}" for i in range(C.HELDOUT_SPLIT_AT)]
+    # Predictions exist for BOTH halves, so a leak would show up as a bigger n.
+    (reports / "mb-01.report.json").write_text(
+        json.dumps(_report(dev_ids + held_ids, ["linear"] * len(dev_ids) + ["verification"] * 4))
+    )
+
+    dev = C.build_results(final=False)
+    iaa = C.build_results(final=False, iaa_heldout=True)
+
+    assert iaa["classifier_vs_human"] == dev["classifier_vs_human"]
+    assert iaa["classifier_vs_human"]["behavior"]["n"] == C.HELDOUT_SPLIT_AT
+    assert iaa["measurement_context"]["classifier_kappa_heldout"] is None
+    assert iaa["measurement_context"]["n_heldout"] is None
+    assert iaa["run"]["labels_scored"] == C.HELDOUT_SPLIT_AT
+
+
+def test_the_iaa_flag_is_refused_together_with_final(workspace) -> None:
+    """`--final` already reads the held-out set; asking for both says the caller has not
+    decided which read this is. C5.4's "opened once" is a count, and an ambiguous invocation
+    is how a count becomes an argument later."""
+    assert C.main(["--iaa", "--final", "--json"]) == 2

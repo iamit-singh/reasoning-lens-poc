@@ -206,7 +206,8 @@ publish exactly that.
 
 ```
 make faithfulness      # faithfulness/panel.json from S4's records — no model, no network
-make calibrate         # calibration/results/latest.json
+make calibrate         # calibration/results/latest.json (dev set; safe, the default)
+make calibrate ARGS="--iaa"   # + B4 #1, the human-vs-human kappa on the double labels
 make seeded-errors     # judge recall; COSTS SPEND
 ```
 

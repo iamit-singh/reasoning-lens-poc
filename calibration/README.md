@@ -74,18 +74,34 @@ wall-clock reading (3.1 h across the file) would have fired it on an artefact of
 > point there is an independent reading under observation-free conditions, and batched entry
 > would remove the only timing evidence that the pass happened as described.
 
-## The second annotator — confirmed, and why it was nearly lost
+## The second annotator — **pass complete, 15 Sep 2026**
 
-**Ankit** is committed for **~2 hours in W6** to independently label the 50 held-out steps.
-Amit is the sole contributor to this PoC, so this was the one role he could not fill himself,
-and for a day it was the most fragile thing on the board.
+**Ankit** labelled the 50 held-out steps independently. **behavior κ 0.867 · soundness
+κ 0.935 · n = 50** — both clear B4 #1's 0.70 bar, and the full record, caveats and the
+adjudication agenda are in [`annotator-2.md`](annotator-2.md).
 
 | Field | Value |
 | --- | --- |
 | Second annotator | **Ankit** |
 | Commitment | ~2 h, W6 |
-| Labels | the 50 held-out steps, independently, rubric-only |
-| Briefed? | **must be NO** — record this in `annotator-2.md` |
+| Labels | **50 of 50**, held-out only, rubric v1, no skips, 14 notes |
+| Briefed? | **unconfirmed — the signed statement in `annotator-2.md` is blank** |
+| Entry | ⚠️ **batched** — all 50 rows carry one `labeled_at` |
+
+> **⚠️ Two controls this section set for itself were not met, and they are recorded rather
+> than waived.**
+>
+> 1. **The pass was batch-entered.** The paragraph directly above says the second
+>    annotator's pass *"must be typed, one step at a time, in the annotator's own sitting"*,
+>    because batched entry removes the only timing evidence that the pass happened as
+>    described. All 50 rows share a single `labeled_at` of `13:39:37Z`. **The timing evidence
+>    this section asked for does not exist.**
+> 2. **"Briefed? must be NO" is unconfirmed.** `annotator-2.md`'s signed statement is the
+>    artefact that records it, and it is unsigned.
+>
+> Neither is evidence that anything went wrong, and neither is repairable by re-running
+> anything. Both are repairable by **asking Ankit and writing down what he says** — which is
+> a two-minute conversation, and is the whole of what B4 #1's procedural claim now rests on.
 
 **Why no substitute works.** The headline claim is *two people, given only a written rulebook
 and no discussion, agreed this often*. It is what separates a measurement from one person

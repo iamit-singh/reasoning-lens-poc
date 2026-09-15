@@ -182,9 +182,188 @@
     "verbalisation_rate": null
   },
   "inter_annotator": {
-    "behavior": null,
-    "note": "Human vs human. NOT COMPUTABLE with a single annotator -- not harder, not noisier: not computable. A null here means the second annotator has not labelled yet, and the headline claim cannot be made until they have.",
-    "soundness": null
+    "annotators": [
+      "amit",
+      "ankit"
+    ],
+    "behavior": {
+      "agreement_over_baseline_pp": 6.0,
+      "classes_absent_from_this_sample": [
+        "backward_chaining"
+      ],
+      "confusion": {
+        "backtracking": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 0,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "backward_chaining": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 0,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "linear": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 46,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "subgoal_setting": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 0,
+          "subgoal_setting": 1,
+          "verification": 0
+        },
+        "verification": {
+          "backtracking": 1,
+          "backward_chaining": 0,
+          "linear": 0,
+          "subgoal_setting": 0,
+          "verification": 2
+        }
+      },
+      "kappa": {
+        "ci_high": 1.0,
+        "ci_low": 0.4949494949494941,
+        "ci_method": "bootstrap-2000",
+        "n": 50,
+        "note": "30 of 2000 resamples dropped as undefined",
+        "value": 0.8673740053050397
+      },
+      "majority_class_baseline": {
+        "ci_high": 0.968450485911407,
+        "ci_low": 0.8116175308165717,
+        "ci_method": "wilson",
+        "n": 50,
+        "note": "most common label: linear",
+        "value": 0.92
+      },
+      "n": 50,
+      "per_class": {
+        "backtracking": {
+          "f1": null,
+          "precision": 0.0,
+          "predicted": 1,
+          "recall": null,
+          "support": 0
+        },
+        "backward_chaining": {
+          "f1": null,
+          "precision": null,
+          "predicted": 0,
+          "recall": null,
+          "support": 0
+        },
+        "linear": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted": 46,
+          "recall": 1.0,
+          "support": 46
+        },
+        "subgoal_setting": {
+          "f1": 1.0,
+          "precision": 1.0,
+          "predicted": 1,
+          "recall": 1.0,
+          "support": 1
+        },
+        "verification": {
+          "f1": 0.8,
+          "precision": 1.0,
+          "predicted": 2,
+          "recall": 0.6666666666666666,
+          "support": 3
+        }
+      },
+      "raw_agreement": {
+        "ci_high": 0.9964607407283539,
+        "ci_low": 0.8950455641036219,
+        "ci_method": "wilson",
+        "n": 50,
+        "note": null,
+        "value": 0.98
+      }
+    },
+    "note": "Human vs human. NOT COMPUTABLE with a single annotator -- not harder, not noisier: not computable. A null here means the second annotator has not labelled yet, and the headline claim cannot be made until they have. Computed on the double-labelled steps only; it reads no classifier output, which is why it does not wait on the held-out freeze.",
+    "soundness": {
+      "agreement_over_baseline_pp": 16.0,
+      "classes_absent_from_this_sample": [
+        "unsound"
+      ],
+      "confusion": {
+        "sound": {
+          "sound": 9,
+          "unsound": 0,
+          "unverifiable": 0
+        },
+        "unsound": {
+          "sound": 0,
+          "unsound": 0,
+          "unverifiable": 0
+        },
+        "unverifiable": {
+          "sound": 1,
+          "unsound": 0,
+          "unverifiable": 40
+        }
+      },
+      "kappa": {
+        "ci_high": 1.0,
+        "ci_low": 0.7663551401869158,
+        "ci_method": "bootstrap-2000",
+        "n": 50,
+        "note": null,
+        "value": 0.935064935064935
+      },
+      "majority_class_baseline": {
+        "ci_high": 0.9022980732976582,
+        "ci_low": 0.6920394632569922,
+        "ci_method": "wilson",
+        "n": 50,
+        "note": "most common label: unverifiable",
+        "value": 0.82
+      },
+      "n": 50,
+      "per_class": {
+        "sound": {
+          "f1": 0.9473684210526316,
+          "precision": 0.9,
+          "predicted": 10,
+          "recall": 1.0,
+          "support": 9
+        },
+        "unsound": {
+          "f1": null,
+          "precision": null,
+          "predicted": 0,
+          "recall": null,
+          "support": 0
+        },
+        "unverifiable": {
+          "f1": 0.9876543209876543,
+          "precision": 1.0,
+          "predicted": 40,
+          "recall": 0.975609756097561,
+          "support": 41
+        }
+      },
+      "raw_agreement": {
+        "ci_high": 0.9964607407283539,
+        "ci_low": 0.8950455641036219,
+        "ci_method": "wilson",
+        "n": 50,
+        "note": null,
+        "value": 0.98
+      }
+    },
+    "source": "heldout-50"
   },
   "measurement_context": {
     "calibration_run_id": "cal-2026-09-15",
@@ -222,13 +401,15 @@
     "analyzer_backend": "hybrid",
     "analyzer_version": "0.1.0",
     "annotators": [
-      "amit"
+      "amit",
+      "ankit"
     ],
-    "generated_at": "2026-09-15T12:54:31Z",
+    "generated_at": "2026-09-15T13:54:07Z",
     "judge_triage_pin": null,
-    "labels_loaded": 40,
+    "labels_loaded": 140,
+    "labels_scored": 40,
     "labels_skipped_by_annotator": 0,
-    "mode": "dev",
+    "mode": "dev+iaa",
     "predictions_loaded": 310,
     "prompt_bundle_version": "97667881c779",
     "steps_joined_behavior": 40,

@@ -32,6 +32,31 @@ a handful each.
 
 ---
 
+## What the second pass touched — added 15 Sep 2026, after M2-2's labelling
+
+Ankit's independent pass is in (**behavior κ 0.867 · soundness κ 0.935 · n=50** —
+[`annotator-2.md`](annotator-2.md)). It disagreed on **two** of the 50 steps, and both land
+on questions already on this list:
+
+| Queue question | Step | amit | ankit |
+| --- | --- | --- | --- |
+| **A2** — common knowledge as outside knowledge | `thinking:thinking-mb-03-root-llm-0:0` | `unverifiable` | **`sound`** |
+| **B2 / precedence** — abandoning an approach | `direct:direct-mb-06-root-llm-0:1` | `verification` | **`backtracking`** |
+
+**A2 was called in advance.** This file named that exact step as *"the sharpest case"* and
+A2 as *"the question most likely to be decided against v1"* — written before anyone else had
+seen the corpus. A cold reader decided it against v1. **That is the strongest single piece of
+evidence this queue has that its open questions are real rubric gaps rather than the author's
+second-guessing**, and it raises the prior on the other thirteen.
+
+> **The other twelve questions were not tested, and the draw is why.** The held-out 50 is
+> **46 `linear` of 50**, and **27 of the 50 steps are `mb-08`** — 15 of them the same repeated
+> sentence. A1, A3, A4, A5, B3, B5–B9 barely appear in it. **A second annotator agreeing
+> 98 of 100 times on this draw is not evidence that the hard questions are settled**; it is
+> evidence that they were mostly not asked. Take the agenda below on its merits, not on the κ.
+
+---
+
 ## A. Soundness — what makes a claim checkable
 
 ### A1. Does a hedge change what a step asserts? — **highest blast radius**
@@ -245,7 +270,11 @@ outcome-bias guard already lives as a property of the code.
 
 ## What M2-2 should do with this
 
-1. **Take A1–A5 first.** They touch 66 of 90 labels; B1–B9 touch a handful each.
+0. **Start with A2 and B2** — they are the two an independent reader actually split on, they
+   are the only two where the adjudicated label changes a committed ground-truth label, and
+   **A2 is the author's own reading against the only cold reading the rubric has ever had.**
+   Neither is settled in this file on purpose: M2-2's card says *by discussion*.
+1. **Then take A1, A3–A5.** They touch 66 of 90 labels; B1–B9 touch a handful each.
 2. **Decide each question, then append it to `rubric.md` as a hard case** — that is M2-2's
    DoD, and it is also what makes v2 stand on its own for a reader who was not here.
 3. **Re-label what a reversal invalidates.** A1 and A2 are the two that could move a large

@@ -151,11 +151,27 @@ Two rows, and they are the real remaining human dependency:
 | | What | Who | Blocks |
 | --- | --- | --- | --- |
 | **L1** | **M2-1b — label the enriched 31** | the Lead, ~50 min at 1.6 min/step | `dev-100.jsonl` complete → M2-3's iteration loop |
-| **L2** | **M2-2 — the second annotator's independent pass** | **Ankit**, ~2 h, booked for W6 | B4 #1's IAA κ → and B4 #1 gates classifier scoring |
+| ~~**L2**~~ | ~~M2-2 — the second annotator's independent pass~~ | **DONE 15 Sep** | — |
+| **L3** | **M2-2's adjudication — 2 disagreements, by discussion** | **Amit + Ankit**, ~20 min | adjudicated ground truth → `rubric.md` hard cases → M2-1b → M2-3 |
+| **L4** | **Ankit signs `annotator-2.md`'s confirmation** | **Ankit**, ~2 min | the *procedural* half of B4 #1's claim |
 
-**L2 has no substitute and no default.** It is the one role the Lead cannot fill himself;
-[`../calibration/annotator-2.md`](../calibration/annotator-2.md) carries the brief to send
-and the reason it must not be expanded.
+**L2 cleared on 15 Sep.** Ankit's 50 labels are in, all held-out, none walking across the dev
+boundary, and **B4 #1 is measured: behavior κ 0.867, soundness κ 0.935, n = 50** — both above
+the 0.70 bar, so C5.3's revision round is not triggered. See
+[`../calibration/annotator-2.md`](../calibration/annotator-2.md) for the record and the
+caveats, which matter more than the headline: the behavior CI is [0.495, 1.000] on a draw that
+is 46/50 `linear`.
+
+**What replaced it is smaller but is still not the Lead's alone.** L3 is the adjudication
+M2-2's card requires *by discussion* — 2 disagreements, both on rubric questions the
+adjudication queue had already raised, one of which it named in advance. It is ~20 minutes
+with Ankit, not a second labelling ask. **L4 is two minutes** and is what the procedural half
+of B4 #1 rests on, since the pass was batch-entered and carries no timing evidence of its own.
+
+> **⚠️ Read [finding 14](findings.md) before the L3 session.** The classifier's prediction for
+> both disputed steps is in committed reports, it agrees with a different annotator on each,
+> and both steps are in the held-out 50 that carries the published κ. P1 has already failed;
+> the adjudication is where that failure could still do damage.
 
 **L1 is ~50 minutes and needs nobody.** The enriched draw is committed (seed `20261014`,
 31 of a target 60 — [finding 9](findings.md)), and the same tool serves it:
