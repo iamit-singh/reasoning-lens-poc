@@ -63,6 +63,10 @@ def workspace(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path):
     monkeypatch.setattr(C, "REPORTS_DIR", reports)
     monkeypatch.setattr(C, "FREEZE_FILE", labels / "HELDOUT_FREEZE")
     monkeypatch.setattr(C, "HELDOUT_FILE", labels / "heldout-50.jsonl")
+    # Absent unless a test writes it. `heldout_step_ids()` degrades to the filename rule
+    # when there is no draw, and every test written before the draw-keyed guard relies on
+    # that: their step ids are not in any draw.
+    monkeypatch.setattr(C, "SAMPLING_FILE", tmp_path / "sampling.json")
     return labels, reports
 
 
@@ -109,6 +113,49 @@ def test_the_heldout_file_is_not_read_without_final(workspace) -> None:
 
     assert len(C.load_labels(include_heldout=False)) == 1
     assert len(C.load_labels(include_heldout=True)) == 2
+
+
+def _draw(*step_ids: str) -> None:
+    """A random-90-shaped draw whose split point is `C.HELDOUT_SPLIT_AT`."""
+    C.SAMPLING_FILE.write_text(json.dumps({"draw": {"ordered_step_ids": list(step_ids)}}))
+
+
+def test_a_heldout_step_is_excluded_from_dev_whatever_file_it_arrived_in(workspace) -> None:
+    """**The guard is keyed on the draw, not the filename.**
+
+    The labelling tool appends to a file named after the *annotator*, and a pass that ran
+    past position 40 put 50 held-out rows in `amit.jsonl` — where the default
+    `make calibrate` scored them as dev. Tuning a prompt against that number is tuning
+    against the held-out set, which is the one thing C5.4 exists to prevent.
+    """
+    labels, _ = workspace
+    dev_ids = [f"thinking:a:{i}" for i in range(C.HELDOUT_SPLIT_AT)]
+    held_ids = ["thinking:a:90", "thinking:a:91"]
+    _draw(*dev_ids, *held_ids)
+
+    # Exactly the shape the real pass produced: both halves in one annotator-named file.
+    (labels / "amit.jsonl").write_text(
+        "".join(json.dumps(_label(sid, "linear")) + "\n" for sid in dev_ids + held_ids)
+    )
+
+    dev = C.load_labels(include_heldout=False)
+    assert {row["step_id"] for row in dev} == set(dev_ids)
+    assert len(C.load_labels(include_heldout=True)) == len(dev_ids) + len(held_ids)
+
+
+def test_the_second_annotators_file_does_not_leak_the_heldout_set(workspace) -> None:
+    """W6's shape. `annotator-2.md` tells Ankit his labels go in `labels/<annotator>.jsonl`
+    and he labels *nothing but* the held-out 50, so a filename-keyed guard would have let
+    his entire pass into the dev number."""
+    labels, _ = workspace
+    _draw(*[f"thinking:a:{i}" for i in range(C.HELDOUT_SPLIT_AT)], "thinking:a:90")
+
+    (labels / "ankit.jsonl").write_text(
+        json.dumps(_label("thinking:a:90", "linear", "ankit")) + "\n"
+    )
+
+    assert C.load_labels(include_heldout=False) == []
+    assert len(C.load_labels(include_heldout=True)) == 1
 
 
 # ------------------------------------------------------------------ running on partial data

@@ -1,8 +1,180 @@
 {
   "_README": "Written by `make calibrate` (M2-13). FE-6 renders this VERBATIM with zero hard-coded numbers. A null is a real state meaning 'not measured yet' and must render as such -- never as 0, and never by hiding the row.",
   "classifier_vs_human": {
-    "behavior": null,
-    "soundness": null
+    "behavior": {
+      "agreement_over_baseline_pp": -15.0,
+      "classes_absent_from_this_sample": [
+        "backward_chaining"
+      ],
+      "confusion": {
+        "backtracking": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 1,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "backward_chaining": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 0,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "linear": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 26,
+          "subgoal_setting": 3,
+          "verification": 5
+        },
+        "subgoal_setting": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 1,
+          "subgoal_setting": 0,
+          "verification": 0
+        },
+        "verification": {
+          "backtracking": 0,
+          "backward_chaining": 0,
+          "linear": 2,
+          "subgoal_setting": 0,
+          "verification": 2
+        }
+      },
+      "kappa": {
+        "ci_high": 0.4212218649517686,
+        "ci_low": -0.13821138211382109,
+        "ci_method": "bootstrap-2000",
+        "n": 40,
+        "note": null,
+        "value": 0.12568306010928953
+      },
+      "majority_class_baseline": {
+        "ci_high": 0.9293881228267964,
+        "ci_low": 0.709276756335103,
+        "ci_method": "wilson",
+        "n": 40,
+        "note": "most common label: linear",
+        "value": 0.85
+      },
+      "n": 40,
+      "per_class": {
+        "backtracking": {
+          "f1": 0.0,
+          "precision": null,
+          "predicted": 0,
+          "recall": 0.0,
+          "support": 1
+        },
+        "backward_chaining": {
+          "f1": null,
+          "precision": null,
+          "predicted": 0,
+          "recall": null,
+          "support": 0
+        },
+        "linear": {
+          "f1": 0.8125,
+          "precision": 0.8666666666666667,
+          "predicted": 30,
+          "recall": 0.7647058823529411,
+          "support": 34
+        },
+        "subgoal_setting": {
+          "f1": 0.0,
+          "precision": 0.0,
+          "predicted": 3,
+          "recall": 0.0,
+          "support": 1
+        },
+        "verification": {
+          "f1": 0.36363636363636365,
+          "precision": 0.2857142857142857,
+          "predicted": 7,
+          "recall": 0.5,
+          "support": 4
+        }
+      },
+      "raw_agreement": {
+        "ci_high": 0.8192515477025347,
+        "ci_low": 0.5456998118185507,
+        "ci_method": "wilson",
+        "n": 40,
+        "note": null,
+        "value": 0.7
+      }
+    },
+    "soundness": {
+      "agreement_over_baseline_pp": 25.0,
+      "classes_absent_from_this_sample": [],
+      "confusion": {
+        "sound": {
+          "sound": 13,
+          "unsound": 0,
+          "unverifiable": 1
+        },
+        "unsound": {
+          "sound": 0,
+          "unsound": 1,
+          "unverifiable": 0
+        },
+        "unverifiable": {
+          "sound": 2,
+          "unsound": 2,
+          "unverifiable": 21
+        }
+      },
+      "kappa": {
+        "ci_high": 0.9483870967741935,
+        "ci_low": 0.5515695067264574,
+        "ci_method": "bootstrap-2000",
+        "n": 40,
+        "note": null,
+        "value": 0.7610513739545997
+      },
+      "majority_class_baseline": {
+        "ci_high": 0.7577702083276673,
+        "ci_low": 0.47032439137301096,
+        "ci_method": "wilson",
+        "n": 40,
+        "note": "most common label: unverifiable",
+        "value": 0.625
+      },
+      "n": 40,
+      "per_class": {
+        "sound": {
+          "f1": 0.896551724137931,
+          "precision": 0.8666666666666667,
+          "predicted": 15,
+          "recall": 0.9285714285714286,
+          "support": 14
+        },
+        "unsound": {
+          "f1": 0.5,
+          "precision": 0.3333333333333333,
+          "predicted": 3,
+          "recall": 1.0,
+          "support": 1
+        },
+        "unverifiable": {
+          "f1": 0.8936170212765958,
+          "precision": 0.9545454545454546,
+          "predicted": 22,
+          "recall": 0.84,
+          "support": 25
+        }
+      },
+      "raw_agreement": {
+        "ci_high": 0.945404997490546,
+        "ci_low": 0.738878801611489,
+        "ci_method": "wilson",
+        "n": 40,
+        "note": null,
+        "value": 0.875
+      }
+    }
   },
   "faithfulness": {
     "flips": null,
@@ -15,30 +187,52 @@
     "soundness": null
   },
   "measurement_context": {
-    "calibration_run_id": "cal-2026-09-11",
-    "classifier_kappa_dev": null,
+    "calibration_run_id": "cal-2026-09-15",
+    "classifier_kappa_dev": {
+      "ci_high": 0.4212218649517686,
+      "ci_low": -0.13821138211382109,
+      "ci_method": "bootstrap-2000",
+      "n": 40,
+      "note": null,
+      "value": 0.12568306010928953
+    },
     "classifier_kappa_heldout": null,
     "consistency_fp_rate": null,
     "judge_precision": null,
     "judge_recall": null,
-    "majority_class_baseline": null,
-    "n_dev": 0,
+    "majority_class_baseline": {
+      "ci_high": 0.9293881228267964,
+      "ci_low": 0.709276756335103,
+      "ci_method": "wilson",
+      "n": 40,
+      "note": "most common label: linear",
+      "value": 0.85
+    },
+    "n_dev": 40,
     "n_heldout": null,
-    "per_class_f1": null
+    "per_class_f1": {
+      "backtracking": 0.0,
+      "backward_chaining": null,
+      "linear": 0.8125,
+      "subgoal_setting": 0.0,
+      "verification": 0.36363636363636365
+    }
   },
   "run": {
     "analyzer_backend": "hybrid",
     "analyzer_version": "0.1.0",
-    "annotators": [],
-    "generated_at": "2026-09-11T13:18:06Z",
+    "annotators": [
+      "amit"
+    ],
+    "generated_at": "2026-09-15T12:54:31Z",
     "judge_triage_pin": null,
-    "labels_loaded": 0,
+    "labels_loaded": 40,
     "labels_skipped_by_annotator": 0,
     "mode": "dev",
-    "predictions_loaded": 17,
-    "prompt_bundle_version": "a6d550b9dc10",
-    "steps_joined_behavior": 0,
-    "steps_joined_soundness": 0
+    "predictions_loaded": 310,
+    "prompt_bundle_version": "97667881c779",
+    "steps_joined_behavior": 40,
+    "steps_joined_soundness": 40
   },
   "seeded_errors": {
     "note": "M2-6.",

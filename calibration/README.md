@@ -7,8 +7,9 @@ something if the procedure is fixed *before* the numbers are seen.
 | --- | --- | --- |
 | `rubric.md` | 5 definitions verbatim from the classifier prompt, the precedence rule, 5 worked examples, 5 adjudicated hard cases, soundness definitions | M1-11 (W4) |
 | `sampling.json` | Both halves of C5.1's frame: the **random-90** (seed + ordered id list, committed *before the first label*) and the **enriched-31** drawn from the v0 predictions, each with its seed, bundle version, per-class counts and enrichment factor | M1-11 (W4) · M2-14 (W5) |
-| `labels/dev-100.jsonl` | Dev steps — what prompt iteration tunes against. **C5.1 intends 100 (random 1–40 + enriched 60); the corpus yields 71**, because two rare classes could not reach their enrichment target — see [finding 9](../docs/findings.md) and `sampling.json.enriched` | M1-11 → M2-14 → M2-1 |
-| `labels/heldout-50.jsonl` | 50 double-labeled steps carrying the **published headline κ**. Opened **once**, after the prompt bundle is frozen | M2-1 |
+| `labels/dev-100.jsonl` | Dev steps — what prompt iteration tunes against. **C5.1 intends 100 (random 1–40 + enriched 60); the corpus yields 71**, because two rare classes could not reach their enrichment target — see [finding 9](../docs/findings.md) and `sampling.json.enriched`. **At 40 of 71**: M1-11's random 1–40 are labelled, the enriched 31 are not | M1-11 ✅ → M2-14 ✅ → M2-1b |
+| `labels/heldout-50.jsonl` | 50 double-labeled steps carrying the **published headline κ**. Opened **once**, after the prompt bundle is frozen. **Amit's 50 are labelled (M2-1a ✅)**; the second annotator's pass and the freeze are still to come | M2-1a ✅ → M2-2 |
+| `adjudication-queue.md` | The 14 rubric questions the v1 pass could not answer, each with the reading actually applied and the labels a reversal would invalidate. **The agenda for M2-2's adjudication** — and it must never be sent to the second annotator | M1-11 / M2-1a ✅ → M2-2 |
 | `annotator-2.md` | who the second annotator is, when they labeled, and confirmation they were **not** briefed. **Written and blank**, with the verbatim brief to send so the annotator cannot be accidentally coached — coaching is the one thing that invalidates B4 #1 | M2-2 |
 | `labels/HELDOUT_FREEZE` | The freeze commit sha. Absent until M2-1; once present, `scripts/check_heldout_freeze.sh` fails any PR that edits the held-out labels | M2-1 |
 | `seeded/` | Mutation definitions + expected flaw step ids | M2-6 |
@@ -28,6 +29,18 @@ the freeze.
 uniform random draw only. The enriched-60 draw needs the classifier's predictions and so
 cannot happen until Month 2 — and drawing early labels from it would bias the very κ the
 two-part frame exists to protect (C5.1).
+
+**And a third, learned the hard way: the held-out exclusion is keyed on the draw, never on a
+filename.** `make calibrate`'s default — the invocation M2-3's loop runs every cycle — used
+to exclude `heldout-50.jsonl` *by name* and nothing else. The labelling tool writes
+`<annotator>.jsonl`, so a pass that ran from position 1 to position 90 in one sitting put
+both halves in one file and the dev number silently included all 50 held-out steps. The
+same hole was waiting for the second annotator regardless: `annotator-2.md` sends him to
+`labels/<annotator>.jsonl` and he labels *nothing but* the held-out 50. `rlens.calibrate`
+now reads `sampling.json`'s random-90 and treats everything past position 40 as held out
+wherever it lives; the filename rule is kept as a redundant second check. The tool also
+refuses to walk across the boundary on its own — `--part` is `dev`, `heldout` or `enriched`,
+and the default is `dev`.
 
 ## The second annotator — confirmed, and why it was nearly lost
 

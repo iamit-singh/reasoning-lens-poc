@@ -52,11 +52,36 @@ _ROOT = pathlib.Path(__file__).resolve().parents[3]
 LABELS_DIR = _ROOT / "calibration/labels"
 RESULTS_DIR = _ROOT / "calibration/results"
 REPORTS_DIR = _ROOT / "out/reports"
+SAMPLING_FILE = _ROOT / "calibration/sampling.json"
 
 #: C5.4's freeze marker. Its presence means the held-out labels are sealed and the prompt
 #: bundle that will be scored against them is pinned.
 FREEZE_FILE = LABELS_DIR / "HELDOUT_FREEZE"
 HELDOUT_FILE = LABELS_DIR / "heldout-50.jsonl"
+
+#: C5.1/§2.2: the random-90 splits at 40. Positions 1-40 are M1-11's dev pass; 41-90 are
+#: the held-out set that carries the published kappa.
+HELDOUT_SPLIT_AT = 40
+
+
+def heldout_step_ids() -> frozenset[str]:
+    """The held-out half of the random draw, by `step_id`.
+
+    **The C5.4 exclusion is keyed on the draw, not on a filename.** It used to be keyed on
+    the filename alone, and that is not a guard: the labelling tool appends to
+    `<annotator>.jsonl`, so a pass that ran straight through position 40 put 50 held-out
+    rows in `amit.jsonl`, where the default `make calibrate` counted them as dev. The same
+    hole was waiting for the second annotator in W6 — `annotator-2.md` tells Ankit his file
+    is `labels/<annotator>.jsonl`, and he labels *nothing but* the held-out 50, so
+    `ankit.jsonl` would have leaked the entire set.
+
+    Returns an empty set when the draw is missing, and the filename rule below still
+    applies — the two checks are deliberately redundant.
+    """
+    if not SAMPLING_FILE.is_file():
+        return frozenset()
+    draw = json.loads(SAMPLING_FILE.read_text()).get("draw", {})
+    return frozenset(draw.get("ordered_step_ids", [])[HELDOUT_SPLIT_AT:])
 
 
 class CalibrationRefused(RuntimeError):
@@ -87,6 +112,7 @@ def load_labels(*, include_heldout: bool) -> list[dict[str, Any]]:
     """
     if not LABELS_DIR.is_dir():
         return []
+    held = frozenset() if include_heldout else heldout_step_ids()
     latest: dict[tuple[str, str], dict[str, Any]] = {}
     for path in sorted(LABELS_DIR.glob("*.jsonl")):
         if path.name == HELDOUT_FILE.name and not include_heldout:
@@ -95,6 +121,9 @@ def load_labels(*, include_heldout: bool) -> list[dict[str, Any]]:
             if not line.strip():
                 continue
             row = json.loads(line)
+            # Whatever file it arrived in. A held-out step is held out.
+            if row["step_id"] in held:
+                continue
             row.setdefault("source_file", path.name)
             latest[(row.get("annotator", path.stem), row["step_id"])] = row
     return list(latest.values())

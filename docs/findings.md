@@ -15,9 +15,10 @@ and every one of them was found by measuring something before building on it.
 ## The pattern, stated once
 
 By the end of Month 1 this project had measured **four** phenomena the plan assumed would
-be present, and found all four absent or far smaller than expected. W5 added four more
+be present, and found all four absent or far smaller than expected. W5 added six more
 entries — one positive, one correction of this project's own work, one that reads as a
-defect and is not, and one more phenomenon that turned out absent:
+defect and is not, one more phenomenon that turned out absent, and **the first measurement
+against human labels, which splits the classifier in two** (§11, §12):
 
 | # | The plan assumed | Measurement said | ADR |
 | - | --- | --- | --- |
@@ -407,6 +408,110 @@ exactly where the discipline is hardest to keep.
 
 ---
 
+## 11. The classifier's two halves are not the same instrument
+
+**The first measurement against human labels, and it splits cleanly down the middle.** 40
+dev labels (M1-11), written blind against rubric v1, joined to the committed v0 reports at
+bundle `97667881c779`.
+
+| | κ | n | majority baseline | verdict against B4 #2 (κ ≥ 0.60) |
+| --- | --- | --- | --- | --- |
+| **Soundness** | **0.761** | 40 | 0.625 | **clears it** |
+| **Behavior** | **0.126** `[-0.138, 0.421]` | 40 | 0.850 | fails, and fails badly |
+
+**The soundness half works.** κ 0.761 on three classes, `sound` F1 0.897 and `unverifiable`
+F1 0.894 — above B4 #2's bar and above even the 0.70 that B4 #1 asks of *two humans*. This
+is the first criterion in the project to be met by the classifier rather than by the judge,
+and it was not the half anybody was worried about.
+
+**The behavior half agrees with a human less often than a constant would.** Raw agreement is
+0.70; answering `linear` to every step scores 0.85. **The classifier is 15 percentage points
+below the majority-class baseline** — it is not a weak signal, it is a signal that costs
+accuracy to use.
+
+> **κ 0.126 is below G2-C's threshold** (κ < 0.45 → *hypothesis falsified*, B2). It is
+> **not** a G2 reading: G2 reads the held-out set at a frozen bundle, and this is the dev
+> set against an **un-tuned v0** classifier — the number M2-3's iteration box exists to
+> move. Recorded now because the starting point is what the iteration will be measured
+> from, and a starting point recorded after the fact is an estimate.
+
+**This is finding 4 arriving from the other side.** ADR-010 measured the taxonomy barely
+populating — 81% one class. A baseline of 0.850 on this draw is that same fact, and it is
+what makes behavior κ brutal: with 34 of 40 steps `linear`, every non-linear call the
+classifier gets wrong costs more than a correct one gains.
+
+**Re-run:** `make calibrate`.
+
+---
+
+## 12. The behavior disagreement is two rubric questions — and the annotator named both, blind
+
+The confusion matrix is not diffuse. **All 12 behavior disagreements fall into two buckets**,
+and both were flagged in the labelling notes *before any score existed*.
+
+| Human → classifier | n | What it is |
+| --- | --- | --- |
+| `linear` → `verification` | 5 | **4 of them are `mb-08`'s repetition loop** |
+| `linear` → `subgoal_setting` | 3 | first steps that restate the problem |
+| non-linear → `linear` | 4 | one each of the real `backtracking`, `subgoal_setting`, and two `verification` |
+
+### The classifier is cueing on the loop prefix
+
+`mb-08` is the trace that says one thing 126 times. Four of the five false `verification`
+calls are inside it, and they open `Let's check:`, `Let's search memory:`, `Let's think:` —
+**the same sentence, a rotating prefix, nothing recomputed.**
+
+The labelling note on that loop, written blind and before scoring:
+
+> *"A third of this loop opens with `Let's check:`, a likely verification cue for the
+> classifier, so disagreement may cluster on this trace."*
+
+**It does. The prediction was exact.** `verification` precision is 0.286 — five of seven
+`verification` calls are on steps a human read as linear, and four of those five are one
+loop in one trace.
+
+> **This is the 141-step trace earning its keep a second time.** It was the best artifact of
+> Month 1 because it showed the model saying one thing 126 times. It is now also the best
+> adversarial case in the corpus: a trace that produces a verification *marker* at high rate
+> with no verification *behind it* is the exact input that separates a classifier reading
+> the surface from one reading the move.
+
+### Goal-restatement versus sub-goal, cutting both ways
+
+The other bucket is first steps. `mb-12:0` and `mb-14:0` restate the problem and set up
+variables; the classifier calls them `subgoal_setting`, the human called them `linear`.
+`mb-06:0` is the mirror image — the human called it `subgoal_setting` and the classifier
+said `linear`.
+
+The note, again blind:
+
+> *"v2 should give a test for 'restates the goal' vs 'names a sub-goal', because nearly
+> every first step does one of the two."*
+
+**Consequence — and it is the one M2-3's card already anticipated.** M2-3's failure clause
+says to check *"whether the failure is concentrated in one class in the confusion matrix,
+which is a rubric-precedence problem rather than a prompt problem and is fixed in the
+rubric."* It is concentrated, in two classes, and both are open rubric questions rather than
+prompt defects. **So the rubric work in M2-2 comes before the prompt work in M2-3**, which
+is the order the plan already sequences them in — now with evidence rather than caution.
+
+The full list is [`calibration/adjudication-queue.md`](../calibration/adjudication-queue.md):
+14 questions the pass could not answer from the rubric, each with the reading actually
+applied and the labels a reversal would invalidate.
+
+### One more, and it is not a rubric question
+
+**Cross-arm label distributions are confounded by segmentation granularity.** The `direct`
+arm packs a full derivation and its conclusion into one step; `thinking` traces split
+comparable content across many. Any scoreboard comparing per-step label *rates* across arms
+is partly measuring the segmenter. This constrains what M2-10b may claim, and it cannot be
+fixed here — the segmenter is frozen and moving it would detach all 90 labels from their
+text.
+
+**Re-run:** `make calibrate`, then read `confusion` in `calibration/results/latest.json`.
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but
@@ -422,6 +527,20 @@ each one would have surfaced later as a wrong number, so they belong in the same
 | **`step_id` not unique across the corpus** — 310 steps, 155 ids | a κ that made no sense, against 40 labels nobody could repair |
 | `ANALYSIS_DEADLINE_S` never enforced — **a 969 s call against a 110 s budget** | a hung demo request in Month 3, with a deadline that looked set |
 | Two CI jobs that would have gone green over nothing | G1 check 7 passing on a job that had never run |
+| **C5.4's held-out guard keyed on a *filename*** — the labelling tool writes `<annotator>.jsonl`, so 50 held-out labels sat in a file the default `make calibrate` counted as dev | the published κ tuned against the held-out set, with every guard reporting green |
+
+**The held-out one is the worst of these and deserves its sentence.** `make calibrate`'s
+default is the *safe* invocation — it is what M2-3's iteration loop runs, every cycle. It
+excluded `heldout-50.jsonl` by name, and nothing else. A labelling pass that ran from
+position 1 to position 90 in one sitting put both halves in `amit.jsonl`, and every
+subsequent dev number would have silently included the 50 steps the published claim depends
+on never having been tuned against. **The same hole was waiting for W6 regardless of how the
+labelling went**: `annotator-2.md` tells the second annotator his file is
+`labels/<annotator>.jsonl`, and he labels *nothing but* the held-out 50 — so `ankit.jsonl`
+would have leaked the entire set on its own. The guard is now keyed on the **draw**
+(`sampling.json`'s random-90, split at 40), which is where the held-out set is actually
+defined; the filename rule is kept as a redundant second check. Both regression tests were
+watched to fail before being trusted to pass.
 
 **Three of these share one shape** — *we could not read it* being reported as *it was
 wrong*. It appeared in the answer checker (M1-5), in `trace_quality` (M1-8), and again in

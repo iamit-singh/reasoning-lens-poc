@@ -87,15 +87,39 @@ def load_traces() -> dict[str, dict[str, object]]:
     return index
 
 
-def labels_path(annotator: str) -> pathlib.Path:
-    return LABELS / f"{annotator}.jsonl"
+# C5.1's frame splits the random-90 at 40: positions 1-40 are M1-11's dev pass, 41-90 are
+# M2-1a's held-out set. They are different tasks, different files and different weeks, and
+# the boundary is the C5.4 overfitting control -- so it is a CLI choice here, never a step
+# the queue walks over on its own.
+PARTS = {
+    "dev": ("draw", 0, 40, "dev-100.jsonl"),
+    "heldout": ("draw", 40, None, "heldout-50.jsonl"),
+    "enriched": ("enriched", 0, None, "dev-100.jsonl"),
+}
+
+
+def labels_path(part: str) -> pathlib.Path:
+    return LABELS / PARTS[part][3]
 
 
 def already_labelled(annotator: str) -> set[str]:
-    path = labels_path(annotator)
-    if not path.exists():
-        return set()
-    return {json.loads(line)["step_id"] for line in path.read_text().splitlines() if line.strip()}
+    """Every step this annotator has labelled, in whichever file it landed in.
+
+    Scans the whole directory rather than one file. Reading only `<annotator>.jsonl` meant
+    that splitting the labels into the dev and held-out files the plan names lost the
+    tool's memory of the pass and re-served all 90 steps as unlabelled.
+    """
+    done: set[str] = set()
+    if not LABELS.is_dir():
+        return done
+    for path in sorted(LABELS.glob("*.jsonl")):
+        for line in path.read_text().splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if row.get("annotator", path.stem) == annotator:
+                done.add(row["step_id"])
+    return done
 
 
 def render(entry: dict[str, object], item: dict[str, object], n: int, total: int) -> str:
@@ -162,23 +186,24 @@ def main(argv: list[str] | None = None) -> int:
     # calibration/labels/, where everything downstream treats a row as ground truth. A
     # deleted fake is fine; an undeleted one is a label nobody wrote being counted as one.
     ap.add_argument("--dry-run", action="store_true", help="render and prompt, write nothing")
-    # C5.1's frame has two halves drawn by two different tasks, and they are labelled in a
-    # fixed order: the random-90 first. The first 40 of it are M1-11's pass and they carry
-    # the published kappa, so starting on the enriched half would put the easiest-to-find
-    # rare classes into the dev set before the number that has to be independent exists.
+    # See PARTS. `dev` is the default because the parts are labelled in a fixed order and
+    # `dev` is first: starting on `enriched` would put the easiest-to-find rare classes
+    # into the dev set before the number that has to be independent exists, and starting on
+    # `heldout` would label the published-kappa set before the dev set it is held out from.
     ap.add_argument(
         "--part",
-        choices=("random", "enriched"),
-        default="random",
-        help="which half of the sampling frame to serve (default: random-90)",
+        choices=tuple(PARTS),
+        default="dev",
+        help="which part of the sampling frame to serve (default: dev = random 1-40)",
     )
     args = ap.parse_args(argv)
 
+    source, start, stop, _ = PARTS[args.part]
     record = json.loads(SAMPLING.read_text())
-    draw = record.get("draw", {}) if args.part == "random" else record.get("enriched", {})
-    queue: list[str] = draw.get("ordered_step_ids") or []
+    draw = record.get(source, {})
+    queue: list[str] = (draw.get("ordered_step_ids") or [])[start:stop]
     if not queue:
-        target = "make draw-sample" if args.part == "random" else "make draw-enriched"
+        target = "make draw-sample" if source == "draw" else "make draw-enriched"
         print(
             f"no {args.part} draw in calibration/sampling.json. Run `{target}` first -- the "
             f"seed and the ordered id list are committed BEFORE the first label (Hazard 2).",
@@ -194,14 +219,17 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     annotator = args.annotator.strip().lower().replace(" ", "-")
 
-    done = already_labelled(annotator)
+    # Scoped to this part, or the count reads against the wrong denominator: the annotator
+    # who has finished dev and held-out has 90 labels and a 40-step queue.
+    done = already_labelled(annotator) & set(queue)
     remaining = [sid for sid in queue if sid not in done]
     if args.status:
         print(
-            f"annotator {annotator}: {len(done)} of {len(queue)} labelled, {len(remaining)} to go"
+            f"annotator {annotator}: {len(done)} of {len(queue)} labelled in --part "
+            f"{args.part}, {len(remaining)} to go"
         )
         print(
-            f"  seed {draw.get('seed')} · drawn {draw.get('drawn_utc')} · {labels_path(annotator)}"
+            f"  seed {draw.get('seed')} · drawn {draw.get('drawn_utc')} · {labels_path(args.part)}"
         )
         return 0
 
@@ -260,7 +288,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.dry_run:
                 print(f"  DRY RUN -- not written: {json.dumps(row)[:120]}...\n")
             else:
-                with labels_path(annotator).open("a") as fh:
+                with labels_path(args.part).open("a") as fh:
                     fh.write(json.dumps(row) + "\n")
                 print(f"  recorded{' (skipped)' if behavior is None else ''}\n")
             written += 1
@@ -271,7 +299,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {written} this session, DRY RUN -- nothing written\n")
         return 0
     total = len(already_labelled(annotator))
-    print(f"  {written} this session · {total} of {len(queue)} in {labels_path(annotator)}")
+    print(f"  {written} this session · {total} of {len(queue)} in {labels_path(args.part)}")
     return 0
 
 

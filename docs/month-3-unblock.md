@@ -121,22 +121,53 @@ still waiting**, and C1.3 prices that delta at 0–1.5 h precisely so the wait i
 
 ---
 
-## The row that is not in §11, and blocks the most
+## The row that is not in §11 — **cleared 15 Sep 2026**
 
-**M1-11's 40 calibration labels.**
+**M1-11's 40 calibration labels, and M2-1a's held-out 50.**
 
-§11 was written assuming Month 2's labelling had happened on schedule. It has not, and the
-consequence is larger than any row above:
+§11 was written assuming Month 2's labelling had happened on schedule. It had not, and for
+four weeks this was the largest single block on the board:
 
     M1-11 (40 labels)  ->  M2-1a  ->  M2-1b  ->  M2-2 (needs the second annotator)
                                             ->  M2-3  ->  M2-5 / M2-7 / M2-8 / M2-10a
                                                       ->  M2-16  ->  M2-17  ->  M2-10b
                                                                            ->  M2-12  ->  G2
 
-**Nine tasks and a gate.** It is ~65 minutes at the plan's own rate of 1.6 min/step, it
-needs no other person, and it is the single highest-value hour left in the project:
+**It is done.** 90 steps labelled in one sitting on 15 Sep — the random-90 entire, which is
+**both** M1-11's dev 40 *and* M2-1a's held-out 50, two tasks rather than the one this row
+anticipated. Blind tool, seeded order, no duplicates, 82 of 90 carrying notes. M2-1a was a
+W5 task and it landed in W5.
 
-    make label ARGS="--annotator <name>"
+**What it bought immediately:** the first κ against human labels — **soundness 0.761,
+behavior 0.126** — and the finding that those two halves of the classifier are not the same
+instrument ([findings §11, §12](findings.md)). Also the defect that measurement exposed:
+C5.4's held-out guard keyed on a filename, and would have let the held-out set into every
+dev number M2-3 was about to tune against.
+
+### What is still blocked on a human, and it is no longer this
+
+Two rows, and they are the real remaining human dependency:
+
+| | What | Who | Blocks |
+| --- | --- | --- | --- |
+| **L1** | **M2-1b — label the enriched 31** | the Lead, ~50 min at 1.6 min/step | `dev-100.jsonl` complete → M2-3's iteration loop |
+| **L2** | **M2-2 — the second annotator's independent pass** | **Ankit**, ~2 h, booked for W6 | B4 #1's IAA κ → and B4 #1 gates classifier scoring |
+
+**L2 has no substitute and no default.** It is the one role the Lead cannot fill himself;
+[`../calibration/annotator-2.md`](../calibration/annotator-2.md) carries the brief to send
+and the reason it must not be expanded.
+
+**L1 is ~50 minutes and needs nobody.** The enriched draw is committed (seed `20261014`,
+31 of a target 60 — [finding 9](findings.md)), and the same tool serves it:
+
+    make label ARGS="--annotator <name> --part enriched"
+
+> **The ordering is a control, not a preference.** M2-1b's card requires M2-2's adjudicated
+> hard cases in the rubric *before* the largest labelling block, and M2-2's card forbids
+> computing the classifier's κ before IAA is settled. So L2 leads, L1 follows, and M2-3's
+> prompt work comes after both — which [finding 12](findings.md) now supports with evidence
+> rather than caution: the behavior disagreement is concentrated in two **rubric** questions,
+> and tuning a prompt against an unsettled rubric tunes against noise.
 
 **The session is interruptible, and that was verified rather than assumed.** Every label is
 appended and flushed the moment you press the key, a `[q]` or a Ctrl-C prints *"everything
