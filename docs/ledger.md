@@ -97,6 +97,10 @@ keep it honest, including when it is unflattering.
 | 2026-09-14 | W5 | FE-11 | 0.6 | **The replay half only — the G2-branch delta stays blocked** until M2-17 names the branch. Its precondition (*"the mutated reports committed in W7"*) had existed for about an hour. Under **L3** the replay is a **labeled bank entry, not a separate UI mode**: ten ordinary item routes keyed by case id, in the picker beside everything else, pre-rendered like every other page — **which is what makes it the surface that survives a provider outage** (C4.8), since there is no live call anywhere in it. **The banner is non-dismissible structurally rather than by setting**: plain markup, no handler, no button, because *"non-dismissible"* implemented as a state a reader can toggle is one bug away from being dismissed. It names the mutated step and the mutation type and says **whether the judge caught it — including when it did not**. **The metadata is kept OFF the report object on purpose**: `Download` promises the blob is *"the ReasoningReport itself, unmodified"* and the schema sets `additionalProperties: false` at every level, so a `__replay` marker on the report would have broken that promise and the download with it — the marker lives on the wrapper. Two export assertions, **both negative-tested**: the banner must appear in **script-free markup** (if it lived only in the JS payload a reader without JavaScript would get the trace and not the warning — the failure mode inverted), and it must have **no dismiss control**, checked as the absence of an affordance rather than the presence of a word. 31 pages, 27 item routes. **0.5 planned for this half, +0.1.** `2b19a83` |
 | 2026-09-14 | W5 | M3-0 | 0.3 | **Two of §11's seven unblock rows are already dead.** §11 marks **D3** *"blocks M3-4"* and calls it the row where *"the critical path stops at a task no amount of code advances"* — true when Month 3 ended at a deployed service. **ADR-003 deleted the deployment**, so D3 and D4 have no account, region, IAM role, hostname or certificate to name; both recorded as **closed-by-decision rather than dropped silently**, because a reviewer who remembers §11 will look for them. **Four are open and none has a default**: five testers, a peer for the runbook dry-run, an owner for the lit-survey sign-off row that **has never had one** (*"it fails only by being forgotten, which is exactly how it will fail"*), and the C10.1 contingency. **U4's numbers have moved and the file says so**: §11's default reads *"C10.5's trigger already fired at G2"* — it fired earlier and by more, **91.5 h against a 12 h allocation** with L1/L2/L3/L4/L6 all applied, so the contingency and the calendar are the only instruments left. **D6 gets a recommendation rather than a silent default** — Langfuse was C9.1's only cost dashboard, but generation is local and free, nothing is deployed, and ADR-011 put the spend total in a file the breaker reads; recommend *superseded*, but that is the tech lead's call so it stays open with the reasoning attached. **And the file names the row §11 does not contain**, because §11 assumed the labelling had happened: **M1-11's 40 labels block nine tasks and a gate**, need no second person, and run ~65 min — the chain drawn out so the cost of deferring it is visible rather than asserted. `5bd0807` |
 | 2026-09-14 | W5 | M1-11 | 0.2 | **Pre-flight on the 40 labels: is the session interruptible?** This project has **twice lost work to a harness that wrote its record only at the end** — M1-9's first attempt lost 13 runs to a sleeping laptop — and the 40 labels are the highest-value hour left and the worst thing to lose at minute 40. So the same failure mode was **checked rather than assumed**. It is not there: every label is appended and flushed on the keypress, an interrupt prints *"everything labelled so far is already written"*, and a second run skips what is done with no duplicates. **Proven by running the real `main()` against a redirected output directory** — three labels survived an abrupt kill mid-session and resume picked up cleanly — **with `calibration/labels/` untouched**, that being the corpus whose entire value is that a human wrote every row, and the reason `--dry-run` exists after a smoke test once wrote a fake label into it. **Consequence for the ask: it does not need to be one sitting**, recorded where somebody about to label will read it. `05a06a4` |
+| 2026-09-15 | W5 | M1-11 | 1.1 | **DoD MET — the 40 dev labels exist and M1-11 closes**, four weeks after its W4 slot and as the last Month-1 task. Random-90 positions 1–40 in seeded order, both labels in one pass, no duplicates, no skips. **Hours are derived, not wall-clock, and that is deliberate**: rows 31–90 were judged first and entered in batches of ten, so `labeled_at` records the write and not the reading. The only clean rate sample is the 30 individually-stamped rows — **1.10 min/step median, 1.66 mean against the plan's 1.6** — and 40 × 1.66 is the 1.1 h booked here. The provenance pattern and the annotator's confirmation are recorded in `calibration/README.md` so a later auditor reads evidence rather than an alarm. `c7e070c` |
+| 2026-09-15 | W5 | M2-1a | 1.4 | **DoD MET — the held-out 50, labelled in W5, the week the plan books them.** Positions 41–90 in seeded order, same blind tool, both labels. 50 × 1.66 min at the measured rate. **M2-1a's overrun trigger does NOT fire** — the naïve wall-clock reading of the file (3.1 h) would have fired it, and it would have been wrong: it is measuring batched entry, not labelling. **C10.3's 3.0 h labelling line is the first estimate in this project to survive contact with the thing it estimated.** `c7e070c` |
+| 2026-09-15 | W5 | M2-1a | 0.8 | **The pass's own outputs, which are not the labels.** (1) The two files the plan names — `dev-100.jsonl` at 40 and `heldout-50.jsonl` at 50 — split out of the single `<annotator>.jsonl` the tool actually wrote, verified as a partition with no row rewritten. (2) `calibration/adjudication-queue.md`: **the 14 rubric questions the pass could not answer**, each with the reading actually applied, the step ids, and the labels a reversal would invalidate. **None was resolved mid-pass** — M1-11's own rule, and the reason v1's 90 labels are internally consistent even where they may be wrong. It is M2-2's agenda and it **must never be sent to the second annotator**, being the author's reasoning about exactly the cases being measured. (3) The provenance record above. `c7e070c` |
+| 2026-09-15 | W5 | M2-13 | 0.9 | **C5.4's held-out guard was keyed on a FILENAME, and the labelling exposed it.** `make calibrate`'s default — what M2-3's loop runs every cycle — excluded `heldout-50.jsonl` by name and nothing else, while the tool writes `<annotator>.jsonl`; so both halves sat in one file and **every dev number would have silently included the 50 steps the published claim depends on never being tuned against**. **The same hole was waiting for W6 no matter how the labelling had gone**: `annotator-2.md` sends Ankit to `labels/<annotator>.jsonl` and he labels *nothing but* the held-out 50. Now keyed on the draw (`sampling.json`'s random-90, split at 40) with the filename rule kept as a redundant second check, and `label.py` gets `--part {dev,heldout,enriched}` so a pass cannot walk across the boundary on its own — which is how these two ran together. **Two regression tests, both watched to FAIL before being trusted to pass.** Then the first real `make calibrate`: **soundness κ 0.761, behavior κ 0.126** — findings 11 and 12. 421 tests green. `c7e070c` |
 
 ## Month-1 planned-vs-actual
 
@@ -106,7 +110,7 @@ keep it honest, including when it is unflattering.
 | W2 | 6.7 | **8.9** | **+2.2** | **Complete.** M1-15, M1-16, M1-2, M1-6, M1-4 all done. 1.4 h of it was delivered in W1 |
 | W3 | 7.5 | **18.6** | **+11.1** | **COMPLETE.** M1-5 6.4/1.5 · M1-7 5.3/3.0 · M1-8 5.0/2.0 · S3 1.9/1.0. `segmenter-frozen-v1` tagged. The heaviest week on the plan ran 2.5x its budget |
 | W4 | 8.0 | **15.5 to date** | | M1-9 4.5/3.0 · M1-10 4.9/1.5 · M1-11 2.6/2.0 (tooling; labels are not the Lead's to fabricate) · M1-13 2.1/1.0 · M1-14 0.7/0.5 · M1-1 0.7. **M1-13 is the first task to give hours back** — ADR-009 re-scopes M2-9 from 3.5 h to ~1.0 h |
-| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **48.3** | **+21.9** | **Month 1 closed at 48.3 h against 26.4 planned and 12.0 allocated**, and W5 has since carried **5.0 h more of Month-1 work** — M1-9's DoD, ADR-001's local-only measurement, M1-14's cassettes and ADR-010's amendment — for a **Month-1 task total of 52.5 h**. One task remains: see the Month-2 table |
+| **Total** | **26.4** *(25.5 + M1-2 0.6 + M1-6 0.9 − M1-4 rounding)* | **48.3** | **+21.9** | **Month 1 closed at 48.3 h against 26.4 planned and 12.0 allocated**, and W5 has since carried **5.3 h more of Month-1 work** — M1-9's DoD, ADR-001's local-only measurement, M1-14's cassettes, ADR-010's amendment and **M1-11's 40 labels (1.1)** — for a **Month-1 task total of 53.6 h**. **No Month-1 task remains open** |
 | *vs. C10.2 Realistic* | 22.0 | | | *+3.0 = the four §1.3 gaps, less L1/L2* |
 | *vs. Lead capacity* | 12.0 | | | *the C10.1 bet, first reading at end W4* |
 
@@ -119,8 +123,8 @@ quietly carried.
 
 | Week | Planned (breakdown) | Actual | Δ | Notes |
 | ---- | ---- | ---- | ---- | ------ |
-| W5 | 9.0 | **43.7 to date** | **+34.7** | M2-13 2.3/1.5 · FE-1 3.2/1.5 · FE-2a 1.4/2.0 · FE-3+FE-4 1.8/3.5 · FE-6 1.2/1.0 · FE-7 0.4/0.5 · M2-5 2.1/2.0 *(part)* · M2-8 1.6/3.0 *(part)* · **M2-4 2.0/2.0 — prep 0.7 + the full-corpus pass 1.3**. **The week splits 16.4 M2 · 12.7 FE · 10.2 M3 · 4.4 M1**, and only the first two are this month's work. M1 spill: ADR-010 + its amendment 1.3, M1-9's harness fixes 0.6 and its DoD 0.8, ADR-001's local-only measurement 0.8, M1-14's cassettes 0.5, the labelling guard 0.2. M3 pulled forward: the backend tier (M3-1a 1.9, M3-3 2.2, M3-2a 0.9, M3-7 0.6), M3-8 0.8, M3-5a 1.1, M3-9 1.1, M3-2b 0.7 |
-| **Month 2 total** | **~34** | **43.7 to date** | | **W5 alone has now outrun the whole month's plan.** **14.6 h of the 43.7 is Month-1 and Month-3 work** carried here rather than hidden — Month 2's own share is 25.2 h against a 9.0 h week |
+| W5 | 9.0 | **47.9 to date** | **+38.9** | **M1-11 + M2-1a — the 90 labels, 3.3 h** · M2-13 3.2/1.5 · FE-1 3.2/1.5 · FE-2a 1.4/2.0 · FE-3+FE-4 1.8/3.5 · FE-6 1.2/1.0 · FE-7 0.4/0.5 · M2-5 2.1/2.0 *(part)* · M2-8 1.6/3.0 *(part)* · **M2-4 2.0/2.0 — prep 0.7 + the full-corpus pass 1.3**. **The week splits 19.5 M2 · 12.7 FE · 10.2 M3 · 5.5 M1**, and only the first two are this month's work. M1 spill: ADR-010 + its amendment 1.3, M1-9's harness fixes 0.6 and its DoD 0.8, ADR-001's local-only measurement 0.8, M1-14's cassettes 0.5, the labelling guard 0.2, **M1-11's 40 labels 1.1**. M3 pulled forward: the backend tier (M3-1a 1.9, M3-3 2.2, M3-2a 0.9, M3-7 0.6), M3-8 0.8, M3-5a 1.1, M3-9 1.1, M3-2b 0.7 |
+| **Month 2 total** | **~34** | **47.9 to date** | | **W5 alone has now outrun the whole month's plan by 5.3x.** **15.7 h of the 47.9 is Month-1 and Month-3 work** carried here rather than hidden — Month 2's own share is 32.2 h against a 9.0 h week. **M2-1a is the first Month-2 task to land inside its estimate** |
 
 > **Six of the eight frontend surfaces came in 1.9 h *under* their combined estimate**, and
 > that is the first sustained underrun in this project. The reason is worth writing down
@@ -129,12 +133,17 @@ quietly carried.
 > without a single question that needed an answer from somewhere else. That is precisely
 > what G1 was for. The gate cost W4 dearly and W5 is where it pays back.
 
-### One Month-1 task is still open, and it is not idle time
+### Month 1 is closed — the last task landed 15 Sep
 
 | Task | State | What it needs |
 | --- | --- | --- |
 | ~~**M1-9**~~ | ✅ **DoD MET 12 Sep** | **1 parse failure in 1,058 calls — 0.095%** against a 2% bar, over 22 graded runs. Took three attempts; twice the machine was the reason. See [`docs/spikes/M1-9-reliability.md`](spikes/M1-9-reliability.md) |
-| **M1-11** | **Blocked on a human** | 40 labels, in seeded order, both labels in one pass. The tool is built, blind, and dry-runnable. **This is the single highest-value 1.5 h left**, and ADR-010's amendment sharpened why rather than removing the need: `backtracking` is **2.0%, not 0**, and nothing in the classifier's own output says whether its 2.0% is the *right* 2.0%. 45 of the 71 rows sit in `mb-08.thinking` — the trace that loops 126 times over a town that does not exist |
+| ~~**M1-11**~~ | ✅ **DoD MET 15 Sep** | 40 labels in seeded order, both labels in one pass, blind tool. **And it answered the question ADR-010's amendment left open**: nothing in the classifier's own output said whether its 2.0% `backtracking` was the *right* 2.0%. A human read those steps, and the answer is that the behavior half of the classifier agrees with a human **less often than a constant would** — κ 0.126 against a 0.850 majority baseline. **The soundness half, which nobody was worried about, clears B4 #2 at κ 0.761.** Findings [11 and 12](findings.md) |
+
+**Month 1 ran 09 Sep – 15 Sep on the calendar and 53.6 h on the clock, against 26.4 planned
+and 12.0 allocated.** The last task was the one that could not be bought with hours: it
+needed a human to read 40 reasoning steps, and it sat blocked for four weeks while
+everything downstream of it waited.
 
 > **⚠️ W1 is +2.9 over, and the raw number overstates it.** Read it in three parts.
 >
@@ -718,3 +727,100 @@ down rather than remembered: chunk with an explicit output cap and assert it too
 run analysis at `think: low`; treat `finish_reason: length` as a hard error. Then M1-10
 freezes `ReasoningReport` at G1 — the one structural decision that makes 12 frontend hours
 cover eight surfaces, and the deadline that E9 and E11 exist to protect.
+
+---
+
+## W5 — the 90 labels land, and the classifier turns out to be two instruments
+
+**The block cleared.** M1-11 sat *blocked on a human* for four weeks — the only task in the
+project that could not be bought with hours — and on 15 Sep it went, along with M2-1a's
+held-out 50, in a single pass over the whole random-90.
+
+### The result, and it is not one result
+
+| | κ | n | baseline | B4 #2 (κ ≥ 0.60) |
+| --- | --- | --- | --- | --- |
+| **Soundness** | **0.761** | 40 | 0.625 | **met** |
+| **Behavior** | **0.126** `[-0.138, 0.421]` | 40 | 0.850 | failed by a distance |
+
+**The half nobody was worried about is the half that works.** Soundness clears B4 #2 and
+clears the 0.70 that B4 #1 asks of *two humans*. It is the first criterion the classifier has
+met on its own rather than through the judge.
+
+**The behavior half agrees with a human less often than a constant would.** Raw agreement
+0.70; answering `linear` to everything scores 0.85. **15 percentage points below the
+majority-class baseline** is not a weak signal — it is a signal that costs accuracy to use.
+
+That is ADR-010 arriving from the other side. The taxonomy barely populates, so the baseline
+is brutal, and every non-linear call the classifier gets wrong costs more than a correct one
+gains. **κ 0.126 is below G2-C's falsification threshold — and it is not a G2 reading**: G2
+reads the *held-out* set at a *frozen* bundle, and this is the dev set against an **un-tuned
+v0**. It is the number M2-3's box exists to move, recorded now precisely because a starting
+point recorded afterwards is an estimate.
+
+### The best thing in the week is a note written before the number existed
+
+The labelling notes on `mb-08`'s repetition loop, blind, with no score in existence:
+
+> *"A third of this loop opens with `Let's check:`, a likely verification cue for the
+> classifier, so disagreement may cluster on this trace."*
+
+**Four of the five false `verification` calls are in that loop.** `verification` precision is
+0.286. The classifier is reading the marker, not the move — on a trace that emits the marker
+126 times while recomputing nothing.
+
+All 12 behavior disagreements fall into two buckets, and **both are open rubric questions
+rather than prompt defects**: surface-marker cueing on loop prefixes, and goal-restatement
+versus sub-goal on first steps. M2-3's card says to check exactly this before spending its
+box — *"concentrated in one class … is a rubric-precedence problem rather than a prompt
+problem and is fixed in the rubric."* It is concentrated. **So M2-2's rubric work comes before
+M2-3's prompt work**, which is the order the plan already had, now with evidence under it.
+
+### The defect the measurement exposed, and it is the worst kind
+
+**C5.4's held-out guard was keyed on a filename.** `make calibrate`'s default — the
+invocation M2-3 runs *every cycle* — excluded `heldout-50.jsonl` by name and nothing else. The
+labelling tool writes `<annotator>.jsonl`. So both halves of the draw sat in one file, and
+every dev number from here on would have silently included the 50 steps whose entire value is
+that nothing was ever tuned against them.
+
+**It would have fired in W6 regardless of how the labelling had gone.** `annotator-2.md` sends
+the second annotator to `labels/<annotator>.jsonl`, and he labels *nothing but* the held-out
+50 — so `ankit.jsonl` would have leaked the whole set on its own, with every guard green.
+
+This is the fourth guard in this project to be *watched failing* before being trusted: the
+import-linter contract, `check_rubric_drift.sh`, the `--dry-run` that exists because a smoke
+test once wrote a fake label into the corpus, and now two regression tests that were run
+against the un-fixed code first. **A guard nobody has watched fire is a guard nobody knows
+works**, and this one had been green for five days while being wrong.
+
+### On the hours, and a first
+
+**W5 is at 47.9 against a 9.0 plan.** The labelling itself came in at **1.66 min/step mean
+against the plan's assumed 1.6** — so **C10.3's labelling line is the first estimate in this
+project to survive contact with the thing it estimated**, and M2-1a's overrun trigger does not
+fire.
+
+**It nearly fired on an artefact.** Read naïvely, the label file spans 3.1 h of wall clock,
+which would have said 2.08 min/step and tripped the trigger. But rows 31–90 were judged first
+and entered in batches of ten, so `labeled_at` records the write and not the reading; the only
+clean sample is the 30 individually-stamped rows. **The pattern and the annotator's
+confirmation are written into `calibration/README.md`** rather than left for an auditor to
+find and misread — the same discipline the file asks of everything else.
+
+**Cumulative: 96.2 h against a 12 h Lead allocation.** The C10.1 bet was lost in W3 and every
+week since has said so louder.
+
+### Next
+
+**Two human-dependent rows, and they are the last of them** — see
+[`month-3-unblock.md`](month-3-unblock.md):
+
+1. **M2-2 — Ankit's independent pass**, ~2 h in W6. No substitute, no default; B4 #1 is not
+   computable without it, and it gates classifier scoring. The agenda for the adjudication
+   that follows is already written: [`adjudication-queue.md`](../calibration/adjudication-queue.md),
+   14 questions with the reading actually applied and the labels a reversal would invalidate.
+2. **M2-1b — the enriched 31**, ~50 min, needs nobody. Sequenced *after* M2-2 by its own card,
+   so the adjudicated hard cases are in the rubric before the largest labelling block.
+
+Then M2-3's box, against a rubric that has been argued rather than assumed.

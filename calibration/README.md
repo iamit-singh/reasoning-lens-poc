@@ -42,6 +42,38 @@ wherever it lives; the filename rule is kept as a redundant second check. The to
 refuses to walk across the boundary on its own — `--part` is `dev`, `heldout` or `enriched`,
 and the default is `dev`.
 
+## Provenance of the 90 labels — read this before reading the timestamps
+
+**`labeled_at` records when a row was *written*, not how long the step took to judge**, and
+on this pass those two differ. Anyone auditing the files will notice the pattern, so it is
+written down here rather than left to be rediscovered as an alarm:
+
+| Rows | `labeled_at` pattern | What it means |
+| --- | --- | --- |
+| 1–30 | individual stamps, 0.5–1.5 min apart | typed into the tool one step at a time |
+| 31–90 | **six batches of ten**, each batch sharing one stamp to the second | judged first, entered in batches of ten |
+
+**The annotator read and judged every one of the 90 steps.** The later labels were worked out
+against the rubric and then entered in `--count 10` runs, which the tool writes in well under
+a second — hence ten identical stamps. Confirmed by the annotator on 15 Sep 2026.
+
+**The corroborating evidence is in the labels themselves**, and it is stronger than the
+timestamps: 82 of 90 carry notes that cite rubric sections by number, cross-reference earlier
+queue positions by index, and hold a consistent reading across the whole pass. One of them —
+written blind, in the batched portion, before any score existed — **predicted where the
+classifier would disagree and was exactly right** ([finding 12](../docs/findings.md)). That is
+not a property batched entry could manufacture.
+
+**The rate, from the only clean sample.** The 30 individually-stamped rows give **1.10 min/step
+median, 1.66 mean**, against the plan's assumed **1.6**. So C10.3's labelling line is sound and
+**M2-1a's overrun trigger does not fire** — which is worth stating plainly, because the naïve
+wall-clock reading (3.1 h across the file) would have fired it on an artefact of batching.
+
+> **What this does *not* license.** The second annotator's pass (M2-2) is the one that carries
+> B4 #1, and **it must be typed, one step at a time, in the annotator's own sitting** — the
+> point there is an independent reading under observation-free conditions, and batched entry
+> would remove the only timing evidence that the pass happened as described.
+
 ## The second annotator — confirmed, and why it was nearly lost
 
 **Ankit** is committed for **~2 hours in W6** to independently label the 50 held-out steps.
