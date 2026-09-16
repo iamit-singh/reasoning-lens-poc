@@ -13,15 +13,43 @@
 
 ## 1. The branch
 
-> # G2-B
+> # G2-B — and it is **one label of fifty** away from G2-C
 >
-> **Pooled judge precision is 0.643 [0.388, 0.837], n = 14 — below the 0.75 bar.**
-> **Held-out classifier κ: `PENDING M2-17`.**
+> **Pooled judge precision 0.643 [0.388, 0.837], n = 14** — below the 0.75 bar.
+> **Held-out classifier κ: 0.550 [−0.017, 1.000] against annotator 1 · 0.401 [−0.017,
+> 0.792] against annotator 2**, n = 50, majority baseline 0.920.
 
-C1.3's rule: `κ_heldout < 0.60 OR precision < 0.75` → **G2-B**, unless
-`κ_heldout < 0.45 OR precision < 0.60` → G2-C. **Precision alone already places this at
-G2-B or worse**, and that is true whatever the held-out κ returns; only a κ below 0.45
-moves it to G2-C.
+C1.3's rule: `κ_heldout < 0.60 OR precision < 0.75` → **G2-B**; `κ_heldout < 0.45 OR
+precision < 0.60` → **G2-C**. Precision (0.643) is a G2-B input either way. **The κ is not:
+0.550 is G2-B and 0.401 is G2-C**, and which one you get depends on whose labels are
+treated as ground truth.
+
+### The two annotators disagree on exactly one behavior label in the held-out 50, and that label moves the gate
+
+| | | |
+| --- | --- | --- |
+| Step | `direct:direct-mb-06-root-llm-0:1` | |
+| **Annotator 1 (amit)** | `verification` | wrote `rubric.md` **and** the classifier prompt |
+| **Annotator 2 (ankit)** | `backtracking` | labelled blind, from the written rubric alone |
+| **The classifier** | **`verification`** | agrees with the rubric's author |
+
+They agree on the other 49. That single step is worth **0.149 of κ** — because with 46 of
+50 steps `linear`, four non-linear steps carry the entire coefficient, so one of them is a
+quarter of the signal.
+
+> **The direction matters and is stated rather than left for the reviewer to notice.** The
+> higher κ comes from scoring against **the person who wrote the rubric the classifier was
+> given**. The independent reading — the blind second pass, which is the whole point of
+> having one — gives the lower number and the worse branch. **There is no adjudication to
+> settle it**: M2-2's adjudication is *by discussion* and amendment 002 dropped it, so this
+> step has two readings and no resolution, and choosing one after the predictions are known
+> is exactly what finding 14 was written to prevent.
+>
+> **This report therefore does not pick.** It names G2-B because precision independently
+> requires at least G2-B and because the primary scoring set is the annotator who labelled
+> the whole draw — and it records that a defensible reading of the same 50 steps yields
+> G2-C. **That choice is the reviewer's, and it is the one decision at this gate that the
+> evidence genuinely does not make for them.**
 
 **What G2-B costs: ~0.5 h of Month-3 UI delta.** Same demo, same architecture. Soundness
 renders with a prominent measured-error-rate chip, the verdict line hedges, and the
@@ -36,7 +64,8 @@ calibration page leads with the shortfall. **No rescope, and nothing to improvis
 | # | Criterion | Target | Measured | n | Interval | Verdict |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Inter-annotator κ | ≥ 0.70 | **behavior 0.867** · soundness 0.935 | 50 | [0.495, 1.000] · [0.766, 1.000] | **MET** ¹ |
-| 2 | Classifier κ (held-out) | ≥ 0.60 | `PENDING M2-17` | 50 | — | — |
+| 2 | Classifier κ (held-out) | ≥ 0.60 | **0.550** (ann. 1) · **0.401** (ann. 2) | 50 | [−0.017, 1.000] · [−0.017, 0.792] | **NOT MET** on either reading |
+| 2 | Soundness κ (held-out) | — | **0.822** (ann. 1) · **0.885** (ann. 2) | 50 | [0.603, 1.000] · [0.696, 1.000] | **clears 0.60 on both** |
 | 2 | Per-class F1, lowest | ≥ 0.50 | **0.000** | 1–4 per class | — | **NOT MET** ² |
 | 3 | Judge recall (seeded) | ≥ 70% | **8 / 10 = 0.80** | 10 | triage-alone, shipped config | **MET** ³ |
 | 4 | Judge precision (pooled) | ≥ 0.75 | **0.643** | 14 | [0.388, 0.837] | **NOT MET** |
@@ -94,7 +123,7 @@ the breaker's own file (ADR-011), which `make trip-breaker` exercises.
 | | κ | n | baseline | note |
 | --- | --- | --- | --- | --- |
 | **IAA, human vs human** | **0.867** behavior · 0.935 soundness | 50 | — | B4 #1. Unadjudicated floor |
-| **Classifier, held-out** | `PENDING M2-17` | 50 | 0.92 expected | The published headline |
+| **Classifier, held-out** | **0.550** / **0.401** | 50 | **0.920** | The published headline — two readings, see §1 |
 | **Classifier, dev** | **−0.052 … +0.186** over five runs | 32–40 | **0.850** | See below |
 | **Majority-class baseline** | **0.850** | 40 | — | Always answering `linear` |
 
@@ -129,11 +158,19 @@ steps right.
 > a gate whose metric has a 0.238 run-to-run range does not improve by being lowered. It is
 > reported against, with the arithmetic shown. Finding 15.
 
-### The dev–held-out gap
+### The dev–held-out gap — and it points the wrong way
 
-The overfitting reading C5.7 asks for cannot be taken as usual: the dev κ is a distribution
-0.238 wide, so a single held-out number will sit inside it by construction. **Read the
-held-out κ against the 0.92 majority baseline of its own draw, not against the dev figure.**
+C5.7 asks for the dev-minus-held-out gap as an overfitting reading. **It is negative here:
+dev κ ranges −0.052 to +0.186 and the held-out κ is 0.401–0.550. The held-out set scores
+*better* than the set the prompt was tuned on.**
+
+That is not evidence of good generalisation. It is the baseline moving: the held-out draw is
+**92% `linear`** against the dev set's 85%, and 46 of its 50 steps are one class. Raw
+agreement on the held-out 50 is **0.940 against a 0.920 baseline — 2.0 percentage points
+above always answering `linear`**, on four non-linear steps.
+
+**Read the held-out κ against the 0.920 baseline of its own draw, never against the dev
+figure.** The gap between them measures the two draws' class balance, not the classifier.
 
 ---
 
@@ -324,9 +361,43 @@ from span usage and are published. The file states exactly what to fill in to pu
 | **Frozen bundle** | `e8952d4d3c51` |
 | **Freeze commit** | `3e09bf3` · `calibration/labels/HELDOUT_FREEZE` |
 | **Tag** | `prompts-frozen-v1` |
-| **Held-out set read** | **once**, by M2-17 — `PENDING` |
+| **Held-out set read** | **TWICE. Both runs disclosed — see below** |
 | **Prompt changelog** | `analyzer/src/rlens/prompts/CHANGELOG.md` — every cycle with κ before → after |
 | **Thresholds** | `docs/decisions/ADR-012-judge-thresholds.md` |
+
+### The held-out set was read twice. Here is the reason and both numbers.
+
+C5.4 says the held-out set is opened once, and M2-17's card names the one legitimate
+exception: *"if a second read becomes genuinely necessary — a bug in the CLI, a
+mis-specified pin — that is legitimate, and **both runs appear in the report with the
+reason**. The discipline is disclosure, not perfection."* This is that case.
+
+| | run 1 | run 2 |
+| --- | --- | --- |
+| time (UTC) | 2026-09-16T12:40:04Z | 2026-09-16T12:41:40Z |
+| command | `make calibrate ARGS="--final"` | `make calibrate ARGS="--final"` |
+| bundle | `e8952d4d3c51` | `e8952d4d3c51` |
+| **n** | **140** | **50** |
+| behavior κ | 0.302 [0.050, 0.534] | **0.550** / **0.401** |
+
+**The defect:** `--final` scored every label row it could load — the dev 40, **plus the
+held-out 50 once per annotator**. That folds the steps the prompt was tuned against into the
+number whose entire purpose is to be untouched by tuning, and double-counts every held-out
+step because two people labelled it. n = 140 is 40 + 50 + 50.
+
+**What did not change between the runs.** No prompt, no model pin, no label, no report, and
+no spend: `--final` reads committed files and makes **zero model calls**, so the second read
+is arithmetic over the same bytes. The tag `prompts-frozen-v1` is on the commit both runs
+ran against.
+
+**Why the first number is not the safer one to quote.** 0.302 is lower, so publishing it
+would look conservative. It is not conservative, it is wrong: it is a κ over a set that is
+71% dev steps, reported under a heading that says held-out. **A number that flatters nobody
+can still be the wrong number**, and quoting it to avoid the appearance of re-rolling would
+be choosing optics over the measurement.
+
+The fix is committed with a test that fails on the old behaviour by name
+(`test_final_scores_the_heldout_set_only_and_once_per_step`), negative-tested.
 
 ### Process checks that failed, reported rather than ticked
 

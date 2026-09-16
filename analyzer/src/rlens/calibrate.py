@@ -249,8 +249,44 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
     iaa_labels = load_labels(include_heldout=True) if (final or iaa_heldout) else labels
     predictions = load_predictions()
 
-    behavior_h, behavior_m, _ = _paired(labels, predictions, "behavior_label", "behavior")
-    sound_h, sound_m, _ = _paired(labels, predictions, "soundness_label", "soundness")
+    # **In `--final`, the published kappa is the HELD-OUT 50 and nothing else.**
+    #
+    # `load_labels(include_heldout=True)` returns every row: the dev 40, plus the held-out
+    # 50 from EACH annotator. Scoring all of them -- which is what this did on the first
+    # `--final` run -- produces n=140: the dev set folded into the number that is supposed
+    # to be untouched by tuning, and every held-out step counted twice because two people
+    # labelled it. Both halves of that are wrong in the same direction: they dilute the
+    # held-out kappa with steps the prompt was tuned against.
+    #
+    # So the scoring set is restricted to the held-out draw and split BY ANNOTATOR. Two
+    # kappas are published rather than one, and that is finding 14's requirement rather
+    # than caution: the two annotators disagree on exactly 2 of 50 steps, the classifier
+    # agrees with a DIFFERENT one on each, and no adjudication exists (amendment 002). A
+    # single number would require choosing whose labels are ground truth on precisely the
+    # two steps where the choice changes the answer -- after the predictions are known.
+    held_ids = heldout_step_ids()
+    scoring_sets: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    if final:
+        for row in labels:
+            if row["step_id"] in held_ids:
+                scoring_sets[row.get("annotator", "?")].append(row)
+    if not scoring_sets:
+        scoring_sets["*"] = labels
+    primary = sorted(scoring_sets)[0]
+
+    per_annotator = {}
+    for who, rows in sorted(scoring_sets.items()):
+        b_h, b_m, _ = _paired(rows, predictions, "behavior_label", "behavior")
+        s_h, s_m, _ = _paired(rows, predictions, "soundness_label", "soundness")
+        per_annotator[who] = {
+            "behavior": agreement(b_h, b_m, BEHAVIOR_CLASSES).as_dict() if b_h else None,
+            "soundness": agreement(s_h, s_m, SOUNDNESS_CLASSES).as_dict() if s_h else None,
+            "n": len(b_h),
+        }
+
+    scored_rows = scoring_sets[primary]
+    behavior_h, behavior_m, _ = _paired(scored_rows, predictions, "behavior_label", "behavior")
+    sound_h, sound_m, _ = _paired(scored_rows, predictions, "soundness_label", "soundness")
 
     classifier_behavior = (
         agreement(behavior_h, behavior_m, BEHAVIOR_CLASSES) if behavior_h else None
@@ -261,8 +297,8 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
 
     annotators = sorted({row.get("annotator", "?") for row in iaa_labels})
     skipped = sum(1 for row in labels if row.get("skipped"))
-    unmatched_behavior = unmatched(labels, predictions, "behavior_label", "behavior")
-    unmatched_soundness = unmatched(labels, predictions, "soundness_label", "soundness")
+    unmatched_behavior = unmatched(scored_rows, predictions, "behavior_label", "behavior")
+    unmatched_soundness = unmatched(scored_rows, predictions, "soundness_label", "soundness")
 
     return {
         "_README": (
@@ -280,7 +316,9 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
             "labels_loaded": len(iaa_labels),
             # What the classifier numbers were computed against. It differs from
             # `labels_loaded` only in `--iaa`, and that difference is the point of the mode.
-            "labels_scored": len(labels),
+            "labels_scored": len(scored_rows),
+            "scored_against_annotator": primary,
+            "classifier_vs_each_annotator": per_annotator,
             "labels_skipped_by_annotator": skipped,
             "annotators": annotators,
             "predictions_loaded": len(predictions),

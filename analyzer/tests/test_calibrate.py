@@ -508,3 +508,46 @@ def test_coverage_preflight_names_the_trace_rather_than_just_a_count(workspace) 
     (reports / "mb-09.report.json").write_text(json.dumps(_report(ids, ["linear"] * 4)))
     clean = C.coverage(include_heldout=False)
     assert clean["ready"] is True and clean["by_trace"] == {}
+
+
+def test_final_scores_the_heldout_set_only_and_once_per_step(workspace) -> None:
+    """**The first `--final` run returned n=140 and this is why.**
+
+    `load_labels(include_heldout=True)` returns every row there is: the dev set, plus the
+    held-out set **once per annotator**. Scoring all of them folds the steps the prompt was
+    tuned against into the number whose whole purpose is to be untouched by tuning, and
+    double-counts every held-out step because two people labelled it.
+
+    The published kappa is the held-out draw, once per step, per annotator.
+    """
+    from rlens.versions import PROMPT_BUNDLE_VERSION
+
+    labels, reports = workspace
+    dev = [f"thinking:t:{i}" for i in range(3)]
+    held = [f"thinking:t:{i}" for i in range(3, 7)]
+    C.SAMPLING_FILE.write_text(json.dumps({"draw": {"ordered_step_ids": dev + held}}))
+    monkey_split = C.HELDOUT_SPLIT_AT
+    C.HELDOUT_SPLIT_AT = 3
+    try:
+        (labels / "amit.jsonl").write_text(
+            "".join(json.dumps(_label(s, "linear")) + "\n" for s in dev + held)
+        )
+        (labels / "ankit.jsonl").write_text(
+            "".join(json.dumps(_label(s, "linear", annotator="ankit")) + "\n" for s in held)
+        )
+        (labels / "heldout-50.jsonl").write_text("")
+        (labels / "HELDOUT_FREEZE").write_text(f"bundle={PROMPT_BUNDLE_VERSION}\n")
+        (reports / "mb-01.report.json").write_text(
+            json.dumps(_report(dev + held, ["linear"] * 7))
+        )
+
+        results = C.build_results(final=True)
+        run = results["run"]
+        # 4 held-out steps, scored once -- NOT 11 (3 dev + 4 + 4).
+        assert run["labels_scored"] == 4, run["labels_scored"]
+        assert run["steps_joined_behavior"] == 4
+        assert set(run["classifier_vs_each_annotator"]) == {"amit", "ankit"}
+        assert run["scored_against_annotator"] == "amit"
+        assert results["measurement_context"]["n_heldout"] == 4
+    finally:
+        C.HELDOUT_SPLIT_AT = monkey_split
