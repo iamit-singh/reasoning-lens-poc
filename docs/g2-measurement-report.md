@@ -66,7 +66,8 @@ calibration page leads with the shortfall. **No rescope, and nothing to improvis
 | 1 | Inter-annotator κ | ≥ 0.70 | **behavior 0.867** · soundness 0.935 | 50 | [0.495, 1.000] · [0.766, 1.000] | **MET** ¹ |
 | 2 | Classifier κ (held-out) | ≥ 0.60 | **0.550** (ann. 1) · **0.401** (ann. 2) | 50 | [−0.017, 1.000] · [−0.017, 0.792] | **NOT MET** on either reading |
 | 2 | Soundness κ (held-out) | — | **0.822** (ann. 1) · **0.885** (ann. 2) | 50 | [0.603, 1.000] · [0.696, 1.000] | **clears 0.60 on both** |
-| 2 | Per-class F1, lowest | ≥ 0.50 | **0.000** | 1–4 per class | — | **NOT MET** ² |
+| 2 | Per-class F1, lowest — **dev** | ≥ 0.50 | **0.000** | 1–4 per class | — | **NOT MET** ² |
+| 2 | Per-class F1, lowest — **held-out** | ≥ 0.50 | **0.500** (`verification`) | **3** | — | **MET, at n = 3** ² |
 | 3 | Judge recall (seeded) | ≥ 70% | **8 / 10 = 0.80** | 10 | triage-alone, shipped config | **MET** ³ |
 | 4 | Judge precision (pooled) | ≥ 0.75 | **0.643** | 14 | [0.388, 0.837] | **NOT MET** |
 | 4 | False flags / known-good trace | ≤ 1.0 | **NOT MEASURABLE** | — | — | **SHORTFALL** ⁴ |
@@ -82,8 +83,12 @@ normally *raises* agreement, so this ships as a **floor**. 2 of 50 steps contest
 published with both readings. The CI runs to 0.495, below the bar it clears: 46 of the 50
 steps are one class and four non-linear steps carry the whole coefficient.
 
-² Three of five classes have n ≤ 1 in the dev set and one has n = 0. **These cells are not
-statements about the classifier** and are not read as any. See §4.
+² §2.2 requires this published **twice**, and the two disagree. **Dev: 0.000** — three of
+five classes have n ≤ 1 and one has n = 0. **Held-out: 0.500**, which clears the bar
+**on a support of 3**, with two classes absent entirely (`backtracking` n = 0,
+`backward_chaining` n = 0). **Neither figure is a statement about the classifier**, and the
+held-out one clearing the bar is the more misleading of the two: it is one class, three
+steps, and a bar that a single label would move either side of. See §4.
 
 ³ **Escalation is shipped off** and this is the triage-alone number. With escalation on it
 is 7/10 — see §6 and finding 16.
@@ -175,6 +180,21 @@ figure.** The gap between them measures the two draws' class balance, not the cl
 ---
 
 ## 4. Per-class F1, and why only one row is a measurement
+
+**Held-out (50 steps, read once — the published set):**
+
+| class | F1 | support | predicted |
+| --- | --- | --- | --- |
+| `linear` | 0.968 | 46 | 47 |
+| `subgoal_setting` | 0.667 | 1 | 2 |
+| `verification` | **0.500** | **3** | 1 |
+| `backtracking` | **n/a** | **0** | 0 |
+| `backward_chaining` | **n/a** | **0** | 0 |
+
+**Two of five classes do not appear in the held-out draw at all**, and a third has a support
+of 1. B4 #2's *"lowest per-class F1 ≥ 0.50"* is **met on this table at 0.500** — one class,
+three steps. One label either way moves it across the bar. It is reported, and it is not
+evidence of anything.
 
 **Dev (40 steps, tuned-on):**
 
