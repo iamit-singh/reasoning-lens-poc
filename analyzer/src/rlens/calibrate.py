@@ -187,6 +187,30 @@ def _paired(
     return human, machine, ids
 
 
+def unmatched(
+    labels: list[dict[str, Any]], predictions: dict[str, dict[str, Any]], field: str, key: str
+) -> list[str]:
+    """Labelled steps the classifier produced no usable prediction for.
+
+    **This exists because the join silently shrinks the denominator, and that was measured
+    rather than imagined.** A variance pass on bundle `e8952d4d3c51` came back κ -0.032 on
+    `n=32` while the header line of the same output read *"40 labels"*. Eight labelled steps
+    had a step entry with a **null behavior** — a degraded or repaired classifier call
+    leaves the step in the report and the label off it — so `_paired` dropped them and κ
+    was computed over 80% of the dev set with nothing raised.
+
+    The reason this matters more than a warning usually would: **M2-17 runs once.** A
+    degraded arm on the day of the `--final` read would publish the headline κ over 42 of
+    50 held-out steps, and the only trace of it would be two fields in a JSON file that
+    disagree. `n` was always reported honestly; nothing ever *reconciled* it.
+    """
+    return [
+        row["step_id"]
+        for row in labels
+        if row.get(field) and not (predictions.get(row["step_id"]) or {}).get(key)
+    ]
+
+
 def inter_annotator(labels: list[dict[str, Any]], field: str) -> Agreement | None:
     """Human vs human, over steps two people both labelled (B4 #1).
 
@@ -237,6 +261,8 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
 
     annotators = sorted({row.get("annotator", "?") for row in iaa_labels})
     skipped = sum(1 for row in labels if row.get("skipped"))
+    unmatched_behavior = unmatched(labels, predictions, "behavior_label", "behavior")
+    unmatched_soundness = unmatched(labels, predictions, "soundness_label", "soundness")
 
     return {
         "_README": (
@@ -260,6 +286,11 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
             "predictions_loaded": len(predictions),
             "steps_joined_behavior": len(behavior_h),
             "steps_joined_soundness": len(sound_h),
+            # The reconciliation. `labels_scored` and `steps_joined_*` could always
+            # disagree; nothing ever said so out loud. See `unmatched()`.
+            "labels_unmatched_behavior": len(unmatched_behavior),
+            "labels_unmatched_soundness": len(unmatched_soundness),
+            "unmatched_step_ids": sorted(set(unmatched_behavior) | set(unmatched_soundness)),
         },
         # C3.4: "exactly the measurement_context block above, plus n, CIs and run metadata".
         "measurement_context": {
@@ -345,6 +376,16 @@ def _render(results: dict[str, Any]) -> str:
         f"{run['labels_loaded']} labels from {run['annotators'] or '(nobody yet)'}",
         "=" * 78,
     ]
+    miss = run.get("unmatched_step_ids") or []
+    if miss:
+        lines += [
+            f"  !! COVERAGE: {run['labels_scored']} labels loaded, "
+            f"{run['steps_joined_behavior']} scored -- {len(miss)} labelled step(s) have no",
+            "     classifier prediction, so every number below is over the SMALLER set.",
+            "     A degraded or repaired classifier call leaves the step in the report with a",
+            "     null label; the join drops it. First few: " + ", ".join(miss[:3]),
+            "",
+        ]
     cvh = results["classifier_vs_human"]["behavior"]
     if not cvh:
         lines += [
@@ -423,6 +464,28 @@ def main(argv: list[str] | None = None) -> int:
             return 2
 
     results = build_results(final=args.final, iaa_heldout=args.iaa)
+
+    # **The published read does not get to quietly shrink its own denominator.**
+    # `--final` runs once (C5.4). If a classifier call degraded that day, the labelled
+    # steps it dropped would come off the bottom of the headline kappa's n and the only
+    # evidence would be two fields in this file that disagree. Measured, not hypothesised:
+    # a dev pass at bundle e8952d4d3c51 reported kappa over n=32 under a header line
+    # reading "40 labels". On the dev path this is a loud warning, because M2-3's loop has
+    # to keep working on partial data; on the final path it is a refusal.
+    missing = results["run"].get("unmatched_step_ids") or []
+    if args.final and missing:
+        sys.stderr.write(
+            f"REFUSING the --final read: {len(missing)} of {results['run']['labels_scored']} "
+            "held-out labelled steps have no classifier prediction.\n"
+            "The published kappa would be computed over the remainder and would report that "
+            "smaller n as though it were the set.\n"
+            "Re-run the corpus so every labelled step carries a prediction, then run --final "
+            "again. This read has not been spent.\n"
+            f"Unmatched: {', '.join(missing[:10])}"
+            f"{' ...' if len(missing) > 10 else ''}\n"
+        )
+        return 2
+
     body = json.dumps(results, indent=2, sort_keys=True) + "\n"
 
     if args.json:

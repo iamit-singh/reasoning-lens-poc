@@ -389,3 +389,91 @@ def test_the_iaa_flag_is_refused_together_with_final(workspace) -> None:
     decided which read this is. C5.4's "opened once" is a count, and an ambiguous invocation
     is how a count becomes an argument later."""
     assert C.main(["--iaa", "--final", "--json"]) == 2
+
+
+# --------------------------------------------- the join's silent denominator (found W6)
+def _report_with_a_degraded_step(step_ids: list[str], behaviors: list[str]) -> dict[str, Any]:
+    """Like `_report`, but the LAST step carries a null label.
+
+    That is what a degraded or repaired classifier call actually leaves behind: the step is
+    still in the report, `behavior.label` is None, and `load_predictions` happily returns
+    the row. It is not a missing step and it does not look like an error anywhere.
+    """
+    report = _report(step_ids, behaviors)
+    report["arms"][0]["steps"][-1]["behavior"] = {"label": None, "confidence": None}
+    report["arms"][0]["steps"][-1]["validity"] = {
+        "verdict": None,
+        "confidence": None,
+        "escalated": False,
+    }
+    return report
+
+
+def test_the_join_reports_which_labelled_steps_had_no_prediction(workspace) -> None:
+    """**Measured, not hypothesised.** A variance pass on bundle `e8952d4d3c51` returned
+    behavior kappa over `n=32` under a header line reading *"40 labels"*: eight labelled
+    steps had a null label on the step, `_paired` dropped them, and nothing said so.
+
+    `n` was always honest. Nothing ever *reconciled* it against what was loaded.
+    """
+    labels, reports = workspace
+    ids = [f"thinking:t:{i}" for i in range(4)]
+    (labels / "amit.jsonl").write_text(
+        "".join(json.dumps(_label(sid, "linear")) + "\n" for sid in ids)
+    )
+    (reports / "mb-01.report.json").write_text(
+        json.dumps(_report_with_a_degraded_step(ids, ["linear"] * 4))
+    )
+
+    results = C.build_results(final=False)
+    run = results["run"]
+    assert run["labels_scored"] == 4
+    assert run["steps_joined_behavior"] == 3
+    assert run["labels_unmatched_behavior"] == 1
+    assert run["unmatched_step_ids"] == ["thinking:t:3"]
+
+
+def test_final_refuses_rather_than_publish_a_silently_smaller_n(
+    workspace, monkeypatch, capsys
+) -> None:
+    """**The reason this guard is worth its lines: `--final` runs once.**
+
+    A degraded arm on the day of the held-out read would take those steps off the bottom of
+    the published kappa's n, report the smaller number as though it were the set, and leave
+    no evidence but two fields in a JSON file that disagree. The dev path keeps working on
+    partial data -- M2-3's loop needs that -- so this is a warning there and a refusal here.
+    """
+    from rlens.versions import PROMPT_BUNDLE_VERSION
+
+    labels, reports = workspace
+    ids = [f"thinking:t:{i}" for i in range(4)]
+    rows = "".join(json.dumps(_label(sid, "linear")) + "\n" for sid in ids)
+    (labels / "heldout-50.jsonl").write_text(rows)
+    (labels / "HELDOUT_FREEZE").write_text(f"bundle={PROMPT_BUNDLE_VERSION}\n")
+    (reports / "mb-01.report.json").write_text(
+        json.dumps(_report_with_a_degraded_step(ids, ["linear"] * 4))
+    )
+
+    assert C.main(["--final"]) == 2
+    err = capsys.readouterr().err
+    assert "REFUSING the --final read" in err
+    assert "thinking:t:3" in err
+    assert "This read has not been spent" in err
+
+
+def test_final_proceeds_when_every_labelled_step_has_a_prediction(workspace, tmp_path) -> None:
+    """The converse, so the guard cannot pass by refusing everything."""
+    from rlens.versions import PROMPT_BUNDLE_VERSION
+
+    labels, reports = workspace
+    ids = [f"thinking:t:{i}" for i in range(4)]
+    rows = "".join(json.dumps(_label(sid, "linear")) + "\n" for sid in ids)
+    (labels / "heldout-50.jsonl").write_text(rows)
+    (labels / "HELDOUT_FREEZE").write_text(f"bundle={PROMPT_BUNDLE_VERSION}\n")
+    (reports / "mb-01.report.json").write_text(json.dumps(_report(ids, ["linear"] * 4)))
+
+    out = tmp_path / "final.json"
+    assert C.main(["--final", "--out", str(out)]) == 0
+    written = json.loads(out.read_text())
+    assert written["run"]["labels_unmatched_behavior"] == 0
+    assert written["run"]["steps_joined_behavior"] == 4
