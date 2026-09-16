@@ -28,11 +28,11 @@ branches ship, and G3 has no failure outcome.
 | **E6** | Auto-rollback demonstrated by a deliberately failed smoke test | ⛔ **deleted** | ADR-003: nothing is deployed, so there is nothing to roll back to. ~0.7 h released |
 | **E7** | Live at the custom domain over TLS, incognito + phone | ⛔ **deleted** | ADR-003: no public hostname, no cloud service. The DNS ticket was drafted and correctly never filed |
 | **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **cached half closed; live half not applicable** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. The live half needs E2, which ADR-003 deleted. Recorded as **half a measurement**, not as a pass |
-| **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. Every metric currently renders *not yet measured*, which is correct |
+| **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
-| **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. I3 holds |
-| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **blocked — needs people** | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. Booking is the only remaining step |
-| **E13** | Runbook **exercised by another team member** | ⏳ **half closed** | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead |
+| **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
+| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. Booking is the only remaining step |
+| **E13** | Runbook **exercised by another team member** | ⏳ **half closed, and not closable** (amendment 002 §4) | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead |
 | **E14** | Wheel installs in a clean venv and runs on third-party spans | ✅ **closed** | `make wheel`. Failed on its first run — the JSON Schema was not packaged — and that defect is the argument for the check existing |
 | **E15** | Embed snippet + fallback video. **Not a launch gate** | ⛔ **deleted / open** | Embed deleted by ADR-003 (no host, no hostile input path). **The fallback video is not deleted and is not made.** Owner: Lead |
 | **E16** | This checklist executed, every open row with an owner and a date | ✅ **closed by this file** | Re-execute at G3 |
@@ -94,12 +94,31 @@ If neither closes, the pre-decided action is the one this project keeps taking: 
 the shortfall as a finding** and name it on the calibration page, rather than quietly
 dropping the criterion or lowering it until it passes.
 
+## Re-executed 16 Sep 2026 (W6), after G2
+
+**What moved:** E9 and E11 both closed *vacuously* before M2-17 — there were no measured
+numbers for the calibration page to render and no precision for a soundness score to render
+beside. **Both are now satisfied by the path they were written for.** E9's grep earned its
+keep in the same session by catching gate thresholds typed into the page as literals.
+
+**What the G2 result means for G3:** the branch is **G2-B** (§`g2-measurement-report.md`),
+whose entire Month-3 cost is ~0.5 h of UI delta — **already applied**: the calibration page
+leads with the shortfall. Nothing in this checklist changes shape.
+
+**What amendment 002 settled, and it is not "blocked":** E12, E13 and E15 were carried as
+blocked-on-people. They are now **published shortfalls with a reasoned decline** rather than
+rows awaiting a booking. A model cannot supply the human half of a human-vs-model
+measurement, and a reader who can open the source is not a naive viewer. The distinction
+matters at a gate: *blocked* invites "chase it"; *declined and published* is a decision
+somebody can disagree with in writing.
+
 ## Open rows, with owners and dates
 
 | Row | Owner | Needs | By |
 | --- | --- | --- | --- |
 | ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, 18/18 smoke with the key stripped | done |
-| E8 | Lead | The cached p90 with n over more than 3 samples; the live half recorded as n/a with its reason | Next |
-| **E12** | **Tech lead** | **Five walkthrough testers booked** | **No default exists** |
-| **E13** | **Tech lead** | **One peer named for the runbook dry-run** | **No default exists** |
-| E15 | Lead | Fallback video — an unedited screen recording (L4) | Before any live demo |
+| ~~E8~~ | — | **Closed** — p50 0.9 / p90 1.0 / p99 1.3 ms over n=140; live half n/a with its reason (ADR-003) | done |
+| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall** | closed as a gap |
+| **E13** | — | **Not closable.** An agent cold-run of the runbook is offered as a labelled partial substitute (amendment 002 §5) and is explicitly **not a pass** | closed as a gap |
+| E15 | Lead | Fallback video — an unedited screen recording (L4). Recordable by the agent if the demo runs headless; otherwise unmade | Before any live demo |
+| **U4** | **Tech lead + DM** | **The C10.1 contingency conversation. 97.4 h against a 12 h allocation, every C14 lever spent** | **The only row no amount of code advances** |
