@@ -6,6 +6,8 @@ separate because generation (local) and analysis (OpenAI) move independently.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from rlens import versions
 from rlens.versions import GenerationPin
@@ -127,3 +129,36 @@ def test_generation_pin_reads_the_environment(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("GEN_SEED", "20260910")
     monkeypatch.setenv("LOCAL_REASONING_EFFORT", "medium")
     assert versions.generation_pin().fingerprint() == PIN.fingerprint()
+
+
+def test_changelog_is_not_hashed_into_the_bundle_version(tmp_path: Path) -> None:
+    """M2-3's changelog lives in `prompts/` and must not move the measurement version.
+
+    The bundle version is the cache key and the thing `--final` pins against. If writing
+    down *what a prompt change did* itself counted as a prompt change, every log line
+    would invalidate the cache and the version would stop naming the prompts.
+    """
+    before = versions._compute_prompt_bundle_version()
+    changelog = versions._PROMPTS_DIR / "CHANGELOG.md"
+    existed = changelog.exists()
+    original = changelog.read_bytes() if existed else None
+    try:
+        changelog.write_text((original.decode() if original else "") + "\nscratch line\n")
+        assert versions._compute_prompt_bundle_version() == before
+    finally:
+        if original is None:
+            changelog.unlink(missing_ok=True)
+        else:
+            changelog.write_bytes(original)
+
+
+def test_an_actual_prompt_edit_does_move_the_bundle_version() -> None:
+    """The other half: the exclusion must not have blunted the hash."""
+    before = versions._compute_prompt_bundle_version()
+    prompt = versions._PROMPTS_DIR / "classify_and_triage.md"
+    original = prompt.read_bytes()
+    try:
+        prompt.write_bytes(original + b"\n<!-- scratch -->\n")
+        assert versions._compute_prompt_bundle_version() != before
+    finally:
+        prompt.write_bytes(original)

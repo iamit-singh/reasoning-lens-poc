@@ -27,9 +27,21 @@ ANALYZER_VERSION = "0.1.0"
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+#: Files that live in ``prompts/`` but are not sent to a model, so they are not part of
+#: the measurement. Only M2-3's changelog qualifies, and it qualifies for a specific
+#: reason: it is the record of what prompt changes *did*, written after each cycle. If
+#: writing that down were itself a prompt change, every log line would invalidate the
+#: cache and bump the version the report attributes its numbers to.
+#:
+#: ``README.md`` is deliberately **not** here. It documents how the prompts are composed
+#: and substituted, which is close enough to the measurement that the stricter reading is
+#: the safer one -- and it has been inside the hash since W3, so excluding it now would
+#: move the bundle version and void the comparison with every number already published.
+_NOT_PROMPTS = frozenset({"CHANGELOG.md"})
+
 
 def _compute_prompt_bundle_version() -> str:
-    """Content hash over ``prompts/*.md``, sorted by name.
+    """Content hash over ``prompts/*.md``, sorted by name, minus :data:`_NOT_PROMPTS`.
 
     Content-addressed so it cannot drift from the prompts it names: a prompt edit that
     forgets to bump the version fails CI rather than silently reusing a cache entry
@@ -37,6 +49,8 @@ def _compute_prompt_bundle_version() -> str:
     """
     digest = hashlib.sha256()
     for path in sorted(_PROMPTS_DIR.glob("*.md")):
+        if path.name in _NOT_PROMPTS:
+            continue
         digest.update(path.name.encode())
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]

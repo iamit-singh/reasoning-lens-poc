@@ -32,6 +32,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import threading
 import time
 from typing import Any
 
@@ -124,22 +125,63 @@ def analysis_ready() -> tuple[bool, str]:
 # ------------------------------------------------------------------ rate limit (C9)
 _HITS: dict[str, list[float]] = {}
 
+#: Guards the read-check-write in `_rate_limited`. See that function's note on why this is
+#: belt-and-braces today and why it is still cheap enough to be worth wearing.
+_HITS_LOCK = threading.Lock()
+
 
 def _rate_limited(key: str) -> bool:
-    """A fixed window per client. In-process on purpose.
+    """A **sliding** 60-second window per client. In-process on purpose.
 
     ADR-003 deleted the deployment: this runs as one process on one laptop, so a shared
     Redis counter would add a dependency whose only job is coordinating with replicas that
     do not exist. If it ever runs replicated, this is the thing to move — and it will be
     obvious, because the limit will be per-replica.
+
+    **The lock is not currently load-bearing, and it is here anyway.** The body is a
+    read-modify-write over shared state, which is a race on its face. It is not reachable
+    today only because this function is synchronous, its one caller is an `async def`
+    coroutine, and no await sits between the length check and the append — so the event
+    loop cannot interleave it. That is an accident of how the route happens to be written,
+    it is invisible at the call site, and three ordinary edits remove it (make this async,
+    add an await between the two lines, or turn the route into a plain `def`, which
+    FastAPI then runs in a threadpool). What it protects is **spend**: every admitted run
+    is a live model call. An uncontended lock acquired at most a few times a minute costs
+    nothing measurable, so the guarantee is made explicit rather than argued for.
     """
     now = time.time()
-    window = [t for t in _HITS.get(key, []) if now - t < 60]
-    _HITS[key] = window
-    if len(window) >= RATE_LIMIT_PER_MIN:
-        return True
-    window.append(now)
-    return False
+    with _HITS_LOCK:
+        _prune_locked(now)
+        window = [t for t in _HITS.get(key, []) if now - t < 60]
+        _HITS[key] = window
+        if len(window) >= RATE_LIMIT_PER_MIN:
+            return True
+        window.append(now)
+        return False
+
+
+def _prune_locked(now: float) -> None:
+    """Drop every client with no live hit left in its window. Caller holds `_HITS_LOCK`.
+
+    `_HITS` is keyed by a value taken from the request, and before this nothing ever
+    removed an entry — an unbounded dict whose keys are chosen by the caller. On a
+    one-operator laptop demo that is a small leak rather than a denial of service, which is
+    exactly why it would have survived to wherever this code went next.
+
+    **Staleness, not emptiness.** The obvious version drops keys whose list is empty, and
+    that collects nothing: a window is only emptied by `_rate_limited` being called for
+    that key again, which is precisely when the key is not garbage. The entries have to be
+    aged out here.
+    """
+    for key in [k for k, hits in _HITS.items() if not any(now - t < 60 for t in hits)]:
+        del _HITS[key]
+
+
+def _prune_rate_limit_keys() -> None:
+    """Lock-taking wrapper over :func:`_prune_locked`, for tests and for a caller that
+    wants to reclaim without recording a hit."""
+    with _HITS_LOCK:
+        _prune_locked(time.time())
 
 
 # ------------------------------------------------------------------ routes
