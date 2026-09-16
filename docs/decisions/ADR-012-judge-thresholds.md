@@ -98,7 +98,43 @@ open rather than inventing a target for at this n.
 | Numeric-step escalation floor | **0.85** *(unchanged, and now known to be insufficient)* | SE-01 is a numeric step the judge got wrong at 0.95. Raising the floor above 0.95 escalates nearly every numeric step, which C11's latency budget will not carry. **The lever is not this number** — see below |
 | Seeded-error recall target | ≥ 0.70 | B4 #3. Met at 0.80 |
 | Known-good false-flag rate | ≤ 1.0 per trace | B4 #4. Currently **0.0** |
+| **Escalation first clause** | **`verdict == "unsound"`** — amended by M2-5 from C4.4's `verdict != "sound"` | See the section below. Measured on one corpus snapshot: the original selected **116 of 270 (43.0%)**, of which **107 were `unverifiable` and 3 were `unsound`**; the amended clause selects **23 (8.5%)**. **Trigger t7 fired on the original and does not fire on the amendment** |
+| `ESCALATION_MAX_STEPS` | **8** *(unchanged)* | It bound on exactly **one arm** — `mb-08:thinking`, the degenerate loop, where it absorbed 138 selections into 8. So the pre-amendment 43.0% *selected* was only **4.4% escalated**: the cap was holding, which is why the response to t7 was a policy fix and not a cap raise |
+| Escalation rate, measured | **8.5% selected · 4.4% escalated** | `make escalation-rate`, 41 arms, 270 classified steps. Both numbers ship — one answers t7, the other answers the C11 latency budget, and neither answers both |
 | `unverifiable` counts as a hit | yes | The seeded step is defective; whether the defect is *wrong* or *uncheckable* is M2-2's adjudication. A judge that stopped and said "I cannot verify this" did not miss it |
+
+### M2-5's amendment: the clause that read "uncheckable" as "doubtful"
+
+C4.4's first escalation condition was `verdict != "sound"`. Over the corpus it selected
+**116 of 270 steps (43.0%)** against t7's 25% bar, and **107 of those 116 were
+`unverifiable`** — exactly 3 were `unsound`.
+
+t7's pre-decided action is *"treat it as a prompt bug, not a budget problem"*: look at why
+triage is unsure so often. **It is not unsure.** `unverifiable` means the step asserts a
+claim it neither derives nor cites, and finding 7 established that half this corpus is
+legitimately unverifiable. The clause selected half the steps by construction.
+
+**What settles it is that escalating them cannot help.** `escalate.md` asks the same
+question under the same constraint — *"judge each step GIVEN ONLY the steps that precede
+it"* — with the same definition of `unverifiable`. The stronger model receives the same
+text and the same absent citation. It is not better placed to verify the claim; it is asked
+not to try. The only way the verdict moves is a reading disagreement about whether the step
+derives its claim, and the classifier's `unverifiable` calls already agree with the human
+annotator (soundness κ 0.761; 21 of 25 human-`unverifiable` steps agreed).
+
+So the clause is **split, not dropped**: `unsound` — a *named* defect, where a stronger
+model genuinely adjudicates — always escalates; `unverifiable` escalates only when the
+judge was **also unsure**, which is the case where a second opinion adds something.
+
+> **This is a design change to a pre-decided policy, made by the agent under amendment 002,
+> and it is flagged rather than buried.** A reviewer who disagrees should read the two rates
+> above: the original clause is recoverable in one line, and `scripts/escalation_rate.py`
+> keeps `should_escalate_c4_4` precisely so the comparison stays reproducible.
+
+**The likely consequence, stated in advance:** at 8.5% selected, escalation may show a
+recall delta near zero in M2-6 — which fires **t9**, whose pre-decided action is *publish
+it*. M2-5's own card calls that "a publishable finding, not an embarrassment: escalation did
+not earn its tokens on this workload."
 
 ### The recommendation the misses actually support
 

@@ -628,6 +628,39 @@ while the classifier was getting two more steps right.
 | baseline | 0.700 | 0.6569 | 0.1257 |
 | cycle 1 | 0.750 | 0.7275 | 0.0826 |
 
+### The same classifier, scored twice, 0.218 apart — with identical accuracy
+
+Three independent passes at the **same bundle** `e8952d4d3c51` (nothing changed between
+them but the classifier's non-determinism):
+
+| pass | n | correct | raw agreement | `linear` predicted | p_e | κ |
+| --- | --- | --- | --- | --- | --- | --- |
+| original | 40 | 28 | 0.775 | 35 | 0.7519 | **+0.104** |
+| A | 32 | 26 | 0.8125 | 31 | 0.8184 | **−0.032** |
+| B | 32 | 26 | 0.8125 | 29 | 0.7695 | **+0.187** |
+| C | 32 | 25 | 0.781 | 30 | 0.7930 | **−0.052** |
+
+**Range 0.238. SD 0.132 over the three n = 32 passes.** Passes A and B are the sharpest
+statement of it: **same n, same 26 of 32 correct, κ 0.218 apart**, entirely because B spread
+its six errors across three classes while A put them all in `linear`. Pass B did not get one extra step
+correct — it spent two of its six errors on `backtracking` and `verification` instead of
+answering `linear`, which lowered p_e from 0.818 to 0.770, and κ did the rest.
+
+That is the whole of finding 15 in two rows, and it is a stronger statement than the cycle
+table above, because between those cycles the *prompt* changed and here **nothing did**.
+
+**The consequence for M2-3, stated plainly: κ_dev on this sample cannot adjudicate between
+prompt bundles.** The run-to-run spread is 0.238 and the per-run SD is 0.132; the largest
+difference between any two cycles was 0.130 — **the noise is 1.8× the largest signal the
+tuning produced**, and every cycle delta sits inside one standard deviation of doing
+nothing. Every cycle delta in this exercise is inside the noise, and M2-3's stop
+rule — *three consecutive cycles improving κ by < 0.02* — is asking a question this
+instrument cannot answer at n = 32–40. The cycles were still worth running: what justifies
+the shipped bundle is **mechanical**, not statistical (the prompt now carries the rubric's
+own §4 adjudications, which the annotator had and the classifier did not), and the
+diagnostics that moved — `verification` false positives 5 → 0, class coverage — are
+step-level facts rather than a coefficient.
+
 **What it means, and it cuts both ways.** This is the prevalence problem — κ is not a
 scaled accuracy and must not be read as one on a skewed sample. But the third cycle is the
 other half of the argument: it produced a **majority-class predictor**, `linear` 39 times in

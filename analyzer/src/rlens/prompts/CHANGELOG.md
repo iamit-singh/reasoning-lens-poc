@@ -204,3 +204,97 @@ right instrument and raw agreement was the misleading one.
 **Reverted.** A classifier that answers `linear` 39 times in 40 makes `pattern_profile`
 constant, makes the trace renderer show one colour, and would turn the demo into a
 demonstration that the taxonomy is unnecessary.
+
+---
+
+## The variance measurement — and why it ends this exercise
+
+ADR-010 is this project's cautionary tale: it published *"backtracking 0 in the whole
+corpus"* off **a single run of a non-deterministic classifier**, and twelve runs later the
+real figure was 2.0%, firing 1–15 times per run. Every κ above is a single run. So before
+choosing a bundle, the same bundle was run three more times with **nothing changed**.
+
+**Bundle `e8952d4d3c51` (cycle 2), four independent passes:**
+
+| pass | n | raw agreement | κ |
+| --- | --- | --- | --- |
+| original | 40 | 0.775 | **+0.104** |
+| A | 32 | 0.8125 | **−0.032** |
+| B | 32 | 0.8125 | **+0.186** |
+| C | 32 | 0.781 | **−0.052** |
+
+**Range 0.238. Standard deviation 0.132 over the three n = 32 passes.**
+
+The largest difference between *any two cycles in this entire exercise* is **0.130** —
+cycle 2 to cycle 3, the one that collapsed the classifier to a majority-class predictor.
+**The run-to-run noise is 1.8× the largest signal the tuning produced.**
+
+Passes A and B are the sharpest statement of it: **same n, same 26 of 32 correct, κ 0.218
+apart**, entirely because B spread its six errors across three classes while A put them all
+in `linear`.
+
+### What this does to the stop rule
+
+M2-3 stops at whichever comes first: **κ_dev ≥ 0.70** · **three consecutive cycles
+improving κ by < 0.02** · **the 2.5-hour box**.
+
+- κ_dev ≥ 0.70 was never approached.
+- *Three consecutive cycles improving κ by < 0.02* reads Δs of −0.043, +0.021, −0.130
+  against a per-run SD of 0.132. **Every one of those deltas is inside one standard
+  deviation of doing nothing.** The rule cannot fire meaningfully at this n; it would be
+  reading noise.
+- **The box expired.** That is the stop rule that fired, and it is named here as M2-3's DoD
+  requires.
+
+M2-3's on-failure branch for *"the box expires below κ_dev 0.60"* offers three options in
+order. **(a)** — check whether the failure is concentrated in one class — was done first
+and drove cycles 1 and 2; it was concentrated, in `verification`, exactly as M2-1a's blind
+note predicted. **(b)** — lower the CI dev gate with a recorded justification — is
+**declined**: a gate whose metric has a 0.238 run-to-run range does not become useful by
+being moved, and lowering it would encode the noise as an expectation. **(c)** — carry the
+shortfall into the G2 report — is taken.
+
+### The bundle that ships, and the honest reason
+
+**`e8952d4d3c51` (cycle 2).** Not because its κ is best — the untuned baseline's 0.126 is
+nominally higher, and the variance says neither number means anything on its own.
+
+It ships because **the justification is mechanical rather than statistical**: the prompt now
+contains the rubric's own §4 adjudications — *"label the move, not the vocabulary"*,
+*"a step that repeats an earlier conclusion without checking it is `linear`"*, *"`linear` is
+the residual"* — which the **annotator had and the classifier did not**. That is a drift
+*reduction* between the two things κ compares, and it is defensible without reference to any
+κ at all. The TAXONOMY block is byte-identical throughout; `make rubric-drift` passes at 19
+identical lines in every cycle.
+
+The step-level facts that moved are also stable in a way the coefficient is not: the five
+*"Let's check:"* false positives on the repetition loop were fixed in cycle 1 and **did not
+return in any of the six subsequent runs**.
+
+**What is published for B4 #2 is the range, not a point.** A single κ_dev from this sample
+would be a number picked out of a distribution 0.238 wide, and quoting it as *the*
+classifier's agreement would be the flattering artifact this project keeps refusing.
+
+### The demonstrated held-out refusal — M2-3's DoD, pasted verbatim
+
+```
+$ make calibrate ARGS="--final"
+--final refused: calibration/labels/HELDOUT_FREEZE is absent, so the prompt bundle is not
+frozen (C5.4). Scoring the held-out set against an unfrozen bundle means the number can be
+re-rolled until it is liked, which is the one thing the held-out set exists to prevent.
+Freeze first (M2-16).
+```
+
+The held-out 50 were not read at any point in this exercise. Every number above is dev-40.
+
+### One thing found by accident, and it changes what M2-17 must do first
+
+Three of the four passes scored **n = 32, not 40**. `mb-09:thinking` fails intermittently
+with `classifier_parse_failure` — 26 rows returned for 25 steps, surviving the repair retry
+— which nulls **every** label in the arm while the arm's `status` stays `"ok"`. That arm
+carries **8 of the 40 dev labels and 10 of the 50 held-out steps**.
+
+`make calibrate` used to score whatever joined and report the smaller n as though it were
+the set. It now refuses on `--final` and warns on dev, and `make coverage-check` asks the
+question in advance. **M2-17 must run `make coverage-check --final` and see READY before
+spending its one read.**
