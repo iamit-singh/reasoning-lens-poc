@@ -285,3 +285,34 @@ def test_a_failed_consistency_call_does_not_take_the_arm_down_with_it(
 
     monkeypatch.setattr(C, "analyze", failing)
     assert pipeline._consistency(_trace(), {"prompt": "p"}) is None
+
+
+def test_the_pipeline_names_a_cassette_for_the_consistency_call(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """**A tier called without a cassette name silently leaves the offline pipeline.**
+
+    `check()` takes `cassette=None` by default, and the first wiring used the default. With
+    no key, `make record-cassettes` records nothing for this tier; then under `MOCK_LLM=1`
+    the call has nothing to replay, fails, and returns None. The report renders
+    `consistency: null` offline and a real verdict online -- which is exactly the
+    divergence M2-16 says the cassettes exist to prevent, in the month the Frontend builds
+    against `MOCK_LLM=1`.
+
+    Nothing failed. Nothing looked wrong. The only visible symptom was zero
+    `consistency.*` files in a cassette store nobody counts.
+    """
+    from rlens import pipeline
+
+    seen: dict[str, Any] = {}
+
+    def capture(prompt: str, *, cassette: str | None = None, **k: Any) -> Any:
+        seen["cassette"] = cassette
+        return type("R", (), {"text": json.dumps(_payload())})()
+
+    monkeypatch.setenv("CONSISTENCY_ENABLED", "1")
+    monkeypatch.setattr(C, "analyze", capture)
+    pipeline.build_arm(_trace(), None, item={"id": "mb-03", "prompt": "p"})
+
+    assert seen.get("cassette"), "the consistency call must carry a cassette name"
+    assert "mb-03" in seen["cassette"] and "thinking" in seen["cassette"], seen["cassette"]

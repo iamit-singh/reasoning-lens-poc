@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 266,
+  "completion_tokens": 333,
   "finish_reason": "stop",
-  "latency_ms": 4611,
+  "latency_ms": 6309,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 692,
-  "reasoning_tokens": 64,
-  "request_digest": "e0a946fa4a46c792",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-02-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States the problem and computes 17*4=68 directly; straightforward arithmetic.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-02-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Provides the computed product 68, which follows from the previous computation.\"\n    }\n  ]\n}"
+  "prompt_tokens": 952,
+  "reasoning_tokens": 128,
+  "request_digest": "a5e7b92c07169e40",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-02-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States the arithmetic operation and choice to compute directly; forward reasoning without checking prior claims.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-02-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.95,\n      \"error_type\": null,\n      \"rationale\": \"Provides the computed result 68, which correctly follows from 17*4.\"\n    }\n  ]\n}"
 }

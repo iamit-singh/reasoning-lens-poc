@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 715,
+  "completion_tokens": 454,
   "finish_reason": "stop",
-  "latency_ms": 9667,
+  "latency_ms": 8846,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 819,
-  "reasoning_tokens": 384,
-  "request_digest": "2c05eced8a23dd92",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-08-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.82,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.65,\n      \"error_type\": null,\n      \"rationale\": \"Declares need for current populations and guesses a 2020 figure; a planning step with an unchecked numeric claim.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-08-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.78,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.60,\n      \"error_type\": null,\n      \"rationale\": \"Makes explicit population assumptions (Fairhaven 12,000; Brightwater 1,200) and computes a difference; the source data are unsupported.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-08-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.74,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Presents final numeric answer based on unchecked assumptions; arithmetic is fine but underlying facts are unsupported.\"\n    }\n  ]\n}"
+  "prompt_tokens": 1079,
+  "reasoning_tokens": 192,
+  "request_digest": "879e3899daeb46a5",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-08-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unverifiable\",\"validity_confidence\":0.78,\"error_type\":null,\"rationale\":\"States a needed datum and proposes a 2020-census figure without citing source; claim cannot be checked from prior steps.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unverifiable\",\"validity_confidence\":0.78,\"error_type\":null,\"rationale\":\"Makes numerical estimates (Fairhaven 12,000; Brightwater 1,200) without support or derivation from prior steps or sources.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Computes difference 12,000\u22121,200=10,800 correctly from the previously stated numbers; arithmetic follows given those values.\"}]}"
 }

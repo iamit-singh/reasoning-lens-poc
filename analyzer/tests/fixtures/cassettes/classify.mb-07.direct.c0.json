@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 353,
+  "completion_tokens": 307,
   "finish_reason": "stop",
-  "latency_ms": 6491,
+  "latency_ms": 7069,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 767,
+  "prompt_tokens": 1027,
   "reasoning_tokens": 128,
-  "request_digest": "155608c5c86ca301",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-07-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Computed simple interest: I = P*r*t with 12500*0.074*3.5 = 3237.5; arithmetic and method correct.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-07-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restates the computed interest $3,237.50, consistent with prior correct calculation.\"\n    }\n  ]\n}"
+  "request_digest": "295f2029ca9c7055",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-07-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.91,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computed simple interest I = PRT: 12500*(0.074)*(3.5)=12500*0.259=3237.5, arithmetic is correct.\"},{\"step_id\":\"direct:direct-mb-07-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the computed result $3,237.50 from the previous step; restates final answer correctly.\"}]}"
 }

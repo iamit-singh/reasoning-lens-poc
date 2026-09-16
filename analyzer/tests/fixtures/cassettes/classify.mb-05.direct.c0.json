@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 291,
+  "completion_tokens": 301,
   "finish_reason": "stop",
-  "latency_ms": 4935,
+  "latency_ms": 5554,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 707,
+  "prompt_tokens": 967,
   "reasoning_tokens": 128,
-  "request_digest": "c3dcedd80720ab7b",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-05-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computed 3*14*32=1344 then subtracted 118 to get 1226; arithmetic is correct.\"},{\"step_id\":\"direct:direct-mb-05-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Restates the result 1226 derived in prior step; consistent and correct.\"}]}"
+  "request_digest": "678f1cd1e9a4fd48",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-05-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Calculated total books: 3 floors * 14 units * 32 books = 1344, then subtracted 118 checked-out books to get 1226.\"},{\"step_id\":\"direct:direct-mb-05-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Restates the computed final answer 1226, which follows from the previous calculation.\"}]}"
 }

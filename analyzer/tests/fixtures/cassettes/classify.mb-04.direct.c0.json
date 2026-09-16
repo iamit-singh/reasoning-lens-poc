@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 297,
+  "completion_tokens": 227,
   "finish_reason": "stop",
-  "latency_ms": 4803,
+  "latency_ms": 3661,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 676,
-  "reasoning_tokens": 128,
-  "request_digest": "20fbda0407bc2b34",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computed 15% of $40 as 0.15\u00d740=6; subtracting gives sale price 40\u22126=34, which is correct.\"},{\"step_id\":\"direct:direct-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"States the computed sale price (34), matching the prior correct calculation.\"}]}"
+  "prompt_tokens": 936,
+  "reasoning_tokens": 64,
+  "request_digest": "2602460aa8adb0a6",
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Computes 15% of $40 as $6 then subtracts from $40 to get $34; straightforward forward arithmetic.\"},{\"step_id\":\"direct:direct-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the final computed sale price as $34, restating the result.\"}]}"
 }

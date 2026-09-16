@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 291,
+  "completion_tokens": 301,
   "finish_reason": "stop",
-  "latency_ms": 5015,
+  "latency_ms": 4104,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 694,
+  "prompt_tokens": 954,
   "reasoning_tokens": 128,
-  "request_digest": "db975c39c906d059",
-  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computes discount correctly: 40*(1-0.15)=40*0.85=34, which yields the sale price.\"},{\"step_id\":\"react:react-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the computed sale price $34, matching the preceding calculation.\"}]}"
+  "request_digest": "fe3725a014137a24",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Forward computation: applied 15% discount to $40: 40*(1-0.15)=40*0.85=34, which is correct.\"},{\"step_id\":\"react:react-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.90,\"error_type\":null,\"rationale\":\"Restates the computed sale price $34 as the final answer; no new inference introduced.\"}]}"
 }

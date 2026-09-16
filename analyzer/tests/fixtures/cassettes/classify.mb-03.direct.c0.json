@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 359,
+  "completion_tokens": 337,
   "finish_reason": "stop",
-  "latency_ms": 5395,
+  "latency_ms": 5989,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 658,
-  "reasoning_tokens": 192,
-  "request_digest": "8c452f4bbb7e91f3",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-03-root-llm-0:0\",\"behavior\":\"subgoal_setting\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"The step sets the immediate objective (just answer) before solving; this is a valid subgoal-setting instruction.\"},{\"step_id\":\"direct:direct-mb-03-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.95,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Provides the three primary additive colors of light (Red, Green, Blue), which directly answers the question.\"}]}"
+  "prompt_tokens": 918,
+  "reasoning_tokens": 128,
+  "request_digest": "1615d81319abd7ab",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-03-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Gives an instruction-like intermediate objective to simply provide the answer; sets the immediate goal.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.95,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Directly states the three primary additive colours of light: Red, Green, Blue.\"\n    }\n  ]\n}"
 }

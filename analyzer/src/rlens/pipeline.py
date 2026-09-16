@@ -128,7 +128,19 @@ def _consistency(trace: NormalizedTrace, item: dict[str, Any]) -> dict[str, Any]
     """
     if not consistency_mod.enabled():
         return None
-    result = consistency_mod.check(trace, item_prompt=item.get("prompt", ""))
+    # **The cassette name is passed ALWAYS**, exactly as the classify call does, and for the
+    # same reason: `rlens.llm.analyze` decides what to do with it, so the recorded call and
+    # the production call are the same call on the same code path (M1-14).
+    #
+    # Omitting it is not a missing optimisation -- it silently removes this tier from the
+    # offline pipeline. With `cassette=None` there is no key to record under, so
+    # `make record-cassettes` writes nothing for consistency, and then under `MOCK_LLM=1`
+    # the call has nothing to replay, fails, and returns None. The report would render
+    # `consistency: null` offline and a real verdict online, which is precisely the
+    # divergence M2-16 says the cassettes exist to prevent -- "the Frontend's MOCK_LLM=1
+    # mode reflects the real pipeline" -- in the month the Frontend builds against it.
+    cassette = f"consistency.{item.get('id', 'unknown')}.{trace.strategy}"
+    result = consistency_mod.check(trace, item_prompt=item.get("prompt", ""), cassette=cassette)
     return result.as_dict() if result else None
 
 
