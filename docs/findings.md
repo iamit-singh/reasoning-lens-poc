@@ -600,6 +600,57 @@ to make impossible. It cannot be made impossible any more. It can be made visibl
 
 ---
 
+## 15. Improving the classifier lowered κ — three times, and the third time it hit zero
+
+**Measured (M2-3, dev-40, single passes):**
+
+| bundle | κ behavior | raw agreement | errors / 40 | `linear` predicted |
+| --- | --- | --- | --- | --- |
+| baseline `97667881c779` | **0.126** | 0.700 | 12 | 30 |
+| cycle 1 `14776ac9d56d` | 0.083 | 0.750 | 10 | 34 |
+| cycle 2 `e8952d4d3c51` | 0.104 | 0.775 | 9 | 35 |
+| cycle 3 `9107b409e1ae` | **−0.026** | **0.825** | **7** | **39** |
+
+**Agreement rose monotonically. Errors fell monotonically. κ did neither.** The best κ in
+the table belongs to the *untuned* prompt, and the best raw agreement belongs to the bundle
+whose κ is below zero.
+
+**Why, exactly.** κ = (p_o − p_e) / (1 − p_e), and p_e is computed from the *marginals* —
+how often each label is used, by each side. The dev set is 34 `linear` in 40. A classifier
+that predicts `linear` 30 times has a lower p_e than one that predicts it 34 times, so the
+baseline's κ was partly earned **by being wrong in a differently-shaped way**: over-calling
+`verification` 7 times against a true 4 depressed chance agreement and flattered the
+coefficient. Fixing that over-call moved p_e from 0.657 to 0.728 and took κ down with it,
+while the classifier was getting two more steps right.
+
+| | p_o | p_e | κ |
+| --- | --- | --- | --- |
+| baseline | 0.700 | 0.6569 | 0.1257 |
+| cycle 1 | 0.750 | 0.7275 | 0.0826 |
+
+**What it means, and it cuts both ways.** This is the prevalence problem — κ is not a
+scaled accuracy and must not be read as one on a skewed sample. But the third cycle is the
+other half of the argument: it produced a **majority-class predictor**, `linear` 39 times in
+40, missing all four real `verification` steps, with the *highest* raw agreement in the
+table. κ went below zero and said so. **Raw agreement could not tell cycle 3 from cycle 2;
+κ could.** Neither metric is sufficient alone on this corpus, and any published number that
+quotes one without the other is quoting the flattering half.
+
+**The consequence for B4 #2, which is not a defence of the classifier.** At p_e ≈ 0.73, κ ≥
+0.60 needs **35.6 of 40 correct — at most 4 errors**. The 0.60 bar was set in the plan
+without reference to this corpus's class balance, and on an 85%-majority sample it is a
+demand for near-perfect agreement. **The bar is not being moved.** It is being reported
+against, with the arithmetic that shows what it actually asks for, which is what C7.2's
+recorded-justification branch is for.
+
+**What guards it:** `prompts/CHANGELOG.md` carries every cycle with both metrics side by
+side, and the baseline row is the untuned prompt, so the comparison cannot be quietly
+re-based. `versions._NOT_PROMPTS` keeps that changelog out of the bundle hash, with the
+converse asserted — a real prompt edit does move the version.
+
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but
@@ -617,6 +668,7 @@ each one would have surfaced later as a wrong number, so they belong in the same
 | Two CI jobs that would have gone green over nothing | G1 check 7 passing on a job that had never run |
 | **C5.4's held-out guard keyed on a *filename*** — the labelling tool writes `<annotator>.jsonl`, so 50 held-out labels sat in a file the default `make calibrate` counted as dev | the published κ tuned against the held-out set, with every guard reporting green |
 | **`make calibrate` could not compute B4 #1 at all** — the IAA κ lives on the held-out 50, which the C5.4 exclusion correctly drops, so the command `annotator-2.md` told you to run reported *NOT COMPUTABLE* with both passes on disk | M2-2 blocked, or "unblocked" by running `--final` — scoring the held-out set against the classifier, before the freeze, to obtain a human-vs-human number |
+| **The calibration join silently shrank its own denominator** — a degraded classifier call leaves the step in the report with a null label, so `_paired` dropped it and κ was computed over 32 of 40 labels while the same output's header read *"40 labels"* | **the published held-out κ computed over 42 of 50 steps, reporting 42 as though it were the set** — on a read that happens once |
 | **The brief in `annotator-2.md` named the wrong labelling command** — `make label ARGS="--annotator <name>"` defaults to `--part dev` | the second annotator labelling the dev 40 instead of the held-out 50, and B4 #1 measured on the wrong half of the frame |
 
 **The held-out one is the worst of these and deserves its sentence.** `make calibrate`'s
