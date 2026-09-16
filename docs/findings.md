@@ -684,6 +684,68 @@ converse asserted — a real prompt edit does move the version.
 
 ---
 
+## 16. The escalation tier made recall **worse**, and it cost 10 extra frontier calls to do it
+
+**Measured (M2-6, same ten seeded errors, one run, escalation on and off recorded in the
+same pass so the comparison is not across runs):**
+
+| | recall | extra calls |
+| --- | --- | --- |
+| triage alone | **8 / 10** | — |
+| triage + escalation | **7 / 10** | **10** |
+
+**Delta: −1 case.** 15 steps selected by the policy, **5 verdicts changed by the stronger
+model, 0 detections gained, 1 detection lost.**
+
+The casualty is **SE-06** (`variable_swap`, mb-11). Triage flagged the mutated step
+`unsound` — correctly. Escalation re-judged that step and its neighbour and returned
+`sound`. A planted variable swap, caught by the cheap tier and **un-caught by the expensive
+one**.
+
+**Why it is not a surprise once you read the prompt.** `escalate.md` is written against
+over-flagging: *"Prefer `sound` when the step is correct but terse. A step is `unsound`
+only when you can name the specific defect."* That instruction exists because the failure
+it was designed against is a stronger model rubber-stamping the cheap one's flags — *"an
+expensive echo"*, in the prompt's own words. It works. It also biases the tier toward
+`sound`, and on text where a defect **was deliberately planted**, that bias converts hits
+into misses. The tier was tuned to reduce false positives and it reduced true positives
+with them.
+
+**What this does to the two-tier design.** C4.4's escalation tier exists to be the
+empirical justification for spending frontier tokens. On this workload it has now been
+measured and the justification is not there:
+
+- it changed 5 of 15 selected verdicts, so it is **not inert** — it is active and wrong;
+- it recovered **none** of the two cases triage missed (SE-01, SE-05 miss before and
+  after);
+- it cost 10 extra calls at the more expensive pin;
+- and it removed one of the eight detections B4 #3 is computed from.
+
+**Trigger t9's condition is "delta near zero" and its pre-decided action is *publish it*.**
+The delta is negative, so the action applies with more force, not less. **The shipped
+configuration is `ESCALATION_ENABLED=0`** — which is already the default, so this is a
+recorded decision rather than a change.
+
+> **The reason is not that 8 > 7, and that distinction matters.** Choosing the
+> configuration that produces the better headline is the move this project refuses
+> everywhere else. The reason is that the tier has **a measured cost and no measured
+> benefit**: zero detections gained across ten cases. The recall number improving is a
+> consequence of that decision, not the argument for it — and both configurations are
+> published here so a reader can check that claim rather than take it.
+
+**And it nearly went unmeasured.** The M2-6 harness had no escalation in it at all —
+`ESCALATION_ENABLED=1` changed nothing because nothing in the spike read the flag. The
+first run at "escalation enabled" returned 9/10 and would have been recorded as a delta of
+about zero against a tier **that never ran**. Same shape as the consistency checker that
+was built, tested and never called, and as `FRONTEND_OUT` defined and never read: a
+capability asserted in prose that only becomes true when something executes it. The harness
+now records `hit`, `hit_triage_only` and an `escalation` block per case, and `None` versus
+`{"selected": 0}` are deliberately distinguishable — *"the tier did not earn its tokens"*
+and *"the tier never ran"* must not be the same sentence.
+
+
+---
+
 ## Findings about the instrument, not the model
 
 Separate, because they are defects that were fixed rather than results to publish — but

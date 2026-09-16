@@ -100,6 +100,7 @@ open rather than inventing a target for at this n.
 | Known-good false-flag rate | ≤ 1.0 per trace | B4 #4. Currently **0.0** |
 | **Escalation first clause** | **`verdict == "unsound"`** — amended by M2-5 from C4.4's `verdict != "sound"` | See the section below. Measured on one corpus snapshot: the original selected **116 of 270 (43.0%)**, of which **107 were `unverifiable` and 3 were `unsound`**; the amended clause selects **23 (8.5%)**. **Trigger t7 fired on the original and does not fire on the amendment** |
 | `ESCALATION_MAX_STEPS` | **8** *(unchanged)* | It bound on exactly **one arm** — `mb-08:thinking`, the degenerate loop, where it absorbed 138 selections into 8. So the pre-amendment 43.0% *selected* was only **4.4% escalated**: the cap was holding, which is why the response to t7 was a policy fix and not a cap raise |
+| **Escalation shipped?** | **NO — `ESCALATION_ENABLED=0`** | Measured recall delta over triage-alone: **−1 case** (8/10 → 7/10) for **10 extra frontier calls**. 15 steps selected, 5 verdicts changed, **0 detections gained, 1 lost**. Trigger **t9** fires; its pre-decided action is *publish it*. Finding 16 |
 | Escalation rate, measured | **8.5% selected · 4.4% escalated** | `make escalation-rate`, 41 arms, 270 classified steps. Both numbers ship — one answers t7, the other answers the C11 latency budget, and neither answers both |
 | `unverifiable` counts as a hit | yes | The seeded step is defective; whether the defect is *wrong* or *uncheckable* is M2-2's adjudication. A judge that stopped and said "I cannot verify this" did not miss it |
 
@@ -135,6 +136,34 @@ judge was **also unsure**, which is the case where a second opinion adds somethi
 recall delta near zero in M2-6 — which fires **t9**, whose pre-decided action is *publish
 it*. M2-5's own card calls that "a publishable finding, not an embarrassment: escalation did
 not earn its tokens on this workload."
+
+### And then the tier was measured, and it subtracted
+
+M2-5's amendment above fixed *what* escalation selects. M2-6 then measured what escalating
+those steps is **worth**, and the answer is less than nothing on this workload:
+
+| | recall | extra calls |
+| --- | --- | --- |
+| triage alone | **8 / 10** | — |
+| triage + escalation | **7 / 10** | **10** |
+
+SE-06 is the case it broke: triage flagged the planted `variable_swap` correctly, and the
+stronger model re-judged it `sound`. The tier recovered neither of the two cases triage
+already missed.
+
+**This is a predictable consequence of `escalate.md` being written correctly.** It says
+*"prefer `sound` when the step is correct but terse"*, because the failure it was designed
+against is a stronger model echoing the cheap one's flags. That instruction reduces false
+positives, and on text with a deliberately planted defect it reduces true positives with
+them.
+
+So the shipped configuration is **escalation off** — already the default, recorded here as
+a decision rather than left as an accident of a flag nobody turned on. **The reason is the
+absence of measured benefit (0 detections gained over 10 cases), not the presence of a
+better headline**; both configurations are published so that claim is checkable.
+
+The `escalated` / `escalation_capped` fields stay in the schema and render `false`. A field
+that disappears when the feature is off cannot be used to show that the feature was off.
 
 ### The recommendation the misses actually support
 

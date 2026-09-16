@@ -47,6 +47,7 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "analyzer/src"))
 
+from rlens import judge
 from rlens.classify import classify
 from rlens.ingest import otel
 from rlens.llm import ProviderError
@@ -103,6 +104,32 @@ def flagged_ids(result) -> set[str]:
     return {r.step_id for r in result.rows if r.verdict != "sound"}
 
 
+def escalated_rows(result, trace, *, item_prompt: str):
+    """Apply M2-5's tier to a triage result, returning (rows, outcome) or (rows, None).
+
+    **This harness measured recall for three runs with no escalation in it at all**, and
+    setting `ESCALATION_ENABLED=1` changed nothing because nothing here read the flag. A
+    "recall delta over triage-alone" computed from that would have compared triage against
+    triage and published the difference as the two-tier design's justification -- the same
+    shape as the consistency checker that was built, tested and never called.
+
+    So the tier is applied explicitly here, and the OUTCOME is returned so the record can
+    say how many steps were selected and how many verdicts actually moved. A delta of zero
+    is a publishable finding (t9); a delta of zero because the tier never ran is not a
+    finding at all.
+    """
+    if not judge.enabled():
+        return result.rows, None
+    outcome = judge.escalate(list(result.rows), list(trace.steps), item_prompt=item_prompt)
+    if not outcome.rows:
+        return result.rows, outcome
+    merged = []
+    for row in result.rows:
+        up = outcome.rows.get(row.step_id)
+        merged.append(row.model_copy(update={"verdict": up.verdict}) if up else row)
+    return merged, outcome
+
+
 def run_case(case: dict, *, baselines: dict) -> dict:
     span = ROOT / case["base_span_path"]
     item_id = span.name.split(".")[0]
@@ -116,10 +143,13 @@ def run_case(case: dict, *, baselines: dict) -> dict:
     if key not in baselines:
         t0 = time.time()
         base = classify(clean, item_prompt=item["prompt"])
+        base_rows, base_esc = escalated_rows(base, clean, item_prompt=item["prompt"])
         baselines[key] = {
-            "flagged": sorted(flagged_ids(base)),
+            "flagged": sorted({r.step_id for r in base_rows if r.verdict != "sound"}),
+            "flagged_triage_only": sorted(flagged_ids(base)),
             "n_steps": len(clean.steps),
             "degraded": base.degraded,
+            "escalation": _esc_record(base_esc),
             "secs": round(time.time() - t0, 1),
         }
     base = baselines[key]
@@ -135,13 +165,26 @@ def run_case(case: dict, *, baselines: dict) -> dict:
         # it as a miss would blame the judge for a parse failure.
         return {**_meta(case, step_id, base), "degraded": result.degraded, "hit": None}
 
-    flags = flagged_ids(result)
+    triage_flags = flagged_ids(result)
+    rows_after, outcome = escalated_rows(result, mutated, item_prompt=item["prompt"])
+    flags = {r.step_id for r in rows_after if r.verdict != "sound"}
     hit = step_id in flags
+    # **Both halves recorded, always.** The delta the two-tier design is justified by is
+    # `hit` minus `hit_triage_only`, and it can only be computed if the triage-alone answer
+    # survives into the record rather than being overwritten by the escalated one.
+    hit_triage_only = step_id in triage_flags
     row = {r.step_id: r for r in result.rows}.get(step_id)
+    after = {r.step_id: r for r in rows_after}.get(step_id)
     return {
         **_meta(case, step_id, base),
         "hit": hit,
+        # `verdict` is the TRIAGE verdict and `verdict_after_escalation` is what the step
+        # ended up with. Keeping only one of them was a real defect: the run that found the
+        # negative escalation delta printed SE-06 as "[MISS] ... verdict=unsound", because
+        # the hit came from the escalated rows and the verdict column came from the triage
+        # ones. A row that reads MISS next to `unsound` is not a typo a reader can resolve.
         "verdict": row.verdict if row else None,
+        "verdict_after_escalation": after.verdict if after else None,
         "error_type": row.error_type if row else None,
         "validity_confidence": row.validity_confidence if row else None,
         "rationale": (row.rationale if row else "")[:160],
@@ -149,7 +192,43 @@ def run_case(case: dict, *, baselines: dict) -> dict:
         # standing opinion about this trace, not damage caused by the mutation.
         "collateral": sorted(flags - {step_id} - set(base["flagged"])),
         "flagged_all": sorted(flags),
+        "hit_triage_only": hit_triage_only,
+        "flagged_triage_only": sorted(triage_flags),
+        "escalation": _esc_record(outcome),
         "secs": round(time.time() - t0, 1),
+    }
+
+
+def _verdict_cell(row: dict) -> str:
+    """The verdict as it ended up, and the triage one too when escalation moved it.
+
+    Printing only the triage verdict made a MISS sit next to `unsound` on any case the
+    tier overturned, which is unreadable and was how the escalation regression first
+    showed up as "that line is wrong" rather than as a finding.
+    """
+    before, after = row.get("verdict"), row.get("verdict_after_escalation")
+    if after is None or after == before:
+        return str(before)
+    return f"{before}->{after}"
+
+
+def _esc_record(outcome) -> dict | None:
+    """What the tier actually did, or None when it did not run.
+
+    None and `{"selected": 0}` are different states and both must be distinguishable in the
+    record: the first means escalation was off, the second means it was on and the policy
+    chose nothing. Reporting a zero delta without saying which one produced it is how "the
+    tier did not earn its tokens" and "the tier never ran" become the same sentence.
+    """
+    if outcome is None:
+        return None
+    return {
+        "selected": len(outcome.selected),
+        "capped": outcome.capped,
+        "rate": round(outcome.rate, 4),
+        "verdicts_changed": list(outcome.changed),
+        "calls": outcome.calls,
+        "note": outcome.note or None,
     }
 
 
@@ -206,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
         extra = f" +{len(row.get('collateral', []))} collateral" if row.get("collateral") else ""
         print(
             f"  [{mark}] {row['case_id']} {row['mutation_type']:24s} "
-            f"{row['trace']:18s} verdict={row.get('verdict')}{extra}"
+            f"{row['trace']:18s} verdict={_verdict_cell(row)}{extra}"
         )
 
     OUT.mkdir(parents=True, exist_ok=True)
@@ -230,6 +309,36 @@ def main(argv: list[str] | None = None) -> int:
         f"  recall           {len(hits)}/{len(graded)}"
         f"  ({100.0 * len(hits) / len(graded) if graded else 0:.0f}%)   target: >= 70%"
     )
+    # ---- M2-5's DoD: the delta the two-tier design is justified by.
+    esc_rows = [r for r in graded if r.get("escalation") is not None]
+    if not esc_rows:
+        print(
+            "  escalation       NOT RUN (ESCALATION_ENABLED off) — so the recall above is\n"
+            "                   TRIAGE-ALONE and no delta is computable from this run."
+        )
+    else:
+        triage_hits = [r for r in graded if r.get("hit_triage_only")]
+        selected = sum(r["escalation"]["selected"] for r in esc_rows)
+        changed = sum(len(r["escalation"]["verdicts_changed"]) for r in esc_rows)
+        delta = len(hits) - len(triage_hits)
+        print(
+            f"  triage alone     {len(triage_hits)}/{len(graded)}"
+            f"  ({100.0 * len(triage_hits) / len(graded) if graded else 0:.0f}%)"
+        )
+        print(
+            f"  ESCALATION DELTA {delta:+d} case(s)   "
+            f"{selected} step(s) selected, {changed} verdict(s) changed, "
+            f"{sum(r['escalation']['calls'] for r in esc_rows)} extra call(s)"
+        )
+        if delta == 0:
+            print(
+                "                   t9's condition. Its pre-decided action is PUBLISH IT:\n"
+                "                   escalation did not earn its tokens on this workload,\n"
+                "                   and that is a finding plus a Month-3 simplification.\n"
+                "                   Note WHICH zero this is: the tier RAN and changed "
+                f"{changed} verdict(s)."
+            )
+
     ungraded = len(rows) - len(graded)
     if ungraded:
         print(f"  ungraded         {ungraded} (degraded or provider error — not counted as misses)")
