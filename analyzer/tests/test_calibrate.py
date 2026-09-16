@@ -537,9 +537,7 @@ def test_final_scores_the_heldout_set_only_and_once_per_step(workspace) -> None:
         )
         (labels / "heldout-50.jsonl").write_text("")
         (labels / "HELDOUT_FREEZE").write_text(f"bundle={PROMPT_BUNDLE_VERSION}\n")
-        (reports / "mb-01.report.json").write_text(
-            json.dumps(_report(dev + held, ["linear"] * 7))
-        )
+        (reports / "mb-01.report.json").write_text(json.dumps(_report(dev + held, ["linear"] * 7)))
 
         results = C.build_results(final=True)
         run = results["run"]
