@@ -611,9 +611,44 @@ to make impossible. It cannot be made impossible any more. It can be made visibl
 | cycle 2 `e8952d4d3c51` | 0.104 | 0.775 | 9 | 35 |
 | cycle 3 `9107b409e1ae` | **−0.026** | **0.825** | **7** | **39** |
 
-**Agreement rose monotonically. Errors fell monotonically. κ did neither.** The best κ in
-the table belongs to the *untuned* prompt, and the best raw agreement belongs to the bundle
-whose κ is below zero.
+**Every row above is a single run, and the correction below is that four of them are not
+comparable.** Read as a progression — agreement rising, errors falling, κ doing neither —
+the table is the wrong reading, and it is kept here exactly as it was first recorded
+because the correction is the finding.
+
+> ### Correction — the cycle-3 "collapse" is not attributable to cycle 3
+>
+> Cycle 3's row was originally written up as *"the change collapsed the classifier to a
+> majority-class predictor"*. **It did not, or at least nothing here shows that it did.**
+> A later run at the **cycle-2** bundle, with the cycle-3 change reverted and the corpus
+> rebuilt, returned **κ −0.026, agreement 0.825, `linear` predicted 39 of 40** — the cycle-3
+> row, to three decimal places, at a different prompt.
+>
+> Five runs at bundle `e8952d4d3c51` alone:
+>
+> | n | agreement | `linear` predicted | κ |
+> | --- | --- | --- | --- |
+> | 40 | 0.775 | 35 | **+0.104** |
+> | 32 | 0.8125 | 31 | −0.032 |
+> | 32 | 0.8125 | 29 | **+0.186** |
+> | 32 | 0.781 | 30 | −0.052 |
+> | 40 | 0.825 | **39** | −0.026 |
+>
+> **Cycle 3's single run sits inside cycle 2's own range on every column.** The degenerate
+> `linear` 39/40 outcome is something this classifier does on its own, at whatever bundle,
+> some of the time.
+>
+> **This is ADR-010's mistake, committed one level up, by the person who had just written
+> the warning.** ADR-010 published a corpus-wide claim off one run of a non-deterministic
+> classifier. The variance pass above was run specifically to avoid repeating that — and
+> then cycle 3's single-run conclusion was left standing anyway, because it was dramatic
+> and it confirmed a tidy story about one nudge too many. It cost nothing only because an
+> unrelated re-run of the corpus happened to reproduce the same numbers at the other bundle.
+>
+> **What survives:** cycle 3 is still reverted, on the honest ground that it was never
+> shown to help — not on the claim that it was shown to harm. And κ still distinguishes a
+> degenerate *run* from a healthy one, which is real; what it cannot do at this n is
+> attribute that run to a prompt.
 
 **Why, exactly.** κ = (p_o − p_e) / (1 − p_e), and p_e is computed from the *marginals* —
 how often each label is used, by each side. The dev set is 34 `linear` in 40. A classifier
@@ -662,12 +697,15 @@ diagnostics that moved — `verification` false positives 5 → 0, class coverag
 step-level facts rather than a coefficient.
 
 **What it means, and it cuts both ways.** This is the prevalence problem — κ is not a
-scaled accuracy and must not be read as one on a skewed sample. But the third cycle is the
-other half of the argument: it produced a **majority-class predictor**, `linear` 39 times in
-40, missing all four real `verification` steps, with the *highest* raw agreement in the
-table. κ went below zero and said so. **Raw agreement could not tell cycle 3 from cycle 2;
-κ could.** Neither metric is sufficient alone on this corpus, and any published number that
-quotes one without the other is quoting the flattering half.
+scaled accuracy and must not be read as one on a skewed sample. The other half of the
+argument is the degenerate run: `linear` 39 times in 40, all four real `verification` steps
+missed, and the **highest raw agreement of any run recorded here**. κ went below zero and
+said so; raw agreement called it the best result on the page. **Neither metric is
+sufficient alone on this corpus**, and a published number quoting one without the other is
+quoting the flattering half.
+
+What that run does **not** establish — see the correction above — is that any *prompt*
+caused it. The same bundle produces `linear` 29 and `linear` 39 on different days.
 
 **The consequence for B4 #2, which is not a defence of the classifier.** At p_e ≈ 0.73, κ ≥
 0.60 needs **35.6 of 40 correct — at most 4 errors**. The 0.60 bar was set in the plan

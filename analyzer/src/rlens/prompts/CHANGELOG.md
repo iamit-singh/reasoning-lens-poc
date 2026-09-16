@@ -196,14 +196,35 @@ now. Raw agreement reached its **highest value of the whole exercise, 0.825**, a
 **below zero**: worse than chance, on a classifier that agrees with the human more often
 than any previous bundle.
 
-**This is the majority-class predictor**, arrived at by three cycles of guidance each of
-which was individually justified by the rubric. It is exactly the degenerate outcome κ
-exists to detect, and κ detected it — the one moment in this exercise where κ was the
-right instrument and raw agreement was the misleading one.
+**Reverted.** A run that answers `linear` 39 times in 40 makes `pattern_profile` constant
+and makes the trace renderer show one colour, and nothing in this cycle had shown a
+benefit worth that risk.
 
-**Reverted.** A classifier that answers `linear` 39 times in 40 makes `pattern_profile`
-constant, makes the trace renderer show one colour, and would turn the demo into a
-demonstration that the taxonomy is unnecessary.
+> ### Correction, written after the fact and kept above the conclusion it replaces
+>
+> This cycle was first written up as *"it collapsed the classifier"* — three nudges in one
+> direction, one too many, arriving at the majority-class predictor. **That attribution is
+> not supported.**
+>
+> After the revert, the corpus was rebuilt at the **cycle-2** bundle and scored again. It
+> returned **κ −0.026, agreement 0.825, `linear` 39 of 40** — cycle 3's numbers, to three
+> decimal places, at cycle 2's prompt. Five runs at `e8952d4d3c51` now span κ −0.052 to
+> +0.186 and `linear` predicted **29 to 39**. Cycle 3's single run sits inside that range
+> on every column.
+>
+> **The degenerate outcome is something this classifier does on its own**, at whatever
+> bundle, some of the time. It was not caused by the cycle-3 sentence, and the sentence
+> was not shown to harm anything.
+>
+> **This is the exact error the section above warns about**, committed in the same
+> document by the same hand: a single run of a non-deterministic classifier, read as a
+> property of the prompt, because the story was tidy. ADR-010 did it with
+> `backtracking = 0`; this did it with `linear = 39`. It cost nothing only because an
+> unrelated corpus rebuild happened to land on the same numbers at the other bundle and
+> made the coincidence visible.
+>
+> **The revert stands on the honest ground**: the change was never shown to help. Not on
+> the claim that it was shown to hurt.
 
 ---
 
@@ -216,14 +237,17 @@ choosing a bundle, the same bundle was run three more times with **nothing chang
 
 **Bundle `e8952d4d3c51` (cycle 2), four independent passes:**
 
-| pass | n | raw agreement | κ |
-| --- | --- | --- | --- |
-| original | 40 | 0.775 | **+0.104** |
-| A | 32 | 0.8125 | **−0.032** |
-| B | 32 | 0.8125 | **+0.186** |
-| C | 32 | 0.781 | **−0.052** |
+| pass | n | raw agreement | `linear` predicted | κ |
+| --- | --- | --- | --- | --- |
+| original | 40 | 0.775 | 35 | **+0.104** |
+| A | 32 | 0.8125 | 31 | **−0.032** |
+| B | 32 | 0.8125 | 29 | **+0.186** |
+| C | 32 | 0.781 | 30 | **−0.052** |
+| D (post-revert corpus rebuild) | 40 | 0.825 | **39** | **−0.026** |
 
-**Range 0.238. Standard deviation 0.132 over the three n = 32 passes.**
+**Range 0.238. Standard deviation 0.132 over the three n = 32 passes.** Pass D was taken
+later, after the cycle-3 revert, and it is the one that overturned this file's own
+conclusion about cycle 3 — see the correction under that cycle.
 
 The largest difference between *any two cycles in this entire exercise* is **0.130** —
 cycle 2 to cycle 3, the one that collapsed the classifier to a majority-class predictor.

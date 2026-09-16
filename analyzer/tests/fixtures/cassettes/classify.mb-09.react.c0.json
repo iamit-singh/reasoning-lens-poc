@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 666,
+  "completion_tokens": 493,
   "finish_reason": "stop",
-  "latency_ms": 10894,
+  "latency_ms": 6137,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 822,
-  "reasoning_tokens": 192,
-  "request_digest": "ab7c4458b15d0d61",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-09-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Identifies the task and selects the lookup tool key to use.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-09-root-tool-0-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Makes the indicated tool call with the provided query key.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-09-root-tool-0-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.82,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Tool returns a single datum, '1887', reported as the lookup result.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-09-root-llm-1:3\",\n      \"behavior\": \"verification\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.86,\n      \"error_type\": null,\n      \"rationale\": \"Asserts that the lookup result provides the answer (1887); consistent with tool output.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-09-root-llm-1:4\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Outputs the final answer, matching the observed lookup result.\"\n    }\n  ]\n}"
+  "prompt_tokens": 1082,
+  "reasoning_tokens": 128,
+  "request_digest": "05c5b5ad33da7eb7",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-09-root-llm-0:0\",\"behavior\":\"subgoal_setting\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Identifies the goal and selects the lookup tool/key to retrieve the founding year.\"},{\"step_id\":\"react:react-mb-09-root-tool-0-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Performs the indicated tool call to query the provided key for the founding year.\"},{\"step_id\":\"react:react-mb-09-root-tool-0-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Tool returned a single value, '1887'; this is an observed result from the lookup.\"},{\"step_id\":\"react:react-mb-09-root-llm-1:3\",\"behavior\":\"linear\",\"behavior_confidence\":0.86,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"States the retrieved value as the answer without further computation or checking.\"},{\"step_id\":\"react:react-mb-09-root-llm-1:4\",\"behavior\":\"linear\",\"behavior_confidence\":0.86,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Outputs the founding year (1887) directly based on the tool observation.\"}]}"
 }

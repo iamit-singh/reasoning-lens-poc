@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 723,
+  "completion_tokens": 657,
   "finish_reason": "stop",
-  "latency_ms": 10768,
+  "latency_ms": 7801,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 823,
-  "reasoning_tokens": 320,
-  "request_digest": "b5a8a3d14e2e844b",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.82,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"States the task and proposes possible departments as initial subgoal; reasonable setup.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:1\",\n      \"behavior\": \"backtracking\",\n      \"behavior_confidence\": 0.75,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Expresses uncertainty and questions the initial assumption\u2014an explicit revision step.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.78,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.72,\n      \"error_type\": null,\n      \"rationale\": \"Assumes the institute is fictional and lists departments without evidence; claim can't be checked from prior steps.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:3\",\n      \"behavior\": \"backtracking\",\n      \"behavior_confidence\": 0.70,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.80,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Final output contradicts its own earlier three-item list by returning a single department without justification.\"\n    }\n  ]\n}"
+  "prompt_tokens": 1083,
+  "reasoning_tokens": 256,
+  "request_digest": "2b3995b7a7d8e5cf",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Makes an unsupported guess about departments without citing any source or derivation.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Expresses uncertainty and a different possible institute identity; no verification or derivation provided.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Offers another unsupported assumption of departments, still without evidence or sourcing.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-10-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Outputs a list of departments as an answer but provides no verification or citation that these are the institute's actual departments.\"\n    }\n  ]\n}"
 }
