@@ -44,10 +44,30 @@ def test_an_unsound_step_always_escalates() -> None:
     )
 
 
-def test_an_unverifiable_step_escalates_even_at_high_confidence() -> None:
-    """`verdict != "sound"` is the condition, not `verdict == "unsound"`. A confidently
-    unverifiable step is exactly the kind a stronger model may be able to verify."""
-    assert J.should_escalate(_row(0, verdict="unverifiable", validity_confidence=0.99), _step(0))
+def test_a_confidently_unverifiable_step_does_NOT_escalate() -> None:
+    """**This assertion is inverted from what it was, and the reason is a measurement.**
+
+    It used to read `verdict != "sound"` is the condition, on the rationale that *"a
+    confidently unverifiable step is exactly the kind a stronger model may be able to
+    verify."* Over the corpus that clause selected 158 of 270 steps (58.5%, against t7's
+    25% bar) and **157 of the 158 were `unverifiable`** -- the clause was reading
+    *uncheckable* as *doubtful* on a corpus that is half unverifiable by design.
+
+    The rationale does not survive reading `escalate.md`: it asks the **same question under
+    the same constraint** ("judge each step GIVEN ONLY the steps that precede it") with the
+    same definition of `unverifiable`. The stronger model gets the same text and the same
+    absent citation. It is not better placed to verify it; it is asked not to try.
+    """
+    assert not J.should_escalate(
+        _row(0, verdict="unverifiable", validity_confidence=0.99), _step(0)
+    )
+
+
+def test_an_unverifiable_step_the_judge_was_UNSURE_about_still_escalates() -> None:
+    """The half of the old clause that survives, and the case where a second opinion adds
+    something: the cheap model said "I cannot check this" and was not confident about even
+    that."""
+    assert J.should_escalate(_row(0, verdict="unverifiable", validity_confidence=0.60), _step(0))
 
 
 def test_a_low_confidence_sound_step_escalates() -> None:

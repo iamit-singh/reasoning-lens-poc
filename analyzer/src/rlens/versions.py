@@ -23,7 +23,7 @@ from pathlib import Path
 RUNNER_VERSION = "0.1.0"
 
 #: Bumped by hand when analyzer semantics change (segmenter, classifier, judge).
-ANALYZER_VERSION = "0.1.0"
+ANALYZER_VERSION = "0.2.0"
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 

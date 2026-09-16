@@ -106,8 +106,45 @@ def is_numeric(text: str) -> bool:
 
 
 def should_escalate(row: StepRow, step: Step) -> bool:
-    """C4.4's policy, as a predicate over one step. Deterministic by construction."""
-    if row.verdict != "sound":
+    """C4.4's policy, as a predicate over one step. Deterministic by construction.
+
+    **Amended by M2-5 after measuring the rate, and trigger t7 is why.** C4.4's first clause
+    was `verdict != "sound"`. Over the 270 classified steps of the corpus that selected
+    **158 steps, 58.5%** — against t7's 25% bar — and the composition is the whole story:
+
+    - **157 of the 158 were `unverifiable`.** Exactly one was `unsound`.
+    - The confidence clauses selected **nothing that clause had not already taken**: no
+      `sound` step falls below 0.70 (their minimum is 0.78), and of 31 numeric steps **none**
+      is below 0.85.
+
+    t7's pre-decided action is *"treat it as a prompt bug, not a budget problem"* — look at
+    why triage is unsure so often. **It is not unsure.** `unverifiable` means the step
+    asserts a claim it neither derives nor cites, and finding 7 already established that
+    half this corpus is legitimately unverifiable. The clause was reading *uncheckable* as
+    *doubtful*, so on this corpus it selected half the steps by construction.
+
+    And escalating them cannot help, which is the part that decides it: `escalate.md` asks
+    the **same question under the same constraint** — *"judge each step GIVEN ONLY the steps
+    that precede it"*, with the same definition of `unverifiable`. A stronger model re-reads
+    the same text, finds the same absent citation, and answers the same question. The only
+    way the verdict moves is a reading disagreement about whether the step derives its
+    claim, and the classifier's `unverifiable` calls already agree with the human annotator
+    (soundness κ 0.761; of 25 human-`unverifiable` steps the classifier agreed on 21).
+
+    So the clause is split. `unsound` — a *named* defect, where a stronger model genuinely
+    adjudicates — always escalates. `unverifiable` escalates only when the judge was also
+    **unsure**, which is the case where a second opinion adds something.
+
+    **Measured effect:** 158 selected (58.5%) -> 6 selected (2.2%). Reported with the
+    pre-change number in ADR-012; both are published, because quoting only the smaller one
+    would hide that the shipped policy used to select half the corpus.
+
+    **This narrows escalation to near-inert on this workload, and that is a finding rather
+    than a regression** — M2-5's own card calls a small recall delta *"a publishable
+    finding, not an embarrassment: escalation did not earn its tokens on this workload"*.
+    The delta is measured in M2-6 and published either way.
+    """
+    if row.verdict == "unsound":
         return True
     if row.validity_confidence < LOW_CONFIDENCE:
         return True
