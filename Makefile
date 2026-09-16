@@ -82,6 +82,9 @@ consistency-fp:  ## M2-8's DoD / B4 #5 -- consistency false flags on the known-g
 pooled-precision:  ## M2-7 / B4 #4 -- pooled precision + false-flag rate. Reads artefacts, calls nothing
 	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/pooled_precision.py $(ARGS)
 
+stamp-reports:  ## M2-10b -- stamp measurement_context + verdict lines into all 42 reports
+	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/stamp_reports.py $(ARGS)
+
 # M2-9, as ADR-009 re-scoped it: 3.5 h -> ~1.0 h. The panel is BUILT and SHIPPED, and what
 # it publishes is the negative result with its denominator. No model call: this reads S4's
 # committed trial records, whose adjudication is an INPUT rather than a step.

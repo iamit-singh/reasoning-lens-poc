@@ -1,0 +1,25 @@
+3e09bf3ee6dc093cf682aabb61bf7050ffcab45a
+bundle=e8952d4d3c51
+frozen_utc=2026-09-16T12:10:00Z
+tag=prompts-frozen-v1
+
+C5.4's freeze. The held-out 50 are sealed against this commit and the published
+classifier kappa belongs to the bundle named above.
+
+Frozen by M2-16 under amendment 002. Preconditions checked, not assumed:
+
+  M2-3  closed -- the 2.5 h box expired; ships cycle 2. classify_and_triage.md final.
+  M2-5  measured -- escalation policy amended (ADR-012), rate 8.5% selected /
+        4.4% escalated, and the tier is shipped OFF on a measured -1 recall
+        delta. escalate.md UNCHANGED by that decision: turning the tier off is a
+        flag, not a prompt edit, so the bundle is unaffected.
+  M2-8  wired and measured -- consistency FP 0 of 5. consistency.md final.
+
+Every *.md under analyzer/src/rlens/prompts/ is final at this bundle, with the
+deliberate exception of CHANGELOG.md, which versions.py excludes by name because
+the record of what a prompt change did must not itself be a prompt change.
+
+If any prompt changes after this line, M2-17's run is VOID: re-tag, re-record,
+re-run, and DISCLOSE BOTH RUNS in the G2 report. The CI check and the CLI guard
+protect the labels; neither protects against a second honest read that goes
+unmentioned, and that is the only protection that matters.

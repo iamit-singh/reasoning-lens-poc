@@ -1,0 +1,47 @@
+{
+  "_README": "C4.6's price table, dated. Read by M2-10b to turn measured token counts into an estimated cost. THE PER-TOKEN RATES ARE NULL AND THAT IS DELIBERATE -- see `why_the_rates_are_null`. Every token count in the reports is MEASURED from span usage attributes and is published; only the dollar conversion is withheld.",
+  "dated": "2026-09-16",
+  "currency": "USD",
+  "unit": "per 1M tokens",
+  "why_the_rates_are_null": [
+    "B4 #7 -- 'cost of thought visible' -- is a REPORTING criterion and its published",
+    "measure is the TOKEN RATIO (thinking reasoning tokens / direct reasoning tokens),",
+    "which is measured from span usage and needs no price table at all. The dollar",
+    "figure is a convenience on top of it.",
+    "",
+    "The rates below are null because nobody has verified the current per-token prices",
+    "for these exact dated model ids, and a published cost is a number a reader will",
+    "quote. An invented rate would make `est_cost_usd` look measured when it was assumed",
+    "-- the same substitution this project refuses for reasoning_tokens (ADR-001: if the",
+    "provider does not return them, cost-of-thought is ESTIMATED, not measured, and it",
+    "says so). A null renders as 'not priced' and cannot be mistaken for a measurement.",
+    "",
+    "TO PUBLISH DOLLARS: fill in the two rates, leave `dated` at the day you checked,",
+    "and re-run `make stamp-reports`. Nothing else changes -- `est_cost_usd` is computed",
+    "from token counts that are already in every report.",
+    "",
+    "B4 #10's spend line is UNAFFECTED: it is reconciled from the breaker's own spend",
+    "file (ADR-011), which records what was actually billed rather than what a rate card",
+    "predicts."
+  ],
+  "generation": {
+    "note": "Local (ADR-001). gpt-oss:20b on ollama, on the operator's own hardware. There is no per-token price: the marginal cost of a generation call is electricity.",
+    "input": 0.0,
+    "output": 0.0,
+    "priced": true
+  },
+  "models": {
+    "gpt-5-mini-2025-08-07": {
+      "role": "analysis -- classifier + triage (MODEL_ANALYZE)",
+      "input": null,
+      "output": null,
+      "priced": false
+    },
+    "gpt-5-2025-08-07": {
+      "role": "escalation (MODEL_ESCALATE). Shipped OFF -- ADR-012, finding 16 -- so this rate prices a tier the demo does not run.",
+      "input": null,
+      "output": null,
+      "priced": false
+    }
+  }
+}
