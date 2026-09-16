@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 61,
+  "finish_reason": "stop",
+  "latency_ms": 3311,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 436,
+  "reasoning_tokens": 0,
+  "request_digest": "a17cb1f34e66becf",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] explicitly reasons: if full on day 48, then day 47 half and day 46 quarter, which yields the final answer 46.\"}"
+}

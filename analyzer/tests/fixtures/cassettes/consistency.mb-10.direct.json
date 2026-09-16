@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 246,
+  "finish_reason": "stop",
+  "latency_ms": 4691,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 517,
+  "reasoning_tokens": 192,
+  "request_digest": "16dea543d17fa8e2",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"4\"],\"rationale\":\"Step [4] explicitly lists 'Department of Engineering' as one of the three departments, so the final answer follows from it.\"}"
+}

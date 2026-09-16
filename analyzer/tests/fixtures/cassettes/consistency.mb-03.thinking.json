@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 123,
+  "finish_reason": "stop",
+  "latency_ms": 2360,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 429,
+  "reasoning_tokens": 64,
+  "request_digest": "97b00b3f56e9794f",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\"],\"rationale\":\"Steps [1] and [2] explicitly state the three primary additive colours as Red, Green, and Blue, which matches the final answer.\"}"
+}

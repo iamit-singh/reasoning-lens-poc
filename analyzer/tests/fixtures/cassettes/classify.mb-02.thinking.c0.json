@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 334,
+  "completion_tokens": 221,
   "finish_reason": "stop",
-  "latency_ms": 10105,
+  "latency_ms": 3419,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 940,
-  "reasoning_tokens": 128,
+  "reasoning_tokens": 64,
   "request_digest": "99abccc450df9e7f",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-02-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"Performs straightforward multiplication: 17 multiplied by 4 equals 68, a direct arithmetic computation.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-02-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Outputs the computed result 68; restates the direct arithmetic conclusion.\"\n    }\n  ]\n}"
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-02-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the multiplication and computes 17*4=68 directly; a straightforward forward calculation.\"},{\"step_id\":\"thinking:thinking-mb-02-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Provides the final answer 68, restating the computed product without additional derivation.\"}]}"
 }

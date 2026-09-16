@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 194,
+  "finish_reason": "stop",
+  "latency_ms": 4598,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 1584,
+  "reasoning_tokens": 128,
+  "request_digest": "da9a8e1fbdebde18",
+  "text": "{\"verdict\":\"contradicts\",\"cited_step_ids\":[\"18\"],\"rationale\":\"Step [18] states the Meridian Institute has three departments (Department of Science; Department of Engineering; Department of Humanities), but the final answer lists only '3. Department of Humanities.'\"}"
+}

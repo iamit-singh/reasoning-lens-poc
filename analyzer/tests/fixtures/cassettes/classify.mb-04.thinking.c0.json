@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 228,
+  "completion_tokens": 235,
   "finish_reason": "stop",
-  "latency_ms": 3440,
+  "latency_ms": 3649,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 971,
   "reasoning_tokens": 64,
   "request_digest": "8ad24f15bce91f2e",
-  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computed 15% of $40 = $6 then subtracted from $40 to get $34; arithmetic is correct.\"},{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Restates the computed sale price $34.00, consistent with the prior computation.\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computes 15% of $40 as $6 and subtracts from $40 to get $34; straightforward forward arithmetic, correctly shown.\"},{\"step_id\":\"thinking:thinking-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the computed sale price $34.00 as the final answer, which matches the prior calculation.\"}]}"
 }

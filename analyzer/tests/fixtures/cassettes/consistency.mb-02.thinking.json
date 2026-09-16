@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 122,
+  "finish_reason": "stop",
+  "latency_ms": 3798,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 412,
+  "reasoning_tokens": 64,
+  "request_digest": "99a1f6bfa67fd38f",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\"],\"rationale\":\"Steps [1] and [2] explicitly state the multiplication result 17 * 4 = 68, which matches the final answer.\"}"
+}

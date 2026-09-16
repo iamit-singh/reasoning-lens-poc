@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 200,
+  "finish_reason": "stop",
+  "latency_ms": 3741,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 529,
+  "reasoning_tokens": 128,
+  "request_digest": "b43405a1d91922d4",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] shows inner dimensions 18-2(1.5)=15 and 24-2(1.5)=21 and computes area 15*21=315, which supports the final answer.\"}"
+}

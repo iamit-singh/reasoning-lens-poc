@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 301,
+  "completion_tokens": 229,
   "finish_reason": "stop",
-  "latency_ms": 4104,
+  "latency_ms": 3595,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 954,
-  "reasoning_tokens": 128,
+  "reasoning_tokens": 64,
   "request_digest": "fe3725a014137a24",
-  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Forward computation: applied 15% discount to $40: 40*(1-0.15)=40*0.85=34, which is correct.\"},{\"step_id\":\"react:react-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.90,\"error_type\":null,\"rationale\":\"Restates the computed sale price $34 as the final answer; no new inference introduced.\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-04-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Computes sale price by applying 15% discount: 40*(1-0.15)=40*0.85=34; concise correct arithmetic.\"},{\"step_id\":\"react:react-mb-04-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States final numeric answer $34 derived in prior step.\"}]}"
 }

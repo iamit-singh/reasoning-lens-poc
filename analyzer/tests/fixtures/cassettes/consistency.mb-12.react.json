@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 67,
+  "finish_reason": "stop",
+  "latency_ms": 2570,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 501,
+  "reasoning_tokens": 0,
+  "request_digest": "7c6b4727b7c8062e",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] sets up equations, solves 2x+2.00=2.60, obtains x=0.30, which directly yields the final answer $0.30.\"}"
+}

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 192,
+  "finish_reason": "stop",
+  "latency_ms": 4182,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 2723,
+  "reasoning_tokens": 128,
+  "request_digest": "4e557a234de4fd20",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"34\",\"40\",\"26\"],\"rationale\":\"Steps explicitly conclude the Meridian Institute was established in 2015 (steps 26, 34, 40), so the final answer follows from the steps.\"}"
+}

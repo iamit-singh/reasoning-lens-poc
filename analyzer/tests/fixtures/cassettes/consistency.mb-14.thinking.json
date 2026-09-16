@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 125,
+  "finish_reason": "stop",
+  "latency_ms": 3263,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 660,
+  "reasoning_tokens": 64,
+  "request_digest": "7ab498c91e8e5a52",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"2\"],\"rationale\":\"Step [2] explicitly reasons backward by halving: day 48 whole, day 47 half, day 46 quarter, which directly supports the final answer.\"}"
+}

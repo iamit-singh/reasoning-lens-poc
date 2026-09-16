@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 131,
+  "finish_reason": "stop",
+  "latency_ms": 3046,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 657,
+  "reasoning_tokens": 64,
+  "request_digest": "9c4f5e368391e63b",
+  "text": "{\"verdict\": \"entails\", \"cited_step_ids\": [], \"rationale\": \"Step [2] computes total watts as 379,995 and step [3] converts to 379.995 kW then rounds down to 379, supporting the final answer.\"}"
+}

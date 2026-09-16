@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 122,
+  "finish_reason": "stop",
+  "latency_ms": 3425,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 471,
+  "reasoning_tokens": 64,
+  "request_digest": "10a29746bd0b1e2b",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"2\",\"3\"],\"rationale\":\"Steps [2] and [3] explicitly state and conclude the Meridian Institute was founded in 2005, which supports the final answer.\"}"
+}

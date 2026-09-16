@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 128,
+  "finish_reason": "stop",
+  "latency_ms": 2421,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 443,
+  "reasoning_tokens": 64,
+  "request_digest": "e2554a622f9b9f98",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[],\"rationale\":\"Steps [1] and [2] compute discount = 6 and sale price = 40-6 = 34, then state $34.00, which supports the final answer.\"}"
+}

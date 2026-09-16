@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 302,
+  "completion_tokens": 237,
   "finish_reason": "stop",
-  "latency_ms": 4296,
+  "latency_ms": 5311,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 769,
-  "reasoning_tokens": 128,
-  "request_digest": "ca2313788cbf1efb",
-  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-12-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Sets variables, forms correct equations, solves 2x+2.00=2.60 to get x=0.30; algebra is correct.\"},{\"step_id\":\"react:react-mb-12-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Restates the computed result $0.30 as the pen's cost; consistent with prior correct computation.\"}]}"
+  "prompt_tokens": 1029,
+  "reasoning_tokens": 64,
+  "request_digest": "f543c82e92558227",
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-12-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Sets variables, forms and solves 2x+2.00=2.60 correctly to get x=0.30; math and reasoning are correct.\"},{\"step_id\":\"react:react-mb-12-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Restates the computed result $0.30 as the answer; consistent with prior derivation.\"}]}"
 }

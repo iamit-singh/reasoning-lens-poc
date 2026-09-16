@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 130,
+  "finish_reason": "stop",
+  "latency_ms": 3061,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 380,
+  "reasoning_tokens": 64,
+  "request_digest": "eb97dbea2831692a",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\"],\"rationale\":\"Both steps explicitly state the answer 'K' (step [1] says 'Need answer: K.' and step [2] says 'K'), which supports the final answer.\"}"
+}

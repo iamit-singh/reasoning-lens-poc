@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 287,
+  "completion_tokens": 280,
   "finish_reason": "stop",
-  "latency_ms": 5225,
+  "latency_ms": 5053,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 828,
+  "prompt_tokens": 1088,
   "reasoning_tokens": 64,
-  "request_digest": "a7b5a4803086e3f8",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-13-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.90,\n      \"error_type\": null,\n      \"rationale\": \"Correct forward-rate reasoning: each printer prints 1 poster in 7 min, so 21 printers produce 3 posters/min, yielding 7 min for 21 posters.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-13-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.82,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Final answer repeats the derived result (7 minutes); consistent with prior correct computation.\"\n    }\n  ]\n}"
+  "request_digest": "379a10fa0582be44",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-13-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Forward-rate reasoning: each printer makes 1 poster in 7 min, so 21 printers make 3 posters/min and 21 posters in 7 min.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-13-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restates derived result: 7 minutes.\"\n    }\n  ]\n}"
 }

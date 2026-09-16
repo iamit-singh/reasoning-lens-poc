@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 66,
+  "finish_reason": "stop",
+  "latency_ms": 2386,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 738,
+  "reasoning_tokens": 0,
+  "request_digest": "d0548446223eb77f",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\",\"3\"],\"rationale\":\"Steps 1 and 2 establish each printer prints 1 poster in 7 minutes, and step 3 applies that to 21 printers to conclude 7 minutes.\"}"
+}

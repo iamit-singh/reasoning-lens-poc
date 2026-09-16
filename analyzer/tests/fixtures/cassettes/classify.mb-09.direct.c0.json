@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 636,
+  "completion_tokens": 516,
   "finish_reason": "stop",
-  "latency_ms": 7714,
+  "latency_ms": 7122,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1018,
-  "reasoning_tokens": 320,
+  "reasoning_tokens": 192,
   "request_digest": "ab292eb7d3ec8cc1",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"States the information needed and considers possible referents; sets the intermediate objective of finding the founding year.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"unverifiable\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": null,\n      \"rationale\": \"Makes an unsupported speculative claim about location and a tentative founding year without deriving or citing evidence.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Presents a definitive founding year (2005) despite no provided evidence or derivation from prior steps.\"\n    }\n  ]\n}"
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.82,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Sets the goal then makes an unsupported guess of 2005 without evidence; no lookup or derivation provided.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.78,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Expresses uncertainty but repeats the 2005 guess as if more confident; still no evidence or verification.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-09-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.8,\n      \"error_type\": \"unsupported_leap\",\n      \"rationale\": \"Final answer asserts founding year 2005 without citing any source or checking facts; claim is unsupported.\"\n    }\n  ]\n}"
 }

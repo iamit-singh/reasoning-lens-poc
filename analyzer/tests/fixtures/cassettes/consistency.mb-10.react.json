@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 118,
+  "finish_reason": "stop",
+  "latency_ms": 3426,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 510,
+  "reasoning_tokens": 64,
+  "request_digest": "d8a772908e4a9780",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"3\"],\"rationale\":\"Step 3 returns 'metallurgy, hydrology, cartography', which directly supports the final answer listing those three departments.\"}"
+}

@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 423,
+  "completion_tokens": 353,
   "finish_reason": "stop",
-  "latency_ms": 5751,
+  "latency_ms": 5852,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 908,
-  "reasoning_tokens": 256,
+  "reasoning_tokens": 192,
   "request_digest": "4e58119576c0fdfd",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-01-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"unverifiable\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the needed answer 'K' without derivation or checking; claim cannot be verified from prior context.\"},{\"step_id\":\"direct:direct-mb-01-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Repeats the answer 'K', which follows directly from the prior step's claim (a straightforward restatement).\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-01-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.90,\"verdict\":\"sound\",\"validity_confidence\":0.90,\"error_type\":null,\"rationale\":\"States the intended answer (K) as the needed result; a forward declaration rather than a check or subgoal.\"},{\"step_id\":\"direct:direct-mb-01-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.90,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Outputs the chemical symbol 'K' for potassium directly; a straightforward final answer.\"}]}"
 }

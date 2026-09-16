@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 139,
+  "finish_reason": "stop",
+  "latency_ms": 4168,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 471,
+  "reasoning_tokens": 64,
+  "request_digest": "114ab61a7ddb9748",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] shows that going back one day halves the area: day 48 = whole, day 47 = 1/2, day 46 = 1/4, which supports the final answer Day 46.\"}"
+}

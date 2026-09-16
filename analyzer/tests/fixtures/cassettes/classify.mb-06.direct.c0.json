@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 518,
+  "completion_tokens": 452,
   "finish_reason": "stop",
-  "latency_ms": 7752,
+  "latency_ms": 6183,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1151,
   "reasoning_tokens": 192,
   "request_digest": "b0b5684b0ff29cac",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-06-root-llm-0:0\",\n      \"behavior\": \"backtracking\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"unsound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": \"arithmetic\",\n      \"rationale\": \"Starts a numeric calculation then abandons and shows confused/incorrect intermediate arithmetic (394800-14805 miscomputed).\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-06-root-llm-0:1\",\n      \"behavior\": \"verification\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Recomputes the product correctly (987*385=379995) and converts to 379.995 kW, then floors to 379 kW.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-06-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States the final rounded-down answer (379 kW), directly following the verified computation.\"\n    }\n  ]\n}"
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-06-root-llm-0:0\",\"behavior\":\"backtracking\",\"behavior_confidence\":0.92,\"verdict\":\"unsound\",\"validity_confidence\":0.9,\"error_type\":\"arithmetic\",\"rationale\":\"Initial arithmetic is confused and self-corrected mid-step; intermediate subtraction results are wrong, so the step is unsound.\"},{\"step_id\":\"direct:direct-mb-06-root-llm-0:1\",\"behavior\":\"verification\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Recomputes total precisely (987*385=379995) then converts to 379.995 kW and rounds down to 379 kW; calculations are correct.\"},{\"step_id\":\"direct:direct-mb-06-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.85,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Final answer restates the computed result from previous step (379 kW); follows directly and is consistent.\"}]}"
 }

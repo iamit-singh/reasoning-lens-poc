@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 292,
+  "completion_tokens": 227,
   "finish_reason": "stop",
-  "latency_ms": 7799,
+  "latency_ms": 4156,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 926,
-  "reasoning_tokens": 128,
+  "reasoning_tokens": 64,
   "request_digest": "372938a7fbfedea7",
-  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-01-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Identifies the question and states the chemical symbol for potassium is 'K', a direct factual conclusion.\"},{\"step_id\":\"react:react-mb-01-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Outputs the chemical symbol 'K' as the answer to the question; correct and directly follows step 1.\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-01-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the question and the correct symbol 'K' is known; notes no tool needed. This is a straightforward forward observation.\"},{\"step_id\":\"react:react-mb-01-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.95,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Provides the chemical symbol 'K' for potassium, which correctly answers the question.\"}]}"
 }

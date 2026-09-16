@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 419,
+  "completion_tokens": 305,
   "finish_reason": "stop",
-  "latency_ms": 5727,
+  "latency_ms": 4507,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1067,
-  "reasoning_tokens": 192,
+  "reasoning_tokens": 128,
   "request_digest": "0c27ae747cc7a36d",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-06-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Forward arithmetic: 47*21=987; 987*385=379,995 W \u2192 379.995 kW, floor = 379 kW. Calculations are correct.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-06-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Restates the computed result (379 kW); consistent with prior correct computation.\"\n    }\n  ]\n}"
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-06-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Forward arithmetic: 47\u00b721=987, 987\u00b7385=379,995 W = 379.995 kW, floor \u2192 379 kW. Computations check out.\"},{\"step_id\":\"react:react-mb-06-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.82,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Final answer restates computed result (379 kW); consistent with prior step.\"}]}"
 }

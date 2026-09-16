@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 127,
+  "finish_reason": "stop",
+  "latency_ms": 2764,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 653,
+  "reasoning_tokens": 64,
+  "request_digest": "6d0a755b39818526",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] shows the computation I = 12500*0.074*3.5 = 3,237.50, which matches the FINAL ANSWER.\"}"
+}

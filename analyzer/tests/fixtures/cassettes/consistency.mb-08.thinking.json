@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 131,
+  "finish_reason": "stop",
+  "latency_ms": 2930,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 7143,
+  "reasoning_tokens": 64,
+  "request_digest": "f6640c16bf72742b",
+  "text": "{\"verdict\":\"underdetermined\",\"cited_step_ids\":[\"1\",\"15\"],\"rationale\":\"Step [1] only restates the task and step [15] offers hypotheses but no final populations or numeric difference are given, so the steps do not support a final answer.\"}"
+}

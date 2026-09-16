@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 350,
+  "completion_tokens": 418,
   "finish_reason": "stop",
-  "latency_ms": 5437,
+  "latency_ms": 6249,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 704,
-  "reasoning_tokens": 128,
-  "request_digest": "eb3d38dcfadf39d6",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Computed per-printer rate (1 poster per 7 min) and scaled to 21 printers producing 21 posters in same time; reasoning is correct.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restates the derived result (7 minutes); consistent with prior correct rate-based reasoning.\"\n    }\n  ]\n}"
+  "prompt_tokens": 964,
+  "reasoning_tokens": 192,
+  "request_digest": "4bfa0cc74ae7bf26",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.94,\n      \"error_type\": null,\n      \"rationale\": \"Computed per-printer rate: 7 printers -> 7 posters in 7 min implies 1 printer -> 1 poster in 7 min, so scaling to 21 printers gives same time.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-13-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restates result derived in previous step: 7 minutes.\"\n    }\n  ]\n}"
 }

@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 64,
+  "finish_reason": "stop",
+  "latency_ms": 2566,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 443,
+  "reasoning_tokens": 0,
+  "request_digest": "1a37855f3f2d8b9c",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] solves 2x+2=2.6 -> x=0.3, which matches the final answer $0.30 given in step [2].\"}"
+}

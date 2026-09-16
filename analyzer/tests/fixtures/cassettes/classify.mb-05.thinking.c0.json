@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 447,
+  "completion_tokens": 439,
   "finish_reason": "stop",
-  "latency_ms": 8155,
+  "latency_ms": 5650,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1060,
   "reasoning_tokens": 128,
   "request_digest": "8d0183e200ace5f9",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Computed total books: 3*14*32. 14*32=448 and 3*448=1344 \u2014 arithmetic is correct.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Subtracted 118 from 1344 yielding 1226; arithmetic is correct and follows from prior step.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Restates the computed result 1226 as the final answer; consistent with previous computation.\"\n    }\n  ]\n}"
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"Correct forward calculation: 14*32=448, then 3*448=1344; arithmetic is correct.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Subtracts checked-out books: 1344-118=1226; arithmetic and inference are correct.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-05-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States final numeric answer derived in previous step: 1226 books on the shelves.\"\n    }\n  ]\n}"
 }

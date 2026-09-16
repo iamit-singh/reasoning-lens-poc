@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 268,
+  "completion_tokens": 218,
   "finish_reason": "stop",
-  "latency_ms": 5777,
+  "latency_ms": 3936,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 910,
   "reasoning_tokens": 64,
   "request_digest": "f841f48ce08af5d7",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-02-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"States the computed product 17 * 4 = 68; a forward assertion matching correct multiplication.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-02-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Outputs the final answer 68, repeating the computed result.\"\n    }\n  ]\n}"
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-02-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.92,\"error_type\":null,\"rationale\":\"Direct forward claim that 17\u00d74 equals 68, which is correct arithmetic.\"},{\"step_id\":\"direct:direct-mb-02-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Final answer restates the computed product 68, matching the correct result.\"}]}"
 }

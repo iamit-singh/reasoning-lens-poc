@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 63,
+  "finish_reason": "stop",
+  "latency_ms": 4198,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 495,
+  "reasoning_tokens": 0,
+  "request_digest": "b52252b8e9b9acb6",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"3\"],\"rationale\":\"Step [3] from the lookup tool returned '1887', and steps [4]\u2013[5] restate that value, so the steps support the final answer.\"}"
+}

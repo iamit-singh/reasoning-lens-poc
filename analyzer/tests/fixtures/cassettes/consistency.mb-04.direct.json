@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 129,
+  "finish_reason": "stop",
+  "latency_ms": 2826,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 408,
+  "reasoning_tokens": 64,
+  "request_digest": "3603f9f0a9be4b1c",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] computes 15% of 40 = 6 and subtracts it from 40 to get sale price 34, which directly supports the final answer 34.\"}"
+}

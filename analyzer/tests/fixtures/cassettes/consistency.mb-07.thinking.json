@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 151,
+  "finish_reason": "stop",
+  "latency_ms": 2660,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 795,
+  "reasoning_tokens": 64,
+  "request_digest": "fb1dbb01b4cffca2",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[],\"rationale\":\"Steps [1]-[5] coherently compute I = 12500*0.074*3.5, show 12500*0.074 = 925 and 925*3.5 = 3237.5, which supports the final answer $3,237.50.\"}"
+}

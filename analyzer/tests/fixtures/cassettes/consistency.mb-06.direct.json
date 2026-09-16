@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 129,
+  "finish_reason": "stop",
+  "latency_ms": 2372,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 604,
+  "reasoning_tokens": 64,
+  "request_digest": "bf658505ecb058f0",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"2\"],\"rationale\":\"Step [2] computes total 987*385=379995 W \u2192 379.995 kW and states rounding down gives 379 kW, which supports the final answer.\"}"
+}

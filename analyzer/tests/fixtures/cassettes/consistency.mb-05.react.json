@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 128,
+  "finish_reason": "stop",
+  "latency_ms": 2966,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 516,
+  "reasoning_tokens": 64,
+  "request_digest": "fc79944137d346c0",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] computes 42 units, 42*32=1344 total books, then subtracts 118 to get 1226, which matches the final answer.\"}"
+}

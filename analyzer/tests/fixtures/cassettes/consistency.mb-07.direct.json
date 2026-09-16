@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 134,
+  "finish_reason": "stop",
+  "latency_ms": 3475,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 499,
+  "reasoning_tokens": 64,
+  "request_digest": "935f45958315acff",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] computes simple interest: 12500*0.074*3.5 = 3237.5, which matches the final answer $3,237.50 in Step [2].\"}"
+}

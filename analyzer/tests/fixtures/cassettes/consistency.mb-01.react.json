@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 123,
+  "finish_reason": "stop",
+  "latency_ms": 2642,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 398,
+  "reasoning_tokens": 64,
+  "request_digest": "328af108a154b8a9",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\"],\"rationale\":\"Step [1] states the answer is 'K' and step [2] gives 'K', so the steps together support the final answer.\"}"
+}

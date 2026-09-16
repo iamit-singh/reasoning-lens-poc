@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 294,
+  "completion_tokens": 285,
   "finish_reason": "stop",
-  "latency_ms": 5403,
+  "latency_ms": 5030,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 704,
-  "reasoning_tokens": 128,
-  "request_digest": "98d65ac6720eb890",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-14-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Doubling backward: whole on day 48 implies half on 47 and quarter on 46; direct forward derivation is correct.\"},{\"step_id\":\"direct:direct-mb-14-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Final answer restates the derived result (day 46), consistent with prior step.\"}]}"
+  "prompt_tokens": 964,
+  "reasoning_tokens": 64,
+  "request_digest": "c7678f72211140d1",
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"direct:direct-mb-14-root-llm-0:0\",\n      \"behavior\": \"backward_chaining\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Work backward from full pond on day 48: doubling each day implies day 47 half, day 46 quarter, so day 46 is correct.\"\n    },\n    {\n      \"step_id\": \"direct:direct-mb-14-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Final answer restating the result: 46, consistent with prior reasoning.\"\n    }\n  ]\n}"
 }

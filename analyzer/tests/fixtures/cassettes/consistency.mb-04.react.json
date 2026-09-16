@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 125,
+  "finish_reason": "stop",
+  "latency_ms": 2471,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 426,
+  "reasoning_tokens": 64,
+  "request_digest": "6eeffe4e70717797",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] shows the computation 40*(1-0.15)=40*0.85=34, which directly supports the final answer $34.\"}"
+}

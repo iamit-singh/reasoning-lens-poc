@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 134,
+  "finish_reason": "stop",
+  "latency_ms": 3093,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 446,
+  "reasoning_tokens": 64,
+  "request_digest": "d9814eab123f9524",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] shows subtracting 2*1.5 from each dimension to get 15 and 21 and computes area 15*21=315, which directly supports the final answer 315.\"}"
+}

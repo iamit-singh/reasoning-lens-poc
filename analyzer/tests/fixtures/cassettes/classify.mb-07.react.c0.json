@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 315,
+  "completion_tokens": 233,
   "finish_reason": "stop",
-  "latency_ms": 4347,
+  "latency_ms": 5426,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1181,
-  "reasoning_tokens": 128,
+  "reasoning_tokens": 64,
   "request_digest": "2d33b5a035af18b4",
-  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-07-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Applies I=Prt with P=12500, r=0.074, t=3.5; multiplies correctly to get 925 per year and 925*3.5=3237.5.\"},{\"step_id\":\"react:react-mb-07-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.88,\"error_type\":null,\"rationale\":\"Restates the computed total interest $3,237.50, matching the prior correct calculation.\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-07-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.92,\"verdict\":\"sound\",\"validity_confidence\":0.95,\"error_type\":null,\"rationale\":\"Applies simple interest formula I=Prt, converts percent and time correctly, and computes arithmetic yielding $3,237.50.\"},{\"step_id\":\"react:react-mb-07-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Restates the computed result $3,237.50 from the previous step as the final answer.\"}]}"
 }

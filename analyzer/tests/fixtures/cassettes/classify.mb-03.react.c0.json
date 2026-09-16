@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 270,
+  "completion_tokens": 331,
   "finish_reason": "stop",
-  "latency_ms": 4794,
+  "latency_ms": 4719,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 942,
-  "reasoning_tokens": 64,
+  "reasoning_tokens": 128,
   "request_digest": "1d5bfc2d12830bae",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-03-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.94,\n      \"error_type\": null,\n      \"rationale\": \"States the question and gives the standard RGB primary colours; forward assertion matching common knowledge.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.95,\n      \"error_type\": null,\n      \"rationale\": \"Provides the final answer repeating the three additive primary colours: Red, Green, Blue.\"\n    }\n  ]\n}"
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-03-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"States the question and gives the three additive primary colours (Red, Green, Blue).\"\n    },\n    {\n      \"step_id\": \"react:react-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Provides the final answer restating Red, Green, and Blue.\"\n    }\n  ]\n}"
 }

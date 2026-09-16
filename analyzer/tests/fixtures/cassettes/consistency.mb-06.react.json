@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 196,
+  "finish_reason": "stop",
+  "latency_ms": 3512,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 539,
+  "reasoning_tokens": 128,
+  "request_digest": "d9616d0041e57e49",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] computes 987 servers \u00d7 385 W = 379,995 W \u2192 379.995 kW and floors to 379 kW, which matches the final answer.\\\"}\"}"
+}

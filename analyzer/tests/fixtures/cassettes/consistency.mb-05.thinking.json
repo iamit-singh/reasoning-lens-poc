@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 126,
+  "finish_reason": "stop",
+  "latency_ms": 2596,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 513,
+  "reasoning_tokens": 64,
+  "request_digest": "c14e20324c734f4e",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[],\"rationale\":\"Steps [1] and [2] compute total books 3*14*32=1344 then subtract 118 to get 1226, which matches the final answer.\"}"
+}

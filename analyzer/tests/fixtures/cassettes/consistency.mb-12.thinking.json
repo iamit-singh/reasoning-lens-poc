@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 140,
+  "finish_reason": "stop",
+  "latency_ms": 3320,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 527,
+  "reasoning_tokens": 64,
+  "request_digest": "b8a2db8a8b18af61",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[],\"rationale\":\"Steps [1]\u2013[2] define n=p+2 and solve p+(p+2)=2.60 to get 2p=0.60 and p=0.30, which supports the final answer $0.30.\"}"
+}

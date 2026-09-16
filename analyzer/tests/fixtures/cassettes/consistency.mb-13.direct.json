@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 128,
+  "finish_reason": "stop",
+  "latency_ms": 3082,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 436,
+  "reasoning_tokens": 64,
+  "request_digest": "2ca7da5c9a88e66d",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\"],\"rationale\":\"Step [1] infers each printer makes 1 poster in 7 min, so 21 printers make 21 posters in 7 min, which supports the final answer.\"}"
+}

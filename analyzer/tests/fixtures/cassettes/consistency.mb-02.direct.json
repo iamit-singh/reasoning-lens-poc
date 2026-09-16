@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 52,
+  "finish_reason": "stop",
+  "latency_ms": 1795,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 382,
+  "reasoning_tokens": 0,
+  "request_digest": "e91bda4f22528ee1",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"1\",\"2\"],\"rationale\":\"Steps [1] and [2] explicitly state the answer as 68, which matches the final answer.\"}"
+}

@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 356,
+  "completion_tokens": 302,
   "finish_reason": "stop",
-  "latency_ms": 5606,
+  "latency_ms": 4969,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1044,
   "reasoning_tokens": 128,
   "request_digest": "fdada9ae1d55986e",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"react:react-mb-05-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Computed total units (3*14=42), total capacity (42*32=1344), then subtracted checked-out books (1344-118=1226). Arithmetic is correct.\"\n    },\n    {\n      \"step_id\": \"react:react-mb-05-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.85,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Restates the computed result from the previous step: 1226 books on shelves.\"\n    }\n  ]\n}"
+  "text": "{\"steps\":[{\"step_id\":\"react:react-mb-05-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Calculated 3*14=42 units, 42*32=1344 books capacity, then 1344-118=1226; arithmetic and reasoning are correct.\"},{\"step_id\":\"react:react-mb-05-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.8,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Restates the computed result 1226, which follows from the previous correct calculation.\"}]}"
 }

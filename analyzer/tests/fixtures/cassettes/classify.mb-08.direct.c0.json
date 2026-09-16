@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 454,
+  "completion_tokens": 436,
   "finish_reason": "stop",
-  "latency_ms": 8846,
+  "latency_ms": 6108,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 1079,
   "reasoning_tokens": 192,
   "request_digest": "879e3899daeb46a5",
-  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-08-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unverifiable\",\"validity_confidence\":0.78,\"error_type\":null,\"rationale\":\"States a needed datum and proposes a 2020-census figure without citing source; claim cannot be checked from prior steps.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unverifiable\",\"validity_confidence\":0.78,\"error_type\":null,\"rationale\":\"Makes numerical estimates (Fairhaven 12,000; Brightwater 1,200) without support or derivation from prior steps or sources.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.85,\"error_type\":null,\"rationale\":\"Computes difference 12,000\u22121,200=10,800 correctly from the previously stated numbers; arithmetic follows given those values.\"}]}"
+  "text": "{\"steps\":[{\"step_id\":\"direct:direct-mb-08-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unverifiable\",\"validity_confidence\":0.82,\"error_type\":null,\"rationale\":\"Asserts 2020 census value without derivation or source; reader cannot check from prior steps.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unsound\",\"validity_confidence\":0.86,\"error_type\":\"unsupported_leap\",\"rationale\":\"Chooses population figures by assumption (no sourcing); inference to difference is based on unsupported data.\"},{\"step_id\":\"direct:direct-mb-08-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.88,\"verdict\":\"unsound\",\"validity_confidence\":0.86,\"error_type\":\"unsupported_leap\",\"rationale\":\"Final numeric claim relies on unstated assumptions about both populations; arithmetic is correct but data sourcing is missing.\"}]}"
 }

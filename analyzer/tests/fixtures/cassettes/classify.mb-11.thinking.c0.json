@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 520,
+  "completion_tokens": 432,
   "finish_reason": "stop",
-  "latency_ms": 15900,
+  "latency_ms": 7269,
   "model": "gpt-5-mini-2025-08-07",
-  "prompt_tokens": 883,
+  "prompt_tokens": 1143,
   "reasoning_tokens": 128,
-  "request_digest": "9ffd373d84a7ce10",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:0\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.86,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Restates given dimensions and path presence; no inference made.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.84,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.87,\n      \"error_type\": null,\n      \"rationale\": \"Correctly notes path reduces each dimension by twice the width (inside both sides).\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:2\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Arithmetic: 18-3=15, 24-3=21, area 15*21=315 \u2014 all correct.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-11-root-llm-0:3\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.8,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.85,\n      \"error_type\": null,\n      \"rationale\": \"Outputs computed result 315, matching prior calculation.\"\n    }\n  ]\n}"
+  "request_digest": "ef280cbd170d2d82",
+  "text": "{\"steps\":[{\"step_id\":\"thinking:thinking-mb-11-root-llm-0:0\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Restates given measurements and path location; no inference beyond the problem statement.\"},{\"step_id\":\"thinking:thinking-mb-11-root-llm-0:1\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Correctly notes path reduces each dimension by twice the path width (one on each side).\"},{\"step_id\":\"thinking:thinking-mb-11-root-llm-0:2\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"Performs arithmetic: 18-3=15, 24-3=21, area 15*21=315; calculations are correct.\"},{\"step_id\":\"thinking:thinking-mb-11-root-llm-0:3\",\"behavior\":\"linear\",\"behavior_confidence\":0.9,\"verdict\":\"sound\",\"validity_confidence\":0.9,\"error_type\":null,\"rationale\":\"States the computed final answer, matching prior correct calculation.\"}]}"
 }

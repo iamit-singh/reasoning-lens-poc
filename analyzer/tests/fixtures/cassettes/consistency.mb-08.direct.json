@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 126,
+  "finish_reason": "stop",
+  "latency_ms": 2574,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 532,
+  "reasoning_tokens": 64,
+  "request_digest": "7eab7e8a6e03394e",
+  "text": "{\"verdict\":\"entails\",\"cited_step_ids\":[\"3\"],\"rationale\":\"Step [3] states Fairhaven ~12,000 and Brightwater ~1,200, yielding a difference of ~10,800, which matches the final answer.\"}"
+}

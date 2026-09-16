@@ -1,12 +1,12 @@
 {
   "attempts": 1,
   "backend": "hybrid",
-  "completion_tokens": 343,
+  "completion_tokens": 341,
   "finish_reason": "stop",
-  "latency_ms": 6310,
+  "latency_ms": 4748,
   "model": "gpt-5-mini-2025-08-07",
   "prompt_tokens": 957,
   "reasoning_tokens": 128,
   "request_digest": "78e58b2586ea8b0d",
-  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.88,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.92,\n      \"error_type\": null,\n      \"rationale\": \"States the task and the intended simple response (list the RGB primaries); this is setting the immediate objective.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.95,\n      \"error_type\": null,\n      \"rationale\": \"Provides the direct answer (Red, Green, Blue); a straightforward forward response from the prompt.\"\n    }\n  ]\n}"
+  "text": "{\n  \"steps\": [\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:0\",\n      \"behavior\": \"subgoal_setting\",\n      \"behavior_confidence\": 0.92,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.9,\n      \"error_type\": null,\n      \"rationale\": \"Identifies the task (name the three additive primary colours) and states the intended short answer to provide.\"\n    },\n    {\n      \"step_id\": \"thinking:thinking-mb-03-root-llm-0:1\",\n      \"behavior\": \"linear\",\n      \"behavior_confidence\": 0.9,\n      \"verdict\": \"sound\",\n      \"validity_confidence\": 0.88,\n      \"error_type\": null,\n      \"rationale\": \"Gives the direct answer: Red, Green, and Blue; a straightforward forward response.\"\n    }\n  ]\n}"
 }

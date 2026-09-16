@@ -1,0 +1,12 @@
+{
+  "attempts": 1,
+  "backend": "hybrid",
+  "completion_tokens": 52,
+  "finish_reason": "stop",
+  "latency_ms": 1842,
+  "model": "gpt-5-mini-2025-08-07",
+  "prompt_tokens": 390,
+  "reasoning_tokens": 0,
+  "request_digest": "fd10a418cc311310",
+  "text": "{\"verdict\": \"entails\", \"cited_step_ids\": [\"2\"], \"rationale\": \"Step [2] explicitly states 'Red, Green, Blue', which matches the final answer exactly.\"}"
+}
