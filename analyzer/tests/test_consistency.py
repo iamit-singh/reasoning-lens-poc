@@ -219,3 +219,69 @@ def test_the_rendered_prompt_substitutes_everything() -> None:
 def test_a_fenced_response_is_tolerated() -> None:
     body = json.dumps(_payload())
     assert C._extract_json(f"```json\n{body}\n```")["verdict"] == "entails"
+
+
+# ------------------------------------------------------- M2-8: the pipeline call site
+def test_the_pipeline_leaves_consistency_null_while_the_flag_is_off(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """**"We did not ask" must never render as "it is fine".**
+
+    The checker existed for a week with the pipeline hardcoding `"consistency": None`, so
+    turning the flag on changed nothing. Now the call site is real, which makes the
+    OFF path worth pinning too: with the flag off no model is called AND the field is
+    null -- not `entails`, which is a verdict nothing reached.
+    """
+    from rlens import pipeline
+
+    def boom(*a: Any, **k: Any) -> Any:
+        raise AssertionError("no model call may happen while CONSISTENCY_ENABLED is off")
+
+    monkeypatch.delenv("CONSISTENCY_ENABLED", raising=False)
+    monkeypatch.setattr(C, "analyze", boom)
+    assert pipeline._consistency(_trace(), {"prompt": "p"}) is None
+
+
+def test_the_pipeline_runs_the_check_once_the_flag_is_on(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The converse, so the test above cannot pass by the wiring being absent again."""
+    from rlens import pipeline
+
+    monkeypatch.setenv("CONSISTENCY_ENABLED", "1")
+    monkeypatch.setattr(
+        C,
+        "analyze",
+        lambda *a, **k: type(
+            "R",
+            (),
+            {"text": json.dumps(_payload(verdict="contradicts", cited_step_ids=["thinking:s:1"]))},
+        )(),
+    )
+    # **Through `build_arm`, not through the helper.** Asserting on `_consistency` alone
+    # still passes when the arm builder is hardcoded back to `"consistency": None` -- which
+    # is the exact state this task found the code in, so it is the state the test must fail
+    # in. Verified by re-introducing that line and watching this fail.
+    arm = pipeline.build_arm(_trace(), None, item={"id": "mb-01", "prompt": "p"})
+    assert arm["consistency"] is not None
+    assert arm["consistency"]["verdict"] == "contradicts"
+
+
+def test_a_failed_consistency_call_does_not_take_the_arm_down_with_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The verdict is an addition to the report, not a precondition for it.
+
+    An arm whose 25 steps classified perfectly should not be discarded because one extra
+    call timed out -- the steps are the measurement, this is commentary on them.
+    """
+    from rlens import pipeline
+    from rlens.llm import ProviderError
+
+    monkeypatch.setenv("CONSISTENCY_ENABLED", "1")
+
+    def failing(*a: Any, **k: Any) -> Any:
+        raise ProviderError("upstream 503")
+
+    monkeypatch.setattr(C, "analyze", failing)
+    assert pipeline._consistency(_trace(), {"prompt": "p"}) is None

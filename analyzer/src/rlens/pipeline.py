@@ -33,6 +33,7 @@ import json
 import pathlib
 from typing import Any
 
+from rlens import consistency as consistency_mod
 from rlens.checkers import CheckerError, check
 from rlens.classify import ClassificationResult, classify
 from rlens.contracts import NormalizedTrace, StepRow
@@ -113,6 +114,24 @@ def _soundness_score(rows: tuple[StepRow, ...]) -> float | None:
     return round(sum(1 for r in rows if r.verdict == "sound") / len(rows), 4)
 
 
+def _consistency(trace: NormalizedTrace, item: dict[str, Any]) -> dict[str, Any] | None:
+    """Run C4.5's whole-trace check, if M2-8 has turned it on.
+
+    **Gated on `CONSISTENCY_ENABLED` rather than always-on**, because C4.5's DoD is a
+    *measured* false-positive rate on the known-good set: shipping the check before that
+    number exists puts an unvalidated warning in front of a reviewer, which is the failure
+    B10 is about. The module owns the flag; this is just the call site.
+
+    A provider failure returns None and does not fail the arm. The consistency verdict is
+    an addition to the report, not a precondition for it -- an arm whose steps classified
+    perfectly should not be thrown away because one extra call timed out.
+    """
+    if not consistency_mod.enabled():
+        return None
+    result = consistency_mod.check(trace, item_prompt=item.get("prompt", ""))
+    return result.as_dict() if result else None
+
+
 def build_arm(
     trace: NormalizedTrace,
     classification: ClassificationResult | None,
@@ -172,8 +191,10 @@ def build_arm(
         "final_answer": trace.final_answer,
         "correct": _correct(item, trace.final_answer),
         "steps": steps,
-        # M2-8 builds the consistency checker. Null, not a cheerful `entails`.
-        "consistency": None,
+        # M2-8. **Null, not a cheerful `entails`** -- and null whenever the check did not
+        # run, which is the flag being off, a one-step trace, or a failed call. C3.3 types
+        # this nullable precisely so "we did not ask" never renders as "it is fine".
+        "consistency": _consistency(trace, item),
         "metrics": {
             "output_tokens": usage.output_tokens or None,
             "reasoning_tokens": usage.reasoning_tokens,
