@@ -49,6 +49,23 @@ GIVEN ONLY the preceding steps.
                   cannot check without outside knowledge
 <!-- END TAXONOMY -->
 
+LABEL THE MOVE, NOT THE VOCABULARY. A cue phrase is not the behaviour it hints at. The
+words "let's check", "let me verify", "let's think", "let's search" and similar openers
+make a step `verification` ONLY IF the step then actually re-derives, recomputes,
+substitutes back, or compares against a result already established. A step that announces
+a check and then repeats an earlier claim without re-deriving it is `linear` — nothing was
+checked, the figure was merely said again.
+
+Apply this to your own reasoning: if the `rationale` you are about to write for a step
+says that nothing was added, checked or re-derived, then the behavior label is not
+`verification`.
+
+`linear` IS THE RESIDUAL, NOT A JUDGEMENT OF QUALITY. Most steps are `linear`, and a long
+run of `linear` steps is not a criticism of the trace. Choose one of the other four only
+when the step's own content demonstrates that move — not because a phrase hints at it, and
+not to vary the output. Labelling a step `linear` is the correct answer whenever none of
+the other four fit.
+
 Do NOT consider whether the final answer is correct. You are not told whether it is.
 
 ERROR TYPE  When `verdict` is `unsound`, name the defect with exactly one of:

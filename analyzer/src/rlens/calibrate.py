@@ -434,6 +434,40 @@ def _render(results: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def coverage(*, include_heldout: bool) -> dict[str, Any]:
+    """Which labelled steps have no classifier prediction, without scoring anything.
+
+    **M2-17's missing pre-flight.** The `--final` read happens once, and it now refuses if
+    any labelled step is unmatched -- correct, but it tells you at the worst possible
+    moment. This is the same question asked in advance and for free.
+
+    `include_heldout=True` reads the held-out *step ids* to check presence. That is not the
+    C5.4 read: nothing here joins a human label to a classifier label or computes any
+    statistic. The held-out guard protects the labels from being **scored** against the
+    classifier before the freeze, and asking "did the pipeline emit a prediction for this
+    step id" touches neither the label's value nor the prediction's.
+
+    This exists because `mb-09:thinking` -- which carries **10 of the 50 held-out steps** --
+    fails intermittently with `classifier_parse_failure` (26 rows returned for 25 steps,
+    surviving the repair retry), and a failed chunk nulls every label in the arm while the
+    arm's `status` stays `"ok"`.
+    """
+    labels = load_labels(include_heldout=include_heldout)
+    predictions = load_predictions()
+    missing = unmatched(labels, predictions, "behavior_label", "behavior")
+    by_trace: dict[str, int] = defaultdict(int)
+    for row in labels:
+        if row["step_id"] in set(missing):
+            by_trace[f"{row.get('item_id', '?')}:{row.get('strategy', '?')}"] += 1
+    return {
+        "labels": len(labels),
+        "unmatched": len(missing),
+        "unmatched_step_ids": sorted(missing),
+        "by_trace": dict(by_trace),
+        "ready": not missing,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="rlens-calibrate", description=__doc__)
     ap.add_argument("--final", action="store_true", help="read the held-out 50 (C5.4 guarded)")
@@ -444,6 +478,11 @@ def main(argv: list[str] | None = None) -> int:
         help="also compute B4 #1 on the double-labelled held-out steps (human vs human only)",
     )
     ap.add_argument("--json", action="store_true", help="print the results instead of a summary")
+    ap.add_argument(
+        "--coverage",
+        action="store_true",
+        help="pre-flight: does every labelled step have a prediction? scores nothing",
+    )
     ap.add_argument("--out", default=str(RESULTS_DIR / "latest.json"))
     args = ap.parse_args(sys.argv[1:] if argv is None else argv)
 
@@ -455,6 +494,24 @@ def main(argv: list[str] | None = None) -> int:
             "'opened once' is a count somebody has to be able to audit afterwards.\n"
         )
         return 2
+
+    if args.coverage:
+        report = coverage(include_heldout=args.final)
+        scope = "dev + held-out" if args.final else "dev"
+        print(f"\ncoverage · {scope} · bundle {PROMPT_BUNDLE_VERSION}")
+        print("=" * 78)
+        print(f"  {report['labels']} labelled steps, {report['unmatched']} with no prediction")
+        for trace, n in sorted(report["by_trace"].items()):
+            print(f"    {trace:<24} {n} unmatched")
+        if report["ready"]:
+            print("  READY -- every labelled step carries a prediction.")
+            return 0
+        print(
+            "  NOT READY. Re-run the corpus (`make report ARGS=--all`) and check again.\n"
+            "  A chunk that fails to parse nulls every label in its arm while the arm's\n"
+            "  status stays 'ok', so this is invisible in the report itself."
+        )
+        return 1
 
     if args.final:
         try:

@@ -477,3 +477,34 @@ def test_final_proceeds_when_every_labelled_step_has_a_prediction(workspace, tmp
     written = json.loads(out.read_text())
     assert written["run"]["labels_unmatched_behavior"] == 0
     assert written["run"]["steps_joined_behavior"] == 4
+
+
+def test_coverage_preflight_names_the_trace_rather_than_just_a_count(workspace) -> None:
+    """M2-17's pre-flight. The `--final` refusal is correct and arrives too late to act on.
+
+    Grouping by trace is the whole value: "8 unmatched" sends you looking through 42
+    reports; "mb-09:thinking, 8 unmatched" is the one arm to re-run. That arm carries 10 of
+    the 50 held-out steps, and it fails intermittently on a parse error that survives the
+    repair retry.
+    """
+    labels, reports = workspace
+    ids = [f"thinking:t:{i}" for i in range(4)]
+    (labels / "amit.jsonl").write_text(
+        "".join(
+            json.dumps(_label(sid, "linear", item_id="mb-09", strategy="thinking")) + "\n"
+            for sid in ids
+        )
+    )
+    (reports / "mb-09.report.json").write_text(
+        json.dumps(_report_with_a_degraded_step(ids, ["linear"] * 4))
+    )
+
+    report = C.coverage(include_heldout=False)
+    assert report["ready"] is False
+    assert report["unmatched"] == 1
+    assert report["by_trace"] == {"mb-09:thinking": 1}
+
+    # And the converse, so "not ready" is not simply what it always says.
+    (reports / "mb-09.report.json").write_text(json.dumps(_report(ids, ["linear"] * 4)))
+    clean = C.coverage(include_heldout=False)
+    assert clean["ready"] is True and clean["by_trace"] == {}
