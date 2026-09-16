@@ -137,7 +137,10 @@ def main() -> int:
         "estimate": est.as_dict() if est is not None else None,
         "citation_downgrades_applied": downgrades,
         "target": "<= 0.05 (B4 #5) -- unresolvable below 20% at this n; read as 'zero'",
-        "meets_target_read_as_zero": flagged == 0,
+        # **Not `flagged == 0`.** With n == 0 that expression is True, and would publish
+        # "target met" for a run in which nothing was ever asked -- the exact substitution
+        # this project refuses everywhere else.
+        "meets_target_read_as_zero": bool(n) and flagged == 0,
         "traces": results,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -149,10 +152,21 @@ def main() -> int:
     print(f"  citation downgrades applied  {downgrades}")
     if skipped:
         print(f"  not checked        {skipped} (one-step trace, or the call failed)")
-    print(
-        f"  B4 #5              {'MET (zero)' if flagged == 0 else 'NOT MET'} "
-        f"-- at n={n} the smallest non-zero rate is {1 / n:.0%}"
-    )
+    if n == 0:
+        print(
+            "  B4 #5              NOT MEASURED -- every call returned None.\n"
+            "                     `check()` returns None on a <2-step trace or a failed\n"
+            "                     call. If MOCK_LLM=1 is set, there is no consistency\n"
+            "                     cassette to replay and every call fails silently: run\n"
+            "                     with MOCK_LLM=0. A zero here is NOT a pass -- 'we asked\n"
+            "                     and found nothing' and 'we never asked' are different\n"
+            "                     claims, and only the first is a measurement."
+        )
+    else:
+        print(
+            f"  B4 #5              {'MET (zero)' if flagged == 0 else 'NOT MET'} "
+            f"-- at n={n} the smallest non-zero rate is {1 / n:.0%}"
+        )
     print(f"  -> {OUT.relative_to(ROOT)}")
     return 0
 

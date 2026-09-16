@@ -180,23 +180,75 @@ def main() -> int:
     ap.add_argument(
         "--force", action="store_true", help="re-select; refuses once judge output exists"
     )
+    ap.add_argument(
+        "--adopt-seeded",
+        action="store_true",
+        help="record the pool M2-6 already mutated, validated against §4.4",
+    )
     args = ap.parse_args()
 
     judged = sorted(SEEDED.glob("SE-*.json")) + sorted((SEEDED / "reports").glob("*.json"))
-    if POOL.exists() and not args.force:
+    # `--adopt-seeded` is exempt from the "already exists" guard, and safely so: it does
+    # not CHOOSE anything. It reads the base traces out of the committed SE-*.json cases,
+    # so re-running it can correct a reporting field but cannot produce a different pool.
+    # The guard exists to stop re-SELECTION, and this path has nothing to select.
+    if POOL.exists() and not args.force and not args.adopt_seeded:
         print(
             f"a pool already exists at {POOL.relative_to(ROOT)} -- §4.4 says never "
             "re-select. Use --force only if no judge has run."
         )
         return 1
-    if POOL.exists() and args.force and judged:
+
+    # **The guard used to be on `--force` alone, and that was the wrong place.** The first
+    # write is the dangerous one here: M2-6 ran in W5, ahead of its slot, and chose its own
+    # five known-good traces to mutate. A *fresh* selection at this point is not "choosing
+    # the pool" -- it is choosing a DIFFERENT pool than the one the judge has already been
+    # scored against, which is exactly the swap rule 5 forbids, arriving through the door
+    # nobody was watching. (It happened: the fresh run picked 4 of 5 traces M2-6 never
+    # touched.) With seeded cases on disk the only honest pool is the one they were built
+    # from, so `--adopt-seeded` is required and plain selection is refused.
+    if judged and not args.adopt_seeded:
         print(
-            "REFUSING to re-select: judge output already exists under calibration/seeded/.\n"
-            "§4.4 rule 5 -- swapping a trace out of the pool because it drew flags converts\n"
-            "the false-flag rate from a measurement into a target.",
+            "REFUSING to select: judge output already exists under calibration/seeded/.\n"
+            "§4.4 rule 5 -- the pool is selected BEFORE any judge has run over it and never\n"
+            "re-selected, because swapping a trace out because it drew flags converts the\n"
+            "false-flag rate from a measurement into a target. M2-6 has already mutated and\n"
+            "scored five traces; the pool is those five.\n"
+            "Use --adopt-seeded to record them, validated against §4.4 with any deviation\n"
+            "stated.",
             file=sys.stderr,
         )
         return 2
+
+    if args.adopt_seeded:
+        bases = set()
+        for path in sorted(SEEDED.glob("SE-*.json")):
+            case = json.loads(path.read_text())
+            stem = pathlib.Path(case["base_span_path"]).stem  # e.g. "mb-07.thinking"
+            item, _, strategy = stem.partition(".")
+            bases.add(f"{item}:{strategy}")
+        # Score EVERY trace, not just the adopted ones: `_write_pool` reports how many
+        # traces were eligible and how many fell in the preferred band, and passing it
+        # unscored rows made both read 0 -- a deviation note claiming the band was empty
+        # when it has one member in it. A wrong number in the sentence explaining a
+        # deviation is worse than no sentence.
+        all_scored = []
+        for tr in _traces():
+            ok, why = _eligible(tr)
+            all_scored.append({**tr, "eligible": ok, "reason": why})
+        by_id = {t["trace_id"]: t for t in all_scored}
+        adopted, problems = [], []
+        for tid in sorted(bases):
+            t_ = by_id.get(tid)
+            if t_ is None:
+                problems.append(f"{tid}: no arm with steps in the corpus")
+                continue
+            ok, why = _eligible(t_)
+            if not ok:
+                problems.append(f"{tid}: {why}")
+            adopted.append(t_)
+        _write_pool(adopted, all_scored, adopted_from_seeded=True, problems=problems)
+        return 0 if not problems else 1
 
     traces = _traces()
     if not traces:
@@ -213,22 +265,71 @@ def main() -> int:
             file=sys.stderr,
         )
 
+    _write_pool(pool, scored, adopted_from_seeded=False, problems=[])
+    return 0
+
+
+def _write_pool(
+    pool: list[dict],
+    scored: list[dict],
+    *,
+    adopted_from_seeded: bool,
+    problems: list[str],
+) -> None:
+    """Write `pool.json`. Shared by both paths so they cannot describe the pool differently."""
+    band_lo, band_hi = PREFERRED_STEPS
+    in_band = [t["trace_id"] for t in pool if band_lo <= t["n_steps"] <= band_hi]
+    eligible_in_band = sum(
+        1 for t in scored if t.get("eligible") and band_lo <= t["n_steps"] <= band_hi
+    )
+    deviations = []
+    if len(in_band) < len(pool):
+        deviations.append(
+            f"RULE 2 NOT MET and it is not satisfiable on this corpus: only "
+            f"{eligible_in_band} eligible trace(s) fall in the {band_lo}-{band_hi} step band "
+            f"at all. The corpus is bimodal -- most traces are 2-6 steps, then 8, 18, 40 and "
+            f"141. Recorded rather than worked around: re-selecting for length would have "
+            f"nothing to select."
+        )
+    primaries = Counter(t["tags"][0] if t["tags"] else "untagged" for t in pool)
+    top, top_n = (primaries.most_common(1) or [("", 0)])[0]
+    if top_n > len(pool) / 2:
+        deviations.append(
+            f"RULE 3 PARTIAL: {top_n} of {len(pool)} traces share the primary tag "
+            f"'{top}'. Their full tag sets still differ; the false-flag rate is a property "
+            f"of a narrower slice of the corpus than rule 3 intends, and that is stated "
+            f"rather than corrected by swapping traces the judge has already scored."
+        )
+    if problems:
+        deviations.extend(problems)
+
     doc = {
         "_README": (
-            "M2-10a / §4.4. The five known-good traces, chosen BEFORE any judge ran over "
-            "them and never re-selected. `labeled_step_coverage` is the honest caveat: rule "
-            "1 is applied to SAMPLED steps, and M2-15 -- which would have labelled every "
-            "step of these five -- was dropped by amendment 002. M2-7 therefore publishes a "
-            "per-labeled-step false-flag rate with the conversion to per-trace stated."
+            "M2-10a / §4.4. The five known-good traces. `labeled_step_coverage` is the "
+            "honest caveat: rule 1 is applied to SAMPLED steps, and M2-15 -- which would "
+            "have labelled every step of these five -- was dropped by amendment 002, so "
+            "M2-7 publishes a per-labeled-step false-flag rate with the conversion to "
+            "per-trace stated rather than performed."
+        ),
+        "provenance": (
+            "ADOPTED from the traces M2-6 had already mutated and scored. M2-6 ran in W5, "
+            "ahead of its slot and ahead of this task, so the pool was chosen then -- by "
+            "M2-6's own selection -- and §4.4 rule 5 makes that choice final. A fresh "
+            "selection here would have picked a DIFFERENT five (it did, on the run that "
+            "caught this: 4 of its 5 were traces M2-6 never touched), which is the swap "
+            "rule 5 exists to forbid, arriving after the judge had already been scored."
+            if adopted_from_seeded
+            else "Selected fresh, before any judge had run over the corpus."
         ),
         "criterion": [
             "1. every human-labeled step is sound or unverifiable; a trace with no "
             "labeled step is NOT eligible",
             "2. prefer 8-15 steps",
-            "3. spread across tags -- coverage spent first, by ordering, not by rejection",
+            "3. spread across tags",
             "4. no trap items",
             "5. selected before any judge ran; never re-selected",
         ],
+        "deviations": deviations or ["none"],
         "selected": [t["trace_id"] for t in pool],
         "traces": [
             {
@@ -241,27 +342,25 @@ def main() -> int:
             }
             for t in pool
         ],
-        "tag_coverage": dict(Counter(t["tags"][0] if t["tags"] else "untagged" for t in pool)),
-        "rejected": [
-            {"trace_id": t["trace_id"], "reason": t["reason"], "n_steps": t["n_steps"]}
-            for t in scored
-            if not t["eligible"]
-        ],
-        "n_eligible": sum(1 for t in scored if t["eligible"]),
+        "tag_coverage": dict(primaries),
+        "n_eligible": sum(1 for t in scored if t.get("eligible")),
+        "n_eligible_in_the_preferred_band": eligible_in_band,
         "n_traces_considered": len(scored),
     }
     POOL.parent.mkdir(parents=True, exist_ok=True)
     POOL.write_text(json.dumps(doc, indent=2) + "\n")
 
-    print(f"selected {len(pool)} of {doc['n_eligible']} eligible ({len(scored)} traces considered)")
+    print(f"pool: {len(pool)} traces ({doc['n_eligible']} eligible of {len(scored)} considered)")
     for t in pool:
         print(
             f"  {t['trace_id']:<22} {t['n_steps']:>3} steps  "
             f"{t['n_labeled']:>2} labeled  {','.join(t['tags'])}"
         )
     print(f"  tag coverage: {doc['tag_coverage']}")
+    for d in deviations:
+        if d != "none":
+            print(f"  ! {d}")
     print(f"  -> {POOL.relative_to(ROOT)}")
-    return 0
 
 
 if __name__ == "__main__":

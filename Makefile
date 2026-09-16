@@ -77,7 +77,7 @@ select-pool:  ## M2-10a -- choose the 5 known-good traces (SS4.4). Refuses once 
 	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/select_pool.py $(ARGS)
 
 consistency-fp:  ## M2-8's DoD / B4 #5 -- consistency false flags on the known-good pool. COSTS SPEND
-	@set -a; [ -f .env ] && . ./.env; set +a; CONSISTENCY_ENABLED=1 $(BIN)/python scripts/consistency_fp.py $(ARGS)
+	@set -a; [ -f .env ] && . ./.env; set +a; CONSISTENCY_ENABLED=1 MOCK_LLM=0 $(BIN)/python scripts/consistency_fp.py $(ARGS)
 
 pooled-precision:  ## M2-7 / B4 #4 -- pooled precision + false-flag rate. Reads artefacts, calls nothing
 	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/pooled_precision.py $(ARGS)

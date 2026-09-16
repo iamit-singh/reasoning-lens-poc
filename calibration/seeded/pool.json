@@ -1,0 +1,87 @@
+{
+  "_README": "M2-10a / \u00a74.4. The five known-good traces. `labeled_step_coverage` is the honest caveat: rule 1 is applied to SAMPLED steps, and M2-15 -- which would have labelled every step of these five -- was dropped by amendment 002, so M2-7 publishes a per-labeled-step false-flag rate with the conversion to per-trace stated rather than performed.",
+  "provenance": "ADOPTED from the traces M2-6 had already mutated and scored. M2-6 ran in W5, ahead of its slot and ahead of this task, so the pool was chosen then -- by M2-6's own selection -- and \u00a74.4 rule 5 makes that choice final. A fresh selection here would have picked a DIFFERENT five (it did, on the run that caught this: 4 of its 5 were traces M2-6 never touched), which is the swap rule 5 exists to forbid, arriving after the judge had already been scored.",
+  "criterion": [
+    "1. every human-labeled step is sound or unverifiable; a trace with no labeled step is NOT eligible",
+    "2. prefer 8-15 steps",
+    "3. spread across tags",
+    "4. no trap items",
+    "5. selected before any judge ran; never re-selected"
+  ],
+  "deviations": [
+    "RULE 2 NOT MET and it is not satisfiable on this corpus: only 1 eligible trace(s) fall in the 8-15 step band at all. The corpus is bimodal -- most traces are 2-6 steps, then 8, 18, 40 and 141. Recorded rather than worked around: re-selecting for length would have nothing to select.",
+    "RULE 3 PARTIAL: 4 of 5 traces share the primary tag 'multi_step'. Their full tag sets still differ; the false-flag rate is a property of a narrower slice of the corpus than rule 3 intends, and that is stated rather than corrected by swapping traces the judge has already scored."
+  ],
+  "selected": [
+    "mb-06:thinking",
+    "mb-07:thinking",
+    "mb-11:thinking",
+    "mb-13:thinking",
+    "mb-14:thinking"
+  ],
+  "traces": [
+    {
+      "trace_id": "mb-06:thinking",
+      "item_id": "mb-06",
+      "strategy": "thinking",
+      "tags": [
+        "multi_step",
+        "arithmetic",
+        "tool_required"
+      ],
+      "n_steps": 4,
+      "labeled_step_coverage": "3/4"
+    },
+    {
+      "trace_id": "mb-07:thinking",
+      "item_id": "mb-07",
+      "strategy": "thinking",
+      "tags": [
+        "multi_step",
+        "arithmetic",
+        "tool_required"
+      ],
+      "n_steps": 5,
+      "labeled_step_coverage": "1/5"
+    },
+    {
+      "trace_id": "mb-11:thinking",
+      "item_id": "mb-11",
+      "strategy": "thinking",
+      "tags": [
+        "multi_step",
+        "geometry"
+      ],
+      "n_steps": 4,
+      "labeled_step_coverage": "2/4"
+    },
+    {
+      "trace_id": "mb-13:thinking",
+      "item_id": "mb-13",
+      "strategy": "thinking",
+      "tags": [
+        "multi_step",
+        "logic"
+      ],
+      "n_steps": 6,
+      "labeled_step_coverage": "3/6"
+    },
+    {
+      "trace_id": "mb-14:thinking",
+      "item_id": "mb-14",
+      "strategy": "thinking",
+      "tags": [
+        "logic"
+      ],
+      "n_steps": 5,
+      "labeled_step_coverage": "3/5"
+    }
+  ],
+  "tag_coverage": {
+    "multi_step": 4,
+    "logic": 1
+  },
+  "n_eligible": 20,
+  "n_eligible_in_the_preferred_band": 1,
+  "n_traces_considered": 42
+}

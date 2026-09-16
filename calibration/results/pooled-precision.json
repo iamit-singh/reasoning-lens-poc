@@ -1,0 +1,65 @@
+{
+  "_README": "M2-7 / B4 #4, C5.6's pooled construction. TWO precision figures are published and neither is 'the' number: `strict` reads C5.6 literally (a genuine flaw is a planted flaw or a human `unsound`), `symmetric` applies the rule ADR-012 already applied to RECALL -- that an `unverifiable` verdict on a defective step is not a miss -- to precision as well. Using ADR-012's rule for recall and not for precision would be a one-way ratchet on a corpus that is half legitimately unverifiable (finding 7). THE PER-TRACE FALSE-FLAG RATE IS NOT COMPUTED: it needs every step of the five traces human-labelled (M2-15), which amendment 002 dropped. The per-labelled-step rate below is SS1.3.1's stated fallback, second-best and taken knowingly.",
+  "precision_strict": {
+    "value": 0.6428571428571429,
+    "n": 14,
+    "ci_low": 0.38764423103907397,
+    "ci_high": 0.8365526824644587,
+    "ci_method": "wilson",
+    "note": null
+  },
+  "precision_symmetric": {
+    "value": 0.6428571428571429,
+    "n": 14,
+    "ci_low": 0.38764423103907397,
+    "ci_high": 0.8365526824644587,
+    "ci_method": "wilson",
+    "note": null
+  },
+  "flags_raised_over_the_pool": 14,
+  "seeded_reports_read": 10,
+  "false_flags_on_human_labelled_sound_steps": 0,
+  "human_labelled_steps_in_the_known_good_pool": 12,
+  "false_flag_rate_per_labelled_step": {
+    "value": 0.0,
+    "n": 12,
+    "ci_low": 2.7755575615628914e-17,
+    "ci_high": 0.24249400665524085,
+    "ci_method": "wilson",
+    "note": null
+  },
+  "false_flag_rate_per_trace": null,
+  "false_flag_rate_per_trace_note": "NOT COMPUTED. B4 #4's second clause needs all steps of the five traces human-labelled (M2-15, dropped by amendment 002). Multiplying the per-labelled-step rate by the mean trace length would state a per-trace figure the labels do not support -- that is the conversion SS1.3.1 says to STATE rather than PERFORM.",
+  "per_trace": {
+    "mb-06:thinking": {
+      "steps": 4,
+      "labelled": 3,
+      "flags": 0,
+      "false_flags": 0
+    },
+    "mb-07:thinking": {
+      "steps": 5,
+      "labelled": 1,
+      "flags": 0,
+      "false_flags": 0
+    },
+    "mb-11:thinking": {
+      "steps": 4,
+      "labelled": 2,
+      "flags": 0,
+      "false_flags": 0
+    },
+    "mb-13:thinking": {
+      "steps": 6,
+      "labelled": 3,
+      "flags": 0,
+      "false_flags": 0
+    },
+    "mb-14:thinking": {
+      "steps": 5,
+      "labelled": 3,
+      "flags": 0,
+      "false_flags": 0
+    }
+  }
+}

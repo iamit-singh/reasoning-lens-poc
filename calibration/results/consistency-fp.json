@@ -1,0 +1,60 @@
+{
+  "_README": "M2-8 / B4 #5. A false positive is a `contradicts` verdict on a trace the pool selection deemed known-good. PUBLISHED AS A COUNT WITH ITS n: at n=5 the smallest non-zero rate is 20%, so a 5% target and a 0% target are the same target on this denominator, and a percentage would imply a resolution this sample does not have.",
+  "false_flags": 0,
+  "n_traces": 5,
+  "n_not_checked": 0,
+  "rate": 0.0,
+  "estimate": {
+    "value": 0.0,
+    "n": 5,
+    "ci_low": 0.0,
+    "ci_high": 0.43448246478317476,
+    "ci_method": "wilson",
+    "note": "0 of 5 known-good traces"
+  },
+  "citation_downgrades_applied": 0,
+  "target": "<= 0.05 (B4 #5) -- unresolvable below 20% at this n; read as 'zero'",
+  "meets_target_read_as_zero": true,
+  "traces": [
+    {
+      "trace_id": "mb-06:thinking",
+      "verdict": "entails",
+      "flagged": false,
+      "cited_step_ids": [],
+      "rationale": "Step [2] computes total watts = 379,995 correctly; step [3] converts to 379.995 kW and floors to 379 kW, which supports the final answer 379.",
+      "downgraded": false
+    },
+    {
+      "trace_id": "mb-07:thinking",
+      "verdict": "entails",
+      "flagged": false,
+      "cited_step_ids": [],
+      "rationale": "Step [1] sets I = 12500\u00b70.074\u00b73.5; Step [3] computes 12500\u00b70.074 = 925; Step [4] multiplies 925\u00b73.5 = 3237.5, matching the final answer.",
+      "downgraded": false
+    },
+    {
+      "trace_id": "mb-11:thinking",
+      "verdict": "entails",
+      "flagged": false,
+      "cited_step_ids": [],
+      "rationale": "Step [3] computes inner dimensions 15 m and 21 m and multiplies to get area 315 m^2, which matches the final answer.",
+      "downgraded": false
+    },
+    {
+      "trace_id": "mb-13:thinking",
+      "verdict": "entails",
+      "flagged": false,
+      "cited_step_ids": [],
+      "rationale": "Step [2] computes each poster requires 7 printer-minutes so one printer makes one poster in 7 minutes; Step [3] applies that to 21 printers to conclude 21 posters in 7 minutes.",
+      "downgraded": false
+    },
+    {
+      "trace_id": "mb-14:thinking",
+      "verdict": "entails",
+      "flagged": false,
+      "cited_step_ids": [],
+      "rationale": "Step [2] explicitly states that day 47 is half and day 46 is a quarter, which directly supports the final answer Day 46.",
+      "downgraded": false
+    }
+  ]
+}
