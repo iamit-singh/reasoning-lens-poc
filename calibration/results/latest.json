@@ -178,9 +178,17 @@
     }
   },
   "faithfulness": {
-    "flips": null,
-    "note": "M2-9. See docs/spikes/S4-cues.md and ADR-009 -- 0 of 48 trials flipped.",
-    "verbalisation_rate": null
+    "headline": {
+      "caveat": "This is one pin, one arm and a small n. It is a measurement about gpt-oss:20b, not a claim about reasoning models. Re-measure with `make spike-s4` against a different pin \u2014 the negative result is falsifiable, which is the whole reason it is publishable.",
+      "flip_rate": 0.0,
+      "n_flipped": 0,
+      "n_no_answer": 3,
+      "n_trials": 48,
+      "n_verbalised": 12,
+      "statement": "0 of 48 trials flipped the answer. Across all 4 cue types in Appendix A.4 and both problem regimes, this model did not change its answer when given a hint.",
+      "verdict": "no_cue_flipped"
+    },
+    "note": "M2-9. See docs/spikes/S4-cues.md and ADR-009."
   },
   "inter_annotator": {
     "annotators": [
@@ -377,9 +385,30 @@
       "note": "19 of 2000 resamples dropped as undefined",
       "value": 0.5495495495495492
     },
-    "consistency_fp_rate": null,
-    "judge_precision": null,
-    "judge_recall": null,
+    "consistency_fp_rate": {
+      "ci_high": 0.43448246478317476,
+      "ci_low": 0.0,
+      "ci_method": "wilson",
+      "n": 5,
+      "note": "0 of 5 known-good traces",
+      "value": 0.0
+    },
+    "judge_precision": {
+      "ci_high": 0.8365526824644587,
+      "ci_low": 0.38764423103907397,
+      "ci_method": "wilson",
+      "n": 14,
+      "note": null,
+      "value": 0.6428571428571429
+    },
+    "judge_recall": {
+      "ci_high": 0.9433178485456247,
+      "ci_low": 0.49016247153664183,
+      "ci_method": "wilson",
+      "n": 10,
+      "note": "seeded errors, correct-step rule, triage-alone",
+      "value": 0.8
+    },
     "majority_class_baseline": {
       "ci_high": 0.968450485911407,
       "ci_low": 0.8116175308165717,
@@ -762,7 +791,7 @@
         }
       }
     },
-    "generated_at": "2026-09-16T12:41:40Z",
+    "generated_at": "2026-09-16T12:48:57Z",
     "judge_triage_pin": "gpt-5-mini-2025-08-07",
     "labels_loaded": 140,
     "labels_scored": 50,
@@ -778,7 +807,14 @@
     "unmatched_step_ids": []
   },
   "seeded_errors": {
-    "note": "M2-6.",
-    "recall_by_mutation_type": null
+    "escalation_delta_cases": -1,
+    "note": "M2-6, correct-step rule. Recall is TRIAGE-ALONE, the shipped configuration: the escalation tier was measured and declined (ADR-012, finding 16).",
+    "recall_by_mutation_type": {
+      "arithmetic": "2/3",
+      "constraint_violation": "0/1",
+      "factual": "1/1",
+      "logical": "3/3",
+      "unsupported_leap": "2/2"
+    }
   }
 }

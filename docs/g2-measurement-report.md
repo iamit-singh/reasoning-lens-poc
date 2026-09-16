@@ -385,20 +385,33 @@ from span usage and are published. The file states exactly what to fill in to pu
 | **Prompt changelog** | `analyzer/src/rlens/prompts/CHANGELOG.md` — every cycle with κ before → after |
 | **Thresholds** | `docs/decisions/ADR-012-judge-thresholds.md` |
 
-### The held-out set was read twice. Here is the reason and both numbers.
+### The held-out set was read three times. Here is every run and the reason for each.
 
 C5.4 says the held-out set is opened once, and M2-17's card names the one legitimate
 exception: *"if a second read becomes genuinely necessary — a bug in the CLI, a
 mis-specified pin — that is legitimate, and **both runs appear in the report with the
 reason**. The discipline is disclosure, not perfection."* This is that case.
 
-| | run 1 | run 2 |
-| --- | --- | --- |
-| time (UTC) | 2026-09-16T12:40:04Z | 2026-09-16T12:41:40Z |
-| command | `make calibrate ARGS="--final"` | `make calibrate ARGS="--final"` |
-| bundle | `e8952d4d3c51` | `e8952d4d3c51` |
-| **n** | **140** | **50** |
-| behavior κ | 0.302 [0.050, 0.534] | **0.550** / **0.401** |
+| | run 1 | run 2 | run 3 |
+| --- | --- | --- | --- |
+| time (UTC) | 12:40:04Z | 12:41:40Z | 12:52Z |
+| bundle | `e8952d4d3c51` | `e8952d4d3c51` | `e8952d4d3c51` |
+| **n** | **140** | **50** | **50** |
+| behavior κ | 0.302 [0.050, 0.534] | **0.5495495495495492** | **0.5495495495495492** |
+| reason | — | CLI defect: n = 140 | join the measured auxiliary metrics |
+
+**Runs 2 and 3 are identical to sixteen decimal places**, including the bootstrap interval
+and its note that *19 of 2000 resamples were dropped as undefined*. That identity is the
+point of reporting run 3 rather than hiding it: it is positive evidence that this
+computation is deterministic over committed bytes and that **nothing was re-rolled**.
+
+**Run 3's reason.** `judge_precision`, `judge_recall` and `consistency_fp_rate` were all
+**measured** — by M2-7, M2-6 and M2-8 — and all sat in their own files, so `latest.json`
+carried `null` and the public calibration page said *"not yet measured"* for three numbers
+this project had measured. **Understating is not automatically safe**: the page was making a
+false statement about the evidence, in the conservative direction. They are now read from
+the artefact each task wrote — read, never recomputed, so each number has exactly one
+producer.
 
 **The defect:** `--final` scored every label row it could load — the dev 40, **plus the
 held-out 50 once per annotator**. That folds the steps the prompt was tuned against into the

@@ -1,0 +1,12 @@
+{
+  "_README": "C1.3's pre-decided G2 branch thresholds, as DATA rather than as literals in a page. FE-6/FE-11 read this file; E9's grep forbids a numeric literal in the calibration page source, and it is right to -- a threshold typed into JSX is a second copy of a plan decision that can drift from the plan silently. These are GATE CONSTANTS, not measurements: nothing here was measured, and nothing here may be changed to make a measurement pass.",
+  "source": "implementation-plan.md C1.3 · month-2-task-breakdown.md §6.2",
+  "fixed_before_any_measurement": true,
+  "branches": {
+    "G2-A": "classifier_kappa_heldout >= 0.60 AND judge_precision >= 0.75",
+    "G2-B": "classifier_kappa_heldout < 0.60 OR judge_precision < 0.75",
+    "G2-C": "classifier_kappa_heldout < 0.45 OR judge_precision < 0.60"
+  },
+  "classifier_kappa_heldout": { "b_floor": 0.6, "c_floor": 0.45 },
+  "judge_precision": { "b_floor": 0.75, "c_floor": 0.6 }
+}

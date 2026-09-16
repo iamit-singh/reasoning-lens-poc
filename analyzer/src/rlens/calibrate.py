@@ -58,7 +58,13 @@ import sys
 from collections import defaultdict
 from typing import Any
 
-from rlens.metrics import BEHAVIOR_CLASSES, SOUNDNESS_CLASSES, Agreement, agreement
+from rlens.metrics import (
+    BEHAVIOR_CLASSES,
+    SOUNDNESS_CLASSES,
+    Agreement,
+    agreement,
+    proportion,
+)
 from rlens.versions import ANALYZER_VERSION, PROMPT_BUNDLE_VERSION
 
 #: Resolved from the checkout root, not the working directory. `rlens.runner.paths` solves
@@ -237,6 +243,88 @@ def inter_annotator(labels: list[dict[str, Any]], field: str) -> Agreement | Non
     return agreement(a_labels, b_labels, classes)
 
 
+AUX_PRECISION = RESULTS_DIR / "pooled-precision.json"
+AUX_CONSISTENCY = RESULTS_DIR / "consistency-fp.json"
+AUX_SEEDED = _ROOT / "docs/spikes/M2-6-raw/m2-6-seeded.json"
+AUX_PANEL = _ROOT / "faithfulness/panel.json"
+
+
+def _json(path: pathlib.Path) -> dict[str, Any] | None:
+    try:
+        return json.loads(path.read_text())  # type: ignore[no-any-return]
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def auxiliary() -> dict[str, Any]:
+    """The measured numbers that live in their own files, joined in here.
+
+    **This exists because the calibration page renders `latest.json` VERBATIM.** M2-7's
+    precision, M2-8's FP rate and M2-6's recall were all measured and all sat in separate
+    files, so the public page said *"not yet measured"* for three numbers this project had
+    measured. A page that understates is not automatically safe: it was telling a reader the
+    instrument is less calibrated than it is, which is a false statement about the evidence.
+
+    **Read, never recomputed.** Each figure is copied from the artefact its own task wrote,
+    so there is exactly one place each number is produced. A second computation here would
+    eventually disagree with the first, and the one on the public page is the one nobody
+    re-derives.
+
+    Missing files give None, which renders as "not yet measured" -- the correct answer when
+    the task has not run.
+    """
+    out: dict[str, Any] = {
+        "judge_precision": None,
+        "judge_recall": None,
+        "consistency_fp_rate": None,
+        "seeded": None,
+        "faithfulness": None,
+    }
+    prec = _json(AUX_PRECISION)
+    if prec:
+        # The STRICT reading -- C5.6 read literally -- is what the page publishes, because
+        # it is the conservative one. The symmetric reading is in the file beside it and in
+        # the G2 report; the page links to both rather than choosing the kinder number.
+        out["judge_precision"] = prec.get("precision_strict")
+    cons = _json(AUX_CONSISTENCY)
+    if cons and cons.get("n_traces"):
+        out["consistency_fp_rate"] = cons.get("estimate")
+    seeded = _json(AUX_SEEDED)
+    if seeded:
+        cases = seeded.get("cases") or []
+        graded = [c for c in cases if c.get("hit") is not None]
+        # **Triage-alone, because that is the shipped configuration** (ADR-012, finding 16).
+        # `hit_triage_only` is absent on records written before the tier was wired, and the
+        # fallback to `hit` is correct for those: escalation had not run.
+        hits = [c for c in graded if c.get("hit_triage_only", c.get("hit"))]
+        if graded:
+            out["judge_recall"] = proportion(
+                len(hits), len(graded), note="seeded errors, correct-step rule, triage-alone"
+            ).as_dict()
+        out["seeded"] = {
+            "recall_by_mutation_type": _by_type(graded),
+            "escalation_delta_cases": (
+                len([c for c in graded if c.get("hit")]) - len(hits)
+                if any(c.get("escalation") for c in graded)
+                else None
+            ),
+        }
+    panel = _json(AUX_PANEL)
+    if panel:
+        out["faithfulness"] = panel.get("headline")
+    return out
+
+
+def _by_type(graded: list[dict[str, Any]]) -> dict[str, str]:
+    """Hit/miss with n, never a bare percentage -- a "100%" over n = 1 is not a percentage."""
+    buckets: dict[str, list[bool]] = defaultdict(list)
+    for case in graded:
+        buckets[case.get("expected_error_type") or "?"].append(
+            bool(case.get("hit_triage_only", case.get("hit")))
+        )
+    return {k: f"{sum(v)}/{len(v)}" for k, v in sorted(buckets.items())}
+
+
 def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
     """Everything C5.5 asks for, over whatever labels exist today.
 
@@ -248,6 +336,7 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
     labels = load_labels(include_heldout=final)
     iaa_labels = load_labels(include_heldout=True) if (final or iaa_heldout) else labels
     predictions = load_predictions()
+    aux = auxiliary()
 
     # **In `--final`, the published kappa is the HELD-OUT 50 and nothing else.**
     #
@@ -346,10 +435,11 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
                 if classifier_behavior
                 else None
             ),
-            # M2-6, M2-7, M2-8 and M2-9 fill these. Null is the honest Month-1/W5 value.
-            "judge_precision": None,
-            "judge_recall": None,
-            "consistency_fp_rate": None,
+            # M2-6, M2-7, M2-8 and M2-9 fill these, from their own artefacts. Null still
+            # means "that task has not run" -- see `auxiliary()`.
+            "judge_precision": aux["judge_precision"],
+            "judge_recall": aux["judge_recall"],
+            "consistency_fp_rate": aux["consistency_fp_rate"],
             "n_heldout": len(behavior_h) if final else None,
             "n_dev": len(behavior_h) if not final else None,
             "calibration_run_id": f"cal-{dt.datetime.now(dt.UTC).strftime('%Y-%m-%d')}",
@@ -372,11 +462,16 @@ def build_results(*, final: bool, iaa_heldout: bool = False) -> dict[str, Any]:
             "soundness": classifier_soundness.as_dict() if classifier_soundness else None,
         },
         "faithfulness": {
-            "note": "M2-9. See docs/spikes/S4-cues.md and ADR-009 -- 0 of 48 trials flipped.",
-            "flips": None,
-            "verbalisation_rate": None,
+            "note": "M2-9. See docs/spikes/S4-cues.md and ADR-009.",
+            "headline": aux["faithfulness"],
         },
-        "seeded_errors": {"note": "M2-6.", "recall_by_mutation_type": None},
+        "seeded_errors": {
+            "note": (
+                "M2-6, correct-step rule. Recall is TRIAGE-ALONE, the shipped configuration: "
+                "the escalation tier was measured and declined (ADR-012, finding 16)."
+            ),
+            **(aux["seeded"] or {"recall_by_mutation_type": None}),
+        },
     }
 
 

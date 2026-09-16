@@ -21,3 +21,17 @@ export function calibration() {
   if (!fs.existsSync(LATEST)) return null;
   return JSON.parse(fs.readFileSync(LATEST, "utf8"));
 }
+
+const GATE_FILE = path.join(process.cwd(), "..", "calibration", "gate-thresholds.json");
+
+/**
+ * C1.3's branch thresholds, read from a committed file rather than typed here.
+ *
+ * E9's grep forbids a numeric literal in the calibration page source and it is right to: a
+ * threshold typed into JSX is a second copy of a plan decision that can drift from the plan
+ * without anyone noticing. These are gate CONSTANTS, not measurements -- nothing in that
+ * file was measured, and nothing in it may be edited to make a measurement pass.
+ */
+export function gateThresholds() {
+  return JSON.parse(fs.readFileSync(GATE_FILE, "utf8"));
+}

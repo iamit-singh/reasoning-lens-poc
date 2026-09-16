@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { calibration } from "../lib/calibration";
+import { calibration, gateThresholds } from "../lib/calibration";
 
 /**
  * FE-6 — the calibration and limitations page.
@@ -69,6 +69,73 @@ function Value({ v }) {
   return <span className="mono">{String(v)}</span>;
 }
 
+
+/**
+ * FE-11's G2-branch delta, C1.3 §G2-B — **and it is derived, never asserted.**
+ *
+ * The branch is not written into this file. It is recomputed from the same
+ * `measurement_context` the table below renders, against the thresholds C1.3 fixed in
+ * advance, so the page cannot claim a branch the numbers do not support. E9's grep over
+ * this source finds no numeric literal that is a metric; the two thresholds here are
+ * **gate constants from the plan**, not measurements, and they are named as such.
+ *
+ * Under G2-B the plan's instruction is that the calibration page **leads with the
+ * shortfall**. It leads with it because a reader who has to scroll to find out that the
+ * headline number missed its bar has been told something true in a way that functions as
+ * concealment.
+ */
+const GATE = gateThresholds();
+
+function shortfalls(ctx) {
+  if (!ctx) return [];
+  const out = [];
+  const k = ctx.classifier_kappa_heldout;
+  const p = ctx.judge_precision;
+  if (k && k.value !== null && k.value < GATE.classifier_kappa_heldout.b_floor) {
+    out.push({
+      what: "Classifier agreement with a human is below the bar this project set for it.",
+      detail:
+        "The headline kappa missed its target. Read it against the majority-class baseline " +
+        "in the table: on this draw, almost every step is one class, so a high raw " +
+        "agreement and a low kappa are the same fact seen twice.",
+      v: k,
+    });
+  }
+  if (p && p.value !== null && p.value < GATE.judge_precision.b_floor) {
+    out.push({
+      what: "When the judge flags a step as unsound, it is wrong more often than intended.",
+      detail:
+        "Precision is the share of flags that landed on a genuine defect. Treat every " +
+        "flagged step on this site as a prompt to look, not as a finding.",
+      v: p,
+    });
+  }
+  return out;
+}
+
+function Shortfall({ ctx }) {
+  const items = shortfalls(ctx);
+  if (!items.length) return null;
+  return (
+    <div className="block shortfall" data-testid="g2-shortfall">
+      <h3>What this instrument does not do well</h3>
+      <p className="lede">
+        Measured, published, and put first deliberately. The demo ships with these numbers
+        rather than without them.
+      </p>
+      <ul className="limits">
+        {items.map((s, i) => (
+          <li key={i}>
+            <b>{s.what}</b> <Value v={s.v} />
+            <br />
+            {s.detail}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function CalibrationPage() {
   const data = calibration();
 
@@ -91,6 +158,7 @@ export default function CalibrationPage() {
         </p>
       ) : (
         <>
+          <Shortfall ctx={data.measurement_context} />
           <div className="block">
             <h3>Measured</h3>
             <table className="metrics">
