@@ -5,8 +5,8 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — 9 closed, 4 deleted by ADR-003, 3 open |
-| **Last executed** | 12 Sep 2026 (W5, ahead of W12) |
+| **Status** | ⏳ **in progress** — 9 closed, 4 deleted by ADR-003, **3 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
+| **Last executed** | **18 Sep 2026 (W6)** — third execution. The three amendment-002 substitutes are filed and **none of them closed a row**; first execution 12 Sep (W5, ahead of W12), re-executed 16 Sep after G2 |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
 > breakdown's own §1.3 says three rows cannot close and one has no owner at all, and that
@@ -112,13 +112,41 @@ measurement, and a reader who can open the source is not a naive viewer. The dis
 matters at a gate: *blocked* invites "chase it"; *declined and published* is a decision
 somebody can disagree with in writing.
 
+## Re-executed 18 Sep 2026 (W6) — the three substitutes are now written, and none of them closed anything
+
+Amendment 002 §5 offered three labelled substitutes for the rows no code can close. **All
+three have now been produced, and all three rows are still open.** That is the intended
+outcome and it is worth stating as a result rather than as an apology: each document gives a
+reviewer evidence they did not have, under a name that does not overstate it.
+
+| Row | Substitute | What it changed | What it did not |
+| --- | --- | --- | --- |
+| **E13** | [`runbook-cold-run.md`](runbook-cold-run.md) | **Eight of the runbook's commands did not work from a clean clone**, including P4's — the procedure E4 and every staleness guarantee rest on — which exited 2. All six procedures now execute cold; `make ci` green from an empty clone in 33 s; `make smoke` 22/22 | **Not a peer.** The agent has read the codebase, so this is a *lower bound on the document's defects*, not a measure of its sufficiency. U2 still owes a peer dry-run |
+| **E12** | [`heuristic-walkthrough-review.md`](heuristic-walkthrough-review.md) | A specific, falsifiable hypothesis about **how B4 #9 would have failed**: the arrival screen argues tool-access while the criterion measures fluent-≠-sound, `sound`/`unsound`/`fluent` appear **zero times** on it, and the best counter-example on the page is labelled `unparsed`. Four queued copy fixes | **Zero naive readers.** B4 #9 stays **lost**. The four fixes are deliberately **not applied** — Hazard 4's argument is that the wording should come from testers' own phrasing, not the author's second guess |
+| **U3 / C15.1 #10** | [`lit-survey-part-a-review.md`](lit-survey-part-a-review.md) | Part A's description of the field held up; **its two forward-looking judgements were both falsified by the PoC it recommended** — A9.3's "biggest risk" fired (κ 0.550, precision 0.643) with its stated mitigation unable to discharge it, and A9.1's faithfulness takeaway returned **0 of 48** on the model actually run. Five concrete fixes listed | **Not a sign-off.** Still an em dash where the owner should be. No source was fetched — no citation was checked against the paper it cites |
+
+**E15 is now decided rather than pending.** The embed half was deleted by ADR-003. The
+fallback video's own condition — amendment 002 §4, *"if the demo runs headless; otherwise
+unmade"* — **is not met**: there is no headless browser driver on this machine, and
+installing one to produce a non-gating artifact is not a call to make unilaterally. **The
+video is unmade and recorded as such.** What it was insurance against is partly covered
+already: `make fe-export-check` proves the static export renders **with every `<script>`
+stripped and nothing running**, so the demo survives a dead backend by construction (I4).
+A video additionally survives a dead *laptop*, and that gap is real and open.
+
 ## Open rows, with owners and dates
 
 | Row | Owner | Needs | By |
 | --- | --- | --- | --- |
-| ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, 18/18 smoke with the key stripped | done |
+| ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, smoke green with the key stripped. **Re-proven from a clean clone 18 Sep**, 22/22 | done |
 | ~~E8~~ | — | **Closed** — p50 0.9 / p90 1.0 / p99 1.3 ms over n=140; live half n/a with its reason (ADR-003) | done |
-| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall** | closed as a gap |
-| **E13** | — | **Not closable.** An agent cold-run of the runbook is offered as a labelled partial substitute (amendment 002 §5) and is explicitly **not a pass** | closed as a gap |
-| E15 | Lead | Fallback video — an unedited screen recording (L4). Recordable by the agent if the demo runs headless; otherwise unmade | Before any live demo |
+| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall.** Heuristic review filed 18 Sep with four queued copy fixes | closed as a gap |
+| **E13** | **Tech lead (U2)** | **Not closable by the substitute.** Cold-run filed 18 Sep and it found eight broken commands — which **raises** rather than lowers the odds a peer finds more. A named peer is still owed | open |
+| **E15** | Lead | **Video unmade**, condition not met (no headless driver). Embed deleted by ADR-003. Not a launch gate | open, decided |
+| **C15.1 #10 / U3** | **Reviewer — still unnamed** | Review report filed 18 Sep with five concrete fixes. **A sign-off is a person; the row needs one name** | open |
 | **U4** | **Tech lead + DM** | **The C10.1 contingency conversation. 97.4 h against a 12 h allocation, every C14 lever spent** | **The only row no amount of code advances** |
+
+> **The shape of the gate has not changed and should not be read as having changed.** Nine
+> rows closed, four deleted by ADR-003, and **three that need a human who is not the Lead**
+> — plus U4, which needs two. Three months of work did not make those four go away, and the
+> substitutes filed on 18 Sep are evidence *for* the rows rather than a discharge of them.
