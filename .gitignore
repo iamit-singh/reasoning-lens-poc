@@ -22,3 +22,19 @@ out/
 # self-test run is not evidence of anything. The written finding lands in
 # docs/spikes/*.md and the ADRs -- that is what gets committed.
 docs/spikes/*-raw/
+
+# EXCEPT S4. Found by M3-5c's cold run, and the exception is the interesting part: for
+# every other spike the raw output IS a self-test, and the rule above is right. S4's
+# records are not that. They are the MEASUREMENT INPUT that scripts/build_faithfulness_panel.py
+# reads to produce faithfulness/panel.json -- the committed artifact behind B4 #6's
+# published "0 of 48 trials flipped", the negative result ADR-009 rests on.
+#
+# Two things followed from ignoring them, both bad. `make faithfulness-check` -- the
+# command E10's evidence line cites as CI's defence against the panel drifting from its
+# source -- could not run on any machine but the author's, so the check that exists to be
+# verified was the one thing nobody could verify. And a published headline had its
+# denominator on one laptop, regenerable only by spending money against a model that may
+# no longer return what it returned in September. 40 KB is a cheap price for a number
+# somebody can check.
+!docs/spikes/S4-raw/
+!docs/spikes/S4-raw/**

@@ -549,3 +549,89 @@ def test_final_scores_the_heldout_set_only_and_once_per_step(workspace) -> None:
         assert results["measurement_context"]["n_heldout"] == 4
     finally:
         C.HELDOUT_SPLIT_AT = monkey_split
+
+
+# ------------------------------------------------- M3-5c: a dev run must not erase B4 #1
+def _measured_iaa_file(path: pathlib.Path) -> None:
+    """A `latest.json` as an `--iaa` run leaves it: B4 #1 measured and present."""
+    path.write_text(
+        json.dumps(
+            {
+                "inter_annotator": {
+                    "annotators": ["amit", "ankit"],
+                    "behavior": {
+                        "kappa": {
+                            "value": 0.8673740053050397,
+                            "ci_low": 0.4949494949494941,
+                            "ci_high": 1.0,
+                            "n": 50,
+                        }
+                    },
+                    "soundness": {
+                        "kappa": {
+                            "value": 0.935064935064935,
+                            "ci_low": 0.7663551401869158,
+                            "ci_high": 1.0,
+                            "n": 50,
+                        }
+                    },
+                    "source": "heldout-50",
+                }
+            }
+        )
+    )
+
+
+def test_a_dev_run_carries_the_measured_iaa_forward_instead_of_nulling_it(
+    workspace, tmp_path
+) -> None:
+    """**Found by M3-5c's cold run, and it silently erased a published headline.**
+
+    P5 documents `make calibrate` first and `make calibrate ARGS="--iaa"` second. Running
+    the first alone rewrote `latest.json` with `inter_annotator.behavior = null` and a note
+    saying *"the second annotator has not labelled yet"* — false since 15 Sep, and rendered
+    VERBATIM by FE-6. The page would have gone back to reading *not yet measured*, which
+    looks like an honest empty state rather than an erasure.
+
+    A dev pass does not read the double-labelled steps. Having not looked, it may not
+    report a finding either way.
+    """
+    labels, _reports = workspace
+    (labels / "amit.jsonl").write_text(
+        "".join(json.dumps(_label(f"thinking:t:{i}", "linear")) + "\n" for i in range(3))
+    )
+    out = tmp_path / "latest.json"
+    _measured_iaa_file(out)
+
+    assert C.main(["--out", str(out)]) == 0
+
+    block = json.loads(out.read_text())["inter_annotator"]
+    assert block["behavior"]["kappa"]["value"] == pytest.approx(0.8673740053050397)
+    assert block["soundness"]["kappa"]["value"] == pytest.approx(0.935064935064935)
+    assert block["annotators"] == ["amit", "ankit"]
+    # Carried, never recomputed — one producer per number, and the file says so.
+    assert "carried_forward" in block
+
+
+def test_an_iaa_run_that_finds_nothing_still_writes_the_null(workspace, tmp_path) -> None:
+    """**The negative half, and the reason the rule is "did this run look?" rather than
+    "is the new value null?".**
+
+    `--iaa` DOES read the double labels. A null from it is a measurement — the second
+    annotator's rows are gone or unreadable — and carrying a stale kappa over the top of
+    that would be the same defect pointing the other way: the page would publish an
+    agreement figure for labels that are no longer there.
+    """
+    labels, _reports = workspace
+    (labels / "amit.jsonl").write_text(
+        "".join(json.dumps(_label(f"thinking:t:{i}", "linear")) + "\n" for i in range(3))
+    )
+    out = tmp_path / "latest.json"
+    _measured_iaa_file(out)
+
+    assert C.main(["--iaa", "--out", str(out)]) == 0
+
+    block = json.loads(out.read_text())["inter_annotator"]
+    assert block["behavior"] is None
+    assert block["soundness"] is None
+    assert "carried_forward" not in block

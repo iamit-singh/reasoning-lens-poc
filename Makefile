@@ -20,9 +20,14 @@ help:  ## show this help
 venv:  ## create the local virtualenv
 	$(PY) -m venv $(VENV)
 
-install: venv  ## install the analyzer plus dev tooling
+# The contract this target has to meet is the runbook's opening pair: `make install` then
+# `make ci`, and the second must pass from the first. Until M3-5c's cold run it could not --
+# `ci` runs `backend-tests`, which imports fastapi, which this target never installed. It
+# worked on one laptop because that venv had been `pip install`ed by hand months earlier.
+install: venv  ## install the analyzer plus dev tooling AND the backend service deps
 	$(BIN)/pip install -q --upgrade pip
 	$(BIN)/pip install -q -e "$(ANALYZER)[dev]"
+	$(BIN)/pip install -q -r backend/requirements.txt
 
 # ---------------------------------------------------------------- every-PR jobs (C7.2)
 # ruff.toml says "one source of truth so analyzer, backend, scripts and spikes are held
@@ -58,7 +63,15 @@ rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt an
 calibration-page:  ## E9 -- the calibration page hard-codes no numbers
 	./scripts/check_calibration_page.sh
 
-ci: lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
+# `spans` runs FIRST, and that it was missing is M3-5c's third cold-run finding. `out/` is
+# gitignored because it is derived (correctly -- committing it is how a derivation quietly
+# stops being run), so on a fresh checkout `contract` and `integration-mock` have no span
+# trees to read and integration-mock fails by SKIPPING, which run_marker.sh catches. pr.yml
+# already knew this: both of those jobs carry an explicit "replay span trees" step. The
+# runbook's opening pair did not, so `make install && make ci` was green only where `out/`
+# already existed. Replay is offline, free and takes seconds -- there was never a reason
+# for the caller to have to know.
+ci: spans lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
@@ -182,8 +195,20 @@ record-cassettes:  ## M1-14 -- record provider responses once per prompt-bundle 
 classify-reliability:  ## M1-9's DoD -- parse-failure rate over N full passes. COSTS SPEND.
 	@set -a; [ -f .env ] && . ./.env; set +a; MOCK_LLM=0 $(BIN)/python spikes/m1_9_parse_reliability.py $(ARGS)
 
+# REPORT_ARGS defaults to --all, and that it did not is M3-5c's sharpest cold-run finding.
+# The runbook's P4 -- "re-warm the cache after any pin change", the procedure every
+# staleness guarantee and E4 itself rest on -- documents the command as a bare `make
+# report`. A bare `make report` exits 2: `rlens: error: one of --item or --all is required`.
+# So did the repair hint the smoke test prints when it finds an empty cache. The author
+# always typed ARGS="--all" and the document never learned it, which is the whole failure
+# mode a peer dry-run exists to catch: the operating procedure that has only ever been run
+# by someone who did not need to read it.
+#
+# `--all` is the right default because warming the cache IS this target's documented job;
+# `make report ARGS="--item mb-01"` still does the single-item thing.
+REPORT_ARGS ?= --all
 report:  ## the end-to-end pipeline: span trees -> ReasoningReport (MOCK_LLM=1 for offline)
-	@set -a; [ -f .env ] && . ./.env; set +a; cd $(ANALYZER) && ../$(BIN)/python -m rlens --spans ../out/spans --out ../out/reports $(ARGS)
+	@set -a; [ -f .env ] && . ./.env; set +a; cd $(ANALYZER) && ../$(BIN)/python -m rlens --spans ../out/spans --out ../out/reports $(if $(ARGS),$(ARGS),$(REPORT_ARGS))
 
 # ---------------------------------------------------------------- frontend (C4.10)
 FRONTEND := frontend
@@ -191,13 +216,21 @@ FRONTEND := frontend
 fe-install:  ## install the frontend toolchain
 	cd $(FRONTEND) && npm install --no-audit --no-fund
 
-fe-build:  ## FE-1+ -- static export against the COMMITTED FIXTURES. No backend, no network
+# Order-only-ish guard, added by M3-5c's cold run. The runbook's P1 opens with `make
+# fe-build` and never mentions `make fe-install`, so on a clean checkout the first command
+# of the first operating procedure dies with `sh: next: command not found` -- a message
+# that names the symptom and not the repair. The build is the thing an operator wants; the
+# toolchain is how it gets made, and having to know that is not a test of anything.
+$(FRONTEND)/node_modules:
+	cd $(FRONTEND) && npm install --no-audit --no-fund
+
+fe-build: $(FRONTEND)/node_modules  ## FE-1+ -- static export against the COMMITTED FIXTURES. No backend, no network
 	cd $(FRONTEND) && npm run build
 
-fe-build-measured:  ## static export against out/reports -- what the demo ships (M3)
+fe-build-measured: $(FRONTEND)/node_modules  ## static export against out/reports -- what the demo ships (M3)
 	cd $(FRONTEND) && npm run build:measured
 
-fe-dev:  ## the frontend dev server, fixtures-first
+fe-dev: $(FRONTEND)/node_modules  ## the frontend dev server, fixtures-first
 	cd $(FRONTEND) && npm run dev
 
 # ---------------------------------------------------------------- local runtime (ADR-001)

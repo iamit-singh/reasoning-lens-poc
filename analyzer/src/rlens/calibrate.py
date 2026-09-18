@@ -676,12 +676,49 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    out = pathlib.Path(args.out)
+
+    # A dev run does not READ the double labels, so it has nothing to say about them --
+    # and until M3-5c's cold run it said `null` anyway, over the top of a measured result.
+    #
+    # The sequence is P5's own documented order: `make calibrate`, then `make calibrate
+    # ARGS="--iaa"`. Run the first alone -- on a fresh checkout, or any time at all -- and
+    # B4 #1's published headline (behavior kappa 0.867, soundness 0.935, n=50) became two
+    # nulls under a note reading "the second annotator has not labelled yet". Ankit
+    # labelled on 15 Sep and his 50 rows are committed. The file asserted something false
+    # about its own evidence, FE-6 renders this file VERBATIM, and the page would have
+    # gone back to "not yet measured" -- which reads as an honest empty state rather than
+    # as an erasure. Exactly FE-11's finding in the other direction: understating is not
+    # automatically safe, because a false statement about the evidence is still false when
+    # it is modest.
+    #
+    # Carried forward ONLY when this run did not look. `--iaa` and `--final` do read the
+    # double labels, so a null from either is a measurement and is written as one.
+    if not (args.iaa or args.final) and out.exists():
+        block = results["inter_annotator"]
+        if block.get("behavior") is None and block.get("soundness") is None:
+            try:
+                prior = json.loads(out.read_text()).get("inter_annotator") or {}
+            except (OSError, json.JSONDecodeError):
+                prior = {}
+            if prior.get("behavior") is not None or prior.get("soundness") is not None:
+                # Kept verbatim and FLAGGED, never recomputed: one producer per number
+                # (FE-11's rule), and a reader can see this run did not make it.
+                results["inter_annotator"] = {
+                    **prior,
+                    "carried_forward": (
+                        "Not recomputed by this run. This is a dev-mode pass, which does "
+                        "not read the double-labelled steps; the block below was measured "
+                        "by the last `--iaa` or `--final` run and is preserved rather than "
+                        'nulled. Re-measure with `make calibrate ARGS="--iaa"`.'
+                    ),
+                }
+
     body = json.dumps(results, indent=2, sort_keys=True) + "\n"
 
     if args.json:
         sys.stdout.write(body)
     else:
-        out = pathlib.Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(body)
         print(_render(results))

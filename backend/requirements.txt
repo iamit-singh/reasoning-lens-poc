@@ -1,0 +1,23 @@
+# The backend's dependencies, declared here rather than in analyzer/pyproject.toml.
+#
+# **Why not an analyzer extra.** I1 is that the analyzer is a standalone package whose
+# only input is a span tree, and .importlinter enforces `rlens` never importing `backend`.
+# Putting FastAPI into `analyzer[dev]` would put the demo service into the metadata of the
+# package B11 #1 intends to sell -- the dependency direction the whole architecture is
+# arranged to forbid, expressed in a file import-linter does not read.
+#
+# **Why this file exists at all.** It did not, until M3-5c's cold run. `make install`
+# installed `analyzer[dev]`, `make ci` ran `backend-tests`, and the second could never pass
+# from the first: fastapi was in the author's venv from an ad-hoc `pip install` and written
+# down nowhere. The whole suite stayed green on one laptop. That is M3-8's defect exactly --
+# an artifact that works from the author's checkout and nowhere else -- and M3-8's note said
+# nothing caught it and nothing could have. The same was true here one level up, and for the
+# same reason: the only environment anybody built was one that already worked.
+#
+# Floors, not pins. The service is not the measured surface -- nothing here can move a
+# number -- so these track their ecosystems rather than freezing a resolution.
+fastapi>=0.115
+uvicorn>=0.30
+# Not a runtime dependency of the service: fastapi.testclient imports httpx, so the
+# backend tests need it and `make ci` fails at collection without it.
+httpx>=0.27

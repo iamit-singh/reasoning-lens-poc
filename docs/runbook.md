@@ -1,11 +1,49 @@
 # Runbook
 
+> **Every command below was re-run from a clean `git clone` on 18 Sep 2026** (M3-5c's cold
+> run, [`runbook-cold-run.md`](runbook-cold-run.md)). Eight of them did not work as written.
+> The corrections are folded in here; the record of what failed and why is in that file,
+> because a runbook that quietly became correct teaches nobody what it was wrong about.
+
 ## Local development
 
 ```
-make install PY=python3.12     # venv + analyzer[dev]
+make install                   # venv + analyzer[dev] + backend/requirements.txt
 make ci                        # everything a PR runs -- no model, no key, no network
 ```
+
+**`make install` then `make ci` is the contract**, and it now holds from an empty checkout
+(~33 s). It did not until the cold run: `ci` runs `backend-tests`, which needs FastAPI,
+which nothing installed — it was in the author's venv from an ad-hoc `pip install` recorded
+nowhere, so the suite was green on exactly one machine. `backend/requirements.txt` exists
+now, `pr.yml` has a backend job, and `ci` replays `make spans` itself rather than assuming
+a `out/` directory that `.gitignore` deliberately withholds.
+
+**Do not pass `PY=python3.12`** unless `python3` is not 3.12+. This file used to; the flag
+fails outright under pyenv when 3.12 is installed but not shimmed, and an empty `PY=`
+resolves to the memorable `make: m: No such file or directory`. The default is `python3`.
+Verified on 3.14.7.
+
+## First-time setup — the `.env` nothing told you to make
+
+```
+cp .env.example .env
+```
+
+**Do this before any of the six procedures.** `.env` is gitignored (it holds a real
+`OPENAI_API_KEY`), it is read by `serve-api`, `smoke`, `spans`, `report`, `calibrate` and
+the spike targets — and until the cold run, no document in the repo ever told an operator
+to create it. Three of the six procedures fail without it, the first with
+`RuntimeError: MODEL_ANALYZE is unset`.
+
+**`.env.example` is not usable as copied.** Two values have to be set by hand:
+
+| Key | Set it to | Why it is not already there |
+| --- | --- | --- |
+| `MODEL_ANALYZE` | `gpt-5-mini-2025-08-07` for offline work | Ships empty. The value that makes the fully-offline path run was written down **only in `.github/workflows/pr.yml`** — replay verifies the (model, prompt) pair a cassette recorded, so `MOCK_LLM=1` still needs the id |
+| `DEMO_MODE` | `cached` | Ships as `live`, which contradicts every other statement about how this demo is run |
+
+With those two, the whole offline path works with no key, no GPU and no network.
 
 ## The local generation model — first-time setup (M1-15, W2-0)
 
@@ -122,8 +160,13 @@ It was a spend control. Generation is local and free, so its job changed: it gua
 more useful than before, not less — a local demo has more single points of failure than a
 hosted one, not fewer.
 
-Run the demo with `make demo`. The spend guard survives at a token $5/$10, purely against a
-runaway loop.
+**Bring the demo up with P1, not with `make demo`.** `make demo` is `docker compose up`,
+which predates ADR-003 and is a second, container-shaped answer to a question P1 already
+answers natively. Two documented ways to start the same demo is one too many for a document
+somebody reads at 9pm, and the cold run hit the disagreement immediately. P1 is the
+procedure; `make demo` is kept for the compose path and is not the one to reach for.
+
+The spend guard survives at a token $5/$10, purely against a runaway loop.
 
 ## Version discipline
 
@@ -156,9 +199,24 @@ was run, so a reader can tell whether their run matched.
 ### P1 — Bring the demo up
 
 ```
-make fe-build          # static export -> frontend/out
-make serve-api         # localhost:8000, cache-first, DEMO_MODE from .env
+make report              # span trees -> out/reports. 14 reports, offline, ~20 s
+make fe-build-measured   # static export -> frontend/out
+make serve-api           # localhost:8000, cache-first, DEMO_MODE from .env
 ```
+
+**Three corrections from the cold run, and the middle one shipped the wrong demo.**
+
+- **`make fe-build-measured`, not `make fe-build`.** `fe-build` builds against the
+  *committed fixtures* — `fx-` items, invented to exercise states the measured corpus does
+  not contain. `fe-build-measured` builds what the demo ships. Following the old line
+  literally brought up a site serving **invented data**, and `make smoke` caught it as
+  `an item page resolves through the mount — 404`, which is the smoke test doing its job
+  against a runbook that was wrong.
+- **`make report` comes first.** `out/` is gitignored because it is derived, so a fresh
+  checkout has an empty cache and P2 fails four checks before it can prove anything.
+- **`make fe-build*` no longer needs `make fe-install` first.** It did, and P1 never said
+  so, so the first command of the first procedure died on `sh: next: command not found`.
+  The build targets now install the toolchain if it is missing.
 
 `/readyz` is the check that matters, not `/healthz`. It reports `cached_reports`,
 `stale_reports` and the breaker state. **A green `/healthz` with an empty cache is a demo
@@ -170,13 +228,25 @@ with nothing to show**, which is why readiness reports what it is ready *for*.
 make smoke
 ```
 
-Starts a real server **with `OPENAI_API_KEY` stripped**, runs 16 checks, stops it. *We did
-not call the provider* and *we could not call the provider* are different claims, and only
-the second proves the fallback product.
+Starts a real server **with `OPENAI_API_KEY` stripped**, runs **22** checks, stops it. *We
+did not call the provider* and *we could not call the provider* are different claims, and
+only the second proves the fallback product.
 
-> **Observed on first run:** 4 of 16 failed, and every failure was real — two stale
-> reports, a thin cache, and a breaker pointed at a directory. Do not treat a red smoke run
-> as flaky. It has not yet produced a false alarm.
+**It needs P1 to have run first** — all of P1, including `make report`. The check count is
+22 and this file said 16 for a week; the number moves when checks are added, so trust the
+output over this line.
+
+> **Observed on first run (12 Sep):** 4 of 16 failed, and every failure was real — two
+> stale reports, a thin cache, and a breaker pointed at a directory.
+>
+> **Observed on the cold run (18 Sep):** 4 of 15 failed on an empty checkout, then 1 of 22
+> after `make report`, and that last one was **the runbook's own error** — P1 said
+> `fe-build` where the demo needs `fe-build-measured`, so the site served fixture items and
+> no measured item page resolved. **22/22 after the fix.**
+>
+> Do not treat a red smoke run as flaky. It has never produced a false alarm, and on the
+> two occasions it went red it was right both times — once about the system, once about
+> this document.
 
 ### P3 — Trip the spend breaker, and reset it
 
@@ -193,8 +263,15 @@ is corrupt or `SPEND_FILE` points somewhere wrong — that is the breaker workin
 ### P4 — Re-warm the cache after any pin change
 
 ```
-make report            # span trees -> out/reports, one report per item
+make report            # span trees -> out/reports, one report per item (--all is the default)
 ```
+
+> **This command did not run as written.** A bare `make report` exited 2 with `rlens: error:
+> one of --item or --all is required`, and the repair hint `make smoke` prints on an empty
+> cache said the same wrong thing. The author always typed `ARGS="--all"`; the document
+> never learned it. `--all` is the default now — `make report ARGS="--item mb-01"` still
+> does the single item. This is the sharpest thing the cold run found, because P4 is the
+> procedure every staleness guarantee and E4 itself rest on.
 
 **Required after any change to the runner version, analyzer version, prompt bundle or
 generation pin.** The server refuses to start on a stale cache rather than serving it,
@@ -211,9 +288,22 @@ make calibrate ARGS="--iaa"   # + B4 #1, the human-vs-human kappa on the double 
 make seeded-errors     # judge recall; COSTS SPEND
 ```
 
-`make faithfulness-check` and the calibration-page grep both run in CI, so a committed
-panel cannot drift from the records behind it and no page can render a number its source
-file does not contain.
+`make faithfulness-check` and the calibration-page grep both run in CI — **genuinely, as of
+the cold run.** Both were in `make ci` and in no workflow, and `faithfulness-check` could
+not have run anywhere but the author's laptop regardless: it reads `docs/spikes/S4-raw/`,
+which `.gitignore` excluded. Those records are the denominator of B4 #6's published *0 of
+48*, so they are committed now (40 KB) and the check is runnable by anyone verifying it.
+
+> **`make calibrate` used to erase B4 #1, and it did it quietly.** A bare dev run wrote
+> `inter_annotator.behavior = null` over the measured κ 0.867 / 0.935, under a note reading
+> *"the second annotator has not labelled yet"* — false since 15 Sep. FE-6 renders this
+> file verbatim, so the calibration page would have gone back to *not yet measured*, which
+> reads as an honest empty state rather than as an erasure.
+>
+> **Fixed:** a dev pass does not read the double-labelled steps, so it now carries the
+> measured block forward and flags it `carried_forward` rather than nulling it. `--iaa` and
+> `--final` do read them, so a null from either is still written — it is a measurement.
+> Both halves are tested, and the first is negative-tested.
 
 ### P6 — Hand the analyzer to someone else
 

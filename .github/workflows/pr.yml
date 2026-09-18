@@ -65,6 +65,40 @@ jobs:
       - working-directory: analyzer
         run: pytest -q -m "not contract and not integration_mock and not measurement"
 
+  # Added by M3-5c's cold run, which is when it became visible that `make ci` had two
+  # targets no workflow ran. The backend's 47 tests -- route-table posture, the spend
+  # breaker's fail-closed semantics, cache staleness -- had only ever executed on the
+  # author's laptop, in a venv whose fastapi came from an ad-hoc install written down
+  # nowhere. "Green on every PR" and "green where it was written" are different claims and
+  # only the first is worth anything at a gate.
+  backend:
+    name: backend (route table, breaker, cache staleness)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      # The file that did not exist until the cold run. Installing it here rather than
+      # relying on fastapi arriving as somebody else's transitive dependency is the whole
+      # point of declaring it.
+      - run: pip install -r backend/requirements.txt
+      - run: pytest backend/tests/test_api.py -q
+
+  # E10's evidence line says "`make faithfulness-check` in CI". That was true of `make ci`
+  # and false of every workflow, which is the gap this job closes: the committed panel is
+  # the artifact the faithfulness surface renders, and a panel that has drifted from S4's
+  # records is a published number with no producer.
+  faithfulness-check:
+    name: committed faithfulness panel matches S4's records
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e "./analyzer[dev]"
+      - run: python scripts/build_faithfulness_panel.py --check
+
   contract:
     name: contract (span trees, ReasoningReport schema)
     runs-on: ubuntu-latest
