@@ -221,8 +221,17 @@ fe-install:  ## install the frontend toolchain
 # of the first operating procedure dies with `sh: next: command not found` -- a message
 # that names the symptom and not the repair. The build is the thing an operator wants; the
 # toolchain is how it gets made, and having to know that is not a test of anything.
+#
+# `npm ci`, NOT `npm install`, and the difference showed up in a cold clone: `npm install`
+# REWROTE package-lock.json on a fresh machine (dropping `"peer": true` metadata -- no
+# version and no integrity hash moved), so every clean checkout built its export from an
+# already-dirty tree. Cosmetic in content and not cosmetic in consequence: it means
+# "reproduced from committed source" could not be asserted by anyone but the author, which
+# is this repo's second recurring defect wearing a lockfile. `npm ci` installs exactly what
+# the lockfile says, refuses if it disagrees with package.json, and writes nothing back.
+# `make fe-install` stays `npm install` -- that one is for CHANGING dependencies on purpose.
 $(FRONTEND)/node_modules:
-	cd $(FRONTEND) && npm install --no-audit --no-fund
+	cd $(FRONTEND) && npm ci --no-audit --no-fund
 
 fe-build: $(FRONTEND)/node_modules  ## FE-1+ -- static export against the COMMITTED FIXTURES. No backend, no network
 	cd $(FRONTEND) && npm run build
