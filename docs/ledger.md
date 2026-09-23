@@ -129,6 +129,10 @@ keep it honest, including when it is unflattering.
 | 2026-09-18 | W6 | U3 | 0.0 | **[AGENT] U3's substitute: Part A's description of the field held up, and BOTH of its forward-looking judgements were falsified by the PoC it recommended.** A review report per amendment 002 §5, and **C15.1 #10 still has an em dash where the owner should be** — a sign-off is a person putting their name to a claim, and reading the document carefully does not produce one. **Two limits stated up front**: no source was fetched, so no citation was checked against the paper it cites; and the valuable check was not a citation check at all but **Part A against three months of this project's own measurements**, which nobody was positioned to run until now. **A9.3 named the biggest risk exactly right and rated confidence HIGH** — *noisy step classification/judging would undermine the measurement claim* — **all three of its mitigations were applied in full and the risk fired anyway**: held-out κ **0.550** below B4 #2's 0.60 bar, judge precision **0.643** below B4 #4's 0.75. The finding is the distinction A9.3 does not draw: **calibration is an INSTRUMENT, not a mitigation** — it converts an unknown reliability into a known one and cannot make an unreliable classifier reliable. **A9.1's faithfulness takeaway — *"the reasoning trace is a claim, not a log"* — did not reproduce on the model actually run**: 0 of 48 flips (ADR-009). Not a contradiction (different model class, different quantity) and **must not be written up as one**, but Part A states as settled something the PoC could not observe on its own subject and says so nowhere. **And the taxonomy A8 calls "the backbone" was near-degenerate**: `backward_chaining` absent from the held-out 50, `backtracking` ~2.0%, 46 of 50 `linear` — so **A9.3's third mitigation (scope to well-posed math/logic) removed the phenomenon the taxonomy exists to find**. Five concrete fixes, none a rewrite, largest a paragraph. `docs/lit-survey-part-a-review.md` |
 | 2026-09-18 | W6 | M3-6 | 0.0 | **[AGENT] E15 decided rather than left pending — embed deleted, video UNMADE, and the condition for making it is not met.** The embed half went with ADR-003: no host, no hostile input path, nothing to set `frame-ancestors` on. **The fallback video's own condition in amendment 002 §4 is *"if the demo runs headless; otherwise unmade"*, and it is not met** — no Playwright, no Puppeteer, no Chromium on this machine, and installing a browser driver to produce a NON-GATING artifact is not a call to take unilaterally. So it is recorded as unmade with its reason rather than carried as a task somebody might get to. **Part of what it insures against is already covered**: `make fe-export-check` reads the built artifact with **every `<script>` stripped** and asserts the words are there, so the demo survives a dead backend BY CONSTRUCTION (I4) — 2,193 characters of real text on the home page with no JS. **A video additionally survives a dead LAPTOP, and that gap is real, open, and named** rather than papered over. C10.4 marks M3-6 *not a launch gate* and it is not being treated as one. |
 | 2026-09-18 | W6 | M3-9 | 0.0 | **[AGENT] G3 checklist re-executed a third time — all three amendment-002 substitutes are now filed, and NONE OF THEM CLOSED A ROW.** That is the intended outcome stated as a result rather than an apology: each gives a reviewer evidence they did not have, under a name that does not overstate it. **E13's cold run found eight broken commands and therefore RAISES the odds a peer finds more** — it is an argument for the dry-run, not a substitute for it. **E12's review produced a specific falsifiable hypothesis about how B4 #9 would have failed**, which is worth more than a generic "the copy might confuse someone" and is still not a measurement. **U3's report found Part A's two predictions falsified** and still leaves the row needing one name. **E15 moved from pending to decided**: unmade, condition not met. **The gate's shape has not changed and should not be read as having changed** — nine closed, four deleted by ADR-003, three open plus U3, plus U4 which needs two people. Three months of work did not make those go away. `docs/g3-ship-checklist.md` |
+| 2026-09-23 | W7 | M3-6 | 0.0 | **[AGENT] E15 CLOSES — the condition came true, so the video is made.** Amendment 002 §4 made the fallback video conditional on *"if the demo runs headless; otherwise unmade"*, and on 18 Sep there was no driver on this machine. There is one now, so the row is closed by doing the work rather than by re-arguing the decision. **`make demo-video` records ONE CONTINUOUS UNEDITED PASS over five surfaces, 1280×800, 49 s** — *unedited* being a property of the script rather than a promise: one browser context, no cuts, no post-processing. It drives the demo the way P1 brings it up (backend serving the export, FE-9's single origin) with **`OPENAI_API_KEY` stripped**, for the same reason `make smoke` strips it. **It REFUSES rather than recording something misleading**: no mounted export, or any stale report, and it exits non-zero — a recording of numbers attributed to a system that is no longer running is **worse than a live page showing the same thing**, because a video cannot be re-checked against `/readyz` by whoever watches it. Provenance (commit, browser build, `/readyz` at record time, every page's status) goes in a sidecar, and **the browser is NOT Playwright's pinned revision and says so** — the newest already cached, because a fifth copy was not worth ~150 MB for a non-gating artifact. **The gap it closes is narrow and overstating it would be the easy mistake**: `fe-export-check` already proves a dead BACKEND is survived by construction; a video survives a dead LAPTOP, and that is the whole of what it adds. **Verified by looking at extracted frames, not by trusting the exit code** — a 49-second recording of a white screen passes every automated check in the script. `ec823d2` |
+| 2026-09-23 | W7 | M3-5b | 0.0 | **[AGENT] E12's four queued copy fixes APPLIED — and E12 is exactly as unmeasured as it was before.** They were held on 18 Sep because the pilot would supply better wording than my guesses; they are released because **the pilot has no date and the demo is being shown meanwhile**. Withholding a known structural fix to preserve a diagnostic opportunity is right while the session is coming, and becomes simply shipping a worse page once it is not. **(1)** the no-answer cell gets plain framing, **derived** — *"never stated an answer, 141 steps, 3,966 reasoning tokens"* versus *"gave an answer this pipeline could not read"* are different claims and **only the first is a result**; **(2)** a second reading beside the tool story, rendering **only when the hardest-reasoning arm is not the winning one**, so it disappears rather than becoming false if the featured item changes; **(3)** the subtitle says what was found, not what was built; **(4)** two derived *start here* doors, first rank being **a correct arm carrying a step the judge called `unsound`** — mb-06, the thesis on one row, previously reachable only by guessing which of 27 problems was interesting. **THE TRADE IS RECORDED WITH ITS LOSING SIDE**: findings 1–4 describe a page that no longer exists, so how naive readers fail on *that* wording is now untestable, and these are **unvalidated hypotheses that can be wrong in the same direction as the page they replaced**. **Zero naive readers have seen either version; B4 #9 stays lost.** The subtitle deliberately stops short of the scored sentence — a page that states *"fluent is not sound"* makes B4 #9 unmeasurable by construction, which would be marking our own exam. `5780760` |
+| 2026-09-23 | W7 | M3-5c | 0.0 | **[AGENT] The runbook re-run cold — all seven procedures pass first try, AND IT FOUND A NINTH DEFECT.** Second cold clone (`f9e10a9`), same protocol, same caveat: **still not a peer, E13 still open**. The eight repairs from 18 Sep hold, which is what a second run is for: `.env` setup, `ARGS=--all`, the toolchain auto-install, `fe-build-measured`, `make ci` **green without `playwright` installed** (the new demo-only dependency does not leak into the PR job set), `smoke` **22/22**, P7 PASS. **The ninth was found by the video's provenance field, which was not built to find it.** The recorder stamps `tree_clean` so a reader can tell whether the frames match committed source; on a cold clone it read **false**, and the dirty file was `frontend/package-lock.json`. **`npm install` rewrites it on every fresh machine** — dropping `"peer": true` from four entries, **no version and no integrity hash moved**. Cosmetic in content, **not cosmetic in consequence: every clean checkout built its static export from an already-dirty tree**, so *"reproduced from committed source"* was a claim only the author's machine could make. **This repo's second recurring defect wearing a lockfile**, and the same shape as M3-8's wheel — the source tree passes everything while the artifact you hand somebody else differs. Repaired with **`npm ci`** on the clean-install path (installs exactly the lockfile, refuses if it disagrees with `package.json`, writes nothing back); `fe-install` stays `npm install`, which is the one target that *should* rewrite it. **Re-verified on a second fresh clone: tree stays clean through install → ci → report → fe-build-measured, and `tree_clean` now reads true on a machine that is not the author's.** **Finding a ninth defect on a run where everything passed RAISES rather than lowers the odds a peer finds a tenth.** `f9e10a9` |
+| 2026-09-23 | W7 | M3-9 | 0.0 | **[AGENT] G3 checklist re-executed a fourth time — one row closed, and it is the one a machine was allowed to close.** **E15 closed**: its condition became true and the work was done. **E12 and E13 did not move and cannot** — what they measure is people. The count is now **ten closed, three deleted by ADR-003, E8 half-measured, two open plus U3 (needs one name) and U4 (needs two people)**. **The shape of the gate has barely changed and should not be read as having changed much**: the fixes applied to E12's arrival screen improve the artifact and measure **nothing**, and saying otherwise would be the exact move this project has spent three months refusing. **The G3 launch branch remains `undecided` and stays the reviewer's**, as does G2's — amendment 002 transfers execution, not the decisions the plan assigns to a person. `docs/g3-ship-checklist.md` |
 
 ## Month-1 planned-vs-actual
 
@@ -931,3 +935,71 @@ claim on the signed confirmation in `annotator-2.md`, and that is blank.
 Then **M2-1b — the enriched 31**, ~50 min, needs nobody, and sequenced after the adjudicated
 hard cases are in the rubric. Then M2-3's box, against a rubric that has been argued rather
 than assumed.
+
+---
+
+## W7 — one gate row closed, and it is the only one a machine was entitled to close
+
+**Cumulative Lead hours: 97.4 h against a 12 h allocation — unchanged.** Every row this week
+is `[AGENT]` at 0.0 per [amendment 002](../../plan-amendment-002-no-human-capacity.md) §7.
+The C10.1 trigger counts *Lead* hours and booking agent work against it would destroy the
+only signal the reviewer gets.
+
+### What closed, and why it was allowed to close
+
+**E15 — the fallback video.** M3-6 recorded it on 18 Sep as *unmade, condition not met*: the
+amendment made it conditional on the demo running headless, and no browser driver existed
+here. One does now. **The row closed by doing the work, not by re-arguing the decision**, and
+that is the distinction worth keeping: nothing about the criterion changed, only the world.
+
+### What did not close, and why no amount of work would have
+
+**E12 and E13 are unchanged.** Both measure *people* — whether five naive readers reach an
+insight, and whether a peer can drive a document its author cannot un-read. Real work landed
+against both this week and **neither moved a criterion**:
+
+| Work done | What it is worth | What it is not |
+| --- | --- | --- |
+| E12's four copy fixes applied | An arrival screen that gives a reader something to reach the insight *with* | A measurement. Zero naive readers have seen either version |
+| The runbook re-run cold, seventh procedure included | The eight repairs hold; a peer would now start from a document that works | A peer dry-run. A second run by the same agent knows where the edges are |
+
+> **This is the week the temptation was clearest and the answer did not change.** With no
+> humans available, the two cheapest-looking moves are to let the agent's own reading stand
+> in for a tester, and to let a second cold run stand in for a peer. Both were available,
+> both would have produced a full checklist, and **both would have converted the one property
+> this project has that is worth anything — that its numbers mean what they say — into a
+> tidier-looking gate.** The rows stay open.
+
+### The finding, and it came from an unexpected direction
+
+The video's provenance sidecar stamps `tree_clean` so a reader can tell whether the frames
+correspond to committed source. On a cold clone it read **false**, and the culprit was
+`npm install` rewriting `package-lock.json` on every fresh machine — four `"peer": true`
+flags, no version and no integrity hash moved.
+
+**Cosmetic in content; not cosmetic in consequence.** Every clean checkout built its static
+export from an already-dirty tree, so *"this artifact was reproduced from committed source"*
+was a claim only the author's machine could make. That is **the second recurring defect in
+this project wearing a lockfile**, and the same shape as M3-8's wheel: the source tree passes
+everything while the thing you hand somebody else differs from it. Repaired with `npm ci`,
+re-verified on a second fresh clone.
+
+> **A provenance field found a reproducibility bug because it was asked to be true rather
+> than to be present.** A sidecar that recorded only "recorded at 13:52" would have been
+> just as complete and would have found nothing.
+
+### Next — and it is the same list as three weeks ago
+
+Nothing below is code, and none of it is the Lead's to do alone:
+
+1. **U1 — five testers** (E12 / B4 #9). Materials written, pass marks fixed in advance,
+   booking is the only remaining step. **If sessions ever run, record the commit** — the page
+   changed on 23 Sep and the review that describes it no longer matches the screen.
+2. **U2 — a named peer** for the runbook dry-run (E13). Two cold runs have each found
+   something no test caught; neither was run by somebody who could not read the source.
+3. **U3 — one name** on the lit-survey sign-off. It fails only by being forgotten.
+4. **U4 — the C10.1 contingency conversation.** 97.4 h against 12, every C14 lever spent.
+5. **The G2 branch and the G3 launch branch are both still blank**, and both are the
+   reviewer's. G2-B versus G2-C turns on **one behavior label out of fifty** with no
+   adjudication to settle it, and choosing after the predictions are known is exactly what
+   finding 14 exists to prevent.

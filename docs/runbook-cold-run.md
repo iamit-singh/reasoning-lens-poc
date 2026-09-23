@@ -7,6 +7,7 @@
 | **Verdict** | **E13 DOES NOT CLOSE.** This is not a peer dry-run and does not become one |
 | **Run** | 18 Sep 2026 (W6), from `git clone` of `d3073bb` into a directory outside the repo |
 | **Result** | **8 of the runbook's commands did not work as written.** All six procedures now execute cold |
+| **Re-run** | **23 Sep 2026 (W7)**, from `git clone` of `f9e10a9`. **All seven procedures execute cold with no repair** — and it found a ninth defect, [below](#the-second-cold-run-23-sep--everything-passes-and-one-more-thing-was-wrong) |
 
 ---
 
@@ -294,3 +295,67 @@ not as a blocked task awaiting a booking. U2 remains open and remains the tech l
 > The honest summary: the runbook had never been read by anyone who needed it, and it shows.
 > One afternoon against a clean clone found eight broken commands and one silent erasure of
 > a published headline. That is an argument for the peer dry-run, not a substitute for it.
+
+
+---
+
+## The second cold run, 23 Sep — everything passes, and one more thing was wrong
+
+Same protocol, same boundary, same caveat: **still not a peer, and E13 still does not
+close.** `git clone` of `f9e10a9` into a directory outside the repo, fresh venv, reading
+only the document.
+
+### What ran, in order, with no repair needed
+
+| Step | Result |
+| --- | --- |
+| `cp .env.example .env` + the two hand-set values | Exactly as the runbook's first-time-setup table says. **This is the repair that made the first cold run's biggest gap disappear** — nothing in the repo used to say `.env` had to exist |
+| `make install` | clean |
+| `make ci` | **green**, and green *without* `playwright` installed — the new demo-only dependency does not leak into the PR job set |
+| `make spans` + `make report ARGS=--all` | 14 reports. **`ARGS=--all` is in the document now**; on 18 Sep P4 exited 2 because the author always typed it and the runbook never learned it |
+| `make fe-build-measured` | clean, and it installs the toolchain itself |
+| `make fe-export-check` | PASS |
+| `make smoke` | **22/22** |
+| `make demo-video` (P7) | PASS — 5 surfaces, 200 each, 0 stale |
+
+**Eight of eight, first try.** The first cold run's eight defects are repaired and stayed
+repaired, which is the thing a second run is actually for.
+
+### The ninth defect — a clean clone was rewriting its own lockfile
+
+**Found by the video's provenance field, which was not built to find it.** The recorder
+stamps `tree_clean` so a reader can tell whether the frames correspond to committed source.
+On the cold clone it came back **false**, and the dirty file was `frontend/package-lock.json`.
+
+`npm install` had rewritten it during the build — dropping `"peer": true` from four entries,
+with **no version and no integrity hash moved**. Cosmetic in content; not cosmetic in
+consequence:
+
+> **Every clean checkout built its static export from an already-dirty tree.** So *"this
+> artifact was reproduced from committed source"* was a claim only the author's machine
+> could make — this repo's second recurring defect, wearing a lockfile. It is the same shape
+> as M3-8's wheel: the source tree passes everything while the thing you hand somebody else
+> differs from it.
+
+Repaired by using **`npm ci`** on the clean-install path, which installs exactly what the
+lockfile says, refuses if it disagrees with `package.json`, and writes nothing back.
+`make fe-install` deliberately stays `npm install`, because that target exists for changing
+dependencies on purpose. **Re-verified on a second fresh clone: the tree stays clean through
+`install → ci → report → fe-build-measured`, and `tree_clean` now reads `true` on a machine
+that is not the author's.**
+
+### What this does to E13 — still nothing
+
+**The peer dry-run is still owed, and is still U2's.** A second cold run by the same agent
+that did the first is *less* informative than the first, not more: I now know where the
+document's edges are, which is exactly the knowledge a peer would not have.
+
+What it adds is narrow and worth stating precisely: **the eight repairs hold from a clean
+clone**, so a peer arriving now starts from a document that works rather than one that
+exits 2 on its fourth procedure. That raises the value of the dry-run when it happens; it
+does not perform it.
+
+> The argument from the first run is unchanged and still the honest read: **finding a ninth
+> defect on a run where everything passed raises rather than lowers the odds a peer finds a
+> tenth.** Two cold runs have now each found something no test caught, and neither was run
+> by somebody who could not read the source.
