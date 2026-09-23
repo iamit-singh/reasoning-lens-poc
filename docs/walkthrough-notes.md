@@ -57,6 +57,43 @@ is a thing the page failed to say, and it is recorded as such rather than answer
 "In their own words" means **verbatim quotes, not a tick**. The phrasing testers reach for
 is more useful than the score — it is the copy the page should have used.
 
+## Two ways to run it, and which one to prefer
+
+**Attended (the original protocol, below) is the better instrument.** Use it if a
+facilitator is available.
+
+**Self-administered ([`walkthrough-kit.html`](walkthrough-kit.html)) exists because the
+facilitator was the binding constraint, not the testers.** Five scheduled 20-minute
+sessions with someone present is why this row has sat open since W1 — not because five
+people are impossible. The kit turns the ask into *send a link, collect a file*: it reads
+the script verbatim, asks the same five questions, times the read, and produces a JSON file
+the tester sends back. **No network, no analytics, nothing posted** — verified by driving
+it in a browser and asserting zero external requests, which also keeps C14.2's no-consent-
+banner posture intact.
+
+| | Attended | Self-administered |
+| --- | --- | --- |
+| Naive testers required | **5** | **5** — unchanged, and unsubstitutable |
+| Facilitator required | yes | **no** |
+| Scheduling | 5 synchronous slots | none |
+| Hesitations observed | **yes** | **no** |
+| Can prompt by accident | yes | **no** |
+
+**The kit is stricter in one way and weaker in another, and the weaker way matters more.**
+It cannot prompt — no nod, no half-answered question, and every answered question
+invalidates an *unaided* result. But this file says hesitations are *"cheaper to fix than
+failures and usually predict them"*, and **an unattended session loses all of them.** What
+comes back is what the tester chose to type, which is strictly less than what a facilitator
+would have seen.
+
+> **The kit does not score itself.** Whether an answer states the insight is precisely the
+> judgement B4 #9 measures, and a kit that graded its own responses would be the author
+> marking the exam with extra steps. It records verbatim text and stops; scoring is a human
+> step, against the pass marks fixed above.
+
+**Record which mode each session used** — the `attended` field is in every returned file.
+Mixing modes in one sample is acceptable; not recording which is not.
+
 ## Recruiting
 
 Five people, ~20 minutes each. **Not from this project**, and ideally not all engineers —
@@ -98,15 +135,15 @@ being measured. If they get there, it must be unprompted.
 
 ## The record — fill in after each session
 
-| # | Date | Tester (role) | Build (commit) | Completed unaided? | Stated the insight? | Time |
-| - | ---- | ------------- | -------------- | ------------------ | ------------------- | ---- |
-| Pilot 1 | | | | | | |
-| Pilot 2 | | | | | | |
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
+| # | Date | Tester (role) | Build (commit) | Mode | Completed unaided? | Stated the insight? | Time |
+| - | ---- | ------------- | -------------- | ---- | ------------------ | ------------------- | ---- |
+| Pilot 1 | | | | | | | |
+| Pilot 2 | | | | | | | |
+| 1 | | | | | | | |
+| 2 | | | | | | | |
+| 3 | | | | | | | |
+| 4 | | | | | | | |
+| 5 | | | | | | | |
 
 **Result:** *(not yet measured)* — completion _/5 · insight _/5
 

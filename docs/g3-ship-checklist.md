@@ -31,8 +31,8 @@ branches ship, and G3 has no failure outcome.
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
-| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. Booking is the only remaining step. **23 Sep: the four queued copy fixes are applied** — that improves the artifact and measures nothing; see the deviation below |
-| **E13** | Runbook **exercised by another team member** | ⏳ **half closed, and not closable** (amendment 002 §4) | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead. **Re-run cold 23 Sep at `f9e10a9`: all seven procedures pass first try** — and it still found a ninth defect (a clean clone rewrote its own lockfile), which is the argument *for* the dry-run |
+| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. **23 Sep: the four queued copy fixes are applied**, and a [self-administered kit](walkthrough-kit.html) removes the facilitator and the scheduling — *send a link, collect a file*. **Five naive testers are still required and still unsubstitutable.** The ask is now as small as it can honestly be made |
+| **E13** | Runbook **exercised by another team member** | ⏳ **half closed, and not closable** (amendment 002 §4) | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead. Re-run cold 23 Sep: all procedures pass, and it still found a ninth defect. **`make runbook-check` now runs on every PR** and asserts every command the runbook prints actually exists — the mechanical half, which is the half that was finding things (8 of 9 defects were exit codes). **It says nothing about whether a stranger can follow the document**, which is what E13 asks |
 | **E14** | Wheel installs in a clean venv and runs on third-party spans | ✅ **closed** | `make wheel`. Failed on its first run — the JSON Schema was not packaged — and that defect is the argument for the check existing |
 | **E15** | Embed snippet + fallback video. **Not a launch gate** | ✅ **closed 23 Sep** | Embed **deleted** by ADR-003 (no host, no hostile input path). **The fallback video is made** — `make demo-video`, [`demo-fallback.webm`](demo-fallback.webm), 49 s, 1280×800, five surfaces in one continuous pass with nothing edited, recorded against the cached read path with `OPENAI_API_KEY` stripped. Amendment 002 §4 made it conditional on the demo running headless; on 18 Sep no driver existed here and it was recorded as unmade, and that condition is now met. Provenance in [`demo-fallback.json`](demo-fallback.json). See the deviation below |
 | **E16** | This checklist executed, every open row with an owner and a date | ✅ **closed by this file** | Re-execute at G3 |
@@ -268,6 +268,33 @@ wording, and those four findings are now untestable. Both halves are recorded in
 > is not the same as sound" would put the scored sentence on the screen and make B4 #9
 > unmeasurable by construction. Giving a reader something to reach it with is the fix;
 > giving them the sentence would be marking our own exam.
+
+### What was done on 23 Sep for the two rows that cannot close
+
+Neither row moved. **Both asks got smaller**, which is the only thing a machine could
+contribute, and it is worth separating from progress on the criteria.
+
+| | The ask before | The ask now | What is unchanged |
+| --- | --- | --- | --- |
+| **E12** | 5 naive testers **+ a facilitator + 5 scheduled 20-minute slots** | 5 naive testers. Send [`walkthrough-kit.html`](walkthrough-kit.html), collect 5 files | **Five people who have never seen the demo.** Unsubstitutable (amendment 002 §2) |
+| **E13** | A peer reads the runbook **and discovers whatever has rotted since it was written** | A peer reads a runbook whose commands are CI-verified to exist | **A person who did not write it, driving it.** Unsubstitutable |
+
+**The kit is stricter in one way and weaker in another**, and the weaker way is the one to
+weigh: it cannot prompt — no nod, no half-answered question — but an unattended session
+loses the *hesitations* the protocol calls *"cheaper to fix than failures and usually
+predict them"*. If a facilitator is ever available, the attended protocol is better and the
+kit should not be used instead of it.
+
+> **`make runbook-check` does not substitute for the dry-run and the script says so in its
+> own docstring.** It removes the class of failure where a peer's scarce hour is spent
+> discovering that a target was renamed six weeks ago. E13 asks whether somebody else can
+> *follow* the document — whether the steps are in a followable order, whether a procedure
+> assumes knowledge it never states, whether the reader gives up. **None of that is
+> checkable by a machine**, and this check passing says nothing about it.
+>
+> Its three branches were negative-tested — a renamed target, a renamed flag and an
+> undocumented env var each fail it by name — because a check that has only ever passed is
+> not evidence of anything.
 
 ## Open rows, with owners and dates
 

@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
+        boundaries schema-freeze rubric-drift calibration-page runbook-check backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo demo-video live-latency clean
 
@@ -63,6 +63,14 @@ rubric-drift:  ## C5.3 -- the taxonomy block must be byte-identical in prompt an
 calibration-page:  ## E9 -- the calibration page hard-codes no numbers
 	./scripts/check_calibration_page.sh
 
+# E13's MECHANICAL half, and the half that was actually finding things: eight of the nine
+# defects two cold runs found in the runbook were exit codes -- a target that did not
+# exist, a flag the document never learned. None of that needed a person, it needed
+# somebody to run the commands from a clean checkout. Now it runs on every PR.
+# It says NOTHING about whether a stranger can follow the document, which is what E13 asks.
+runbook-check:  ## E13 -- every command the runbook prints must exist
+	$(BIN)/python scripts/check_runbook.py
+
 # `spans` runs FIRST, and that it was missing is M3-5c's third cold-run finding. `out/` is
 # gitignored because it is derived (correctly -- committing it is how a derivation quietly
 # stops being run), so on a fresh checkout `contract` and `integration-mock` have no span
@@ -71,7 +79,7 @@ calibration-page:  ## E9 -- the calibration page hard-codes no numbers
 # runbook's opening pair did not, so `make install && make ci` was green only where `out/`
 # already existed. Replay is offline, free and takes seconds -- there was never a reason
 # for the caller to have to know.
-ci: spans lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page  ## everything a PR runs
+ci: spans lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page runbook-check  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3

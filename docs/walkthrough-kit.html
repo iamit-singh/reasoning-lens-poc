@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reasoning Lens — 15 minute read-through</title>
+<!--
+  E12 / B4 #9's SELF-ADMINISTERED KIT (M3-5b).
+
+  WHAT THIS IS FOR, AND WHAT IT DOES NOT DO.
+
+  B4 #9 needs five people who have never seen the demo. That has not moved and this file
+  does not move it: a reader who can read the source is not a naive viewer, and nothing
+  here substitutes anybody for a tester. Amendment 002 §2 is unchanged.
+
+  What it removes is the OTHER two blockers. The protocol in walkthrough-notes.md needs a
+  facilitator to read a script, stay silent, and take notes for ~20 minutes per tester,
+  five times, at times five people are simultaneously free. That is why the row has sat
+  open since W1 -- not because five people are impossible, because five SCHEDULED SESSIONS
+  WITH A FACILITATOR are expensive. This turns the ask into "send a link, collect a file".
+
+  IT IS ALSO A STRICTER INSTRUMENT IN ONE RESPECT, which is worth saying because it is
+  counter-intuitive: a facilitator can prompt by accident -- a nod, a hesitation answered,
+  a question half-addressed -- and every answered question invalidates that tester's
+  "unaided" result. THIS CANNOT PROMPT. It reads the script verbatim and then does nothing.
+
+  AND IT IS A WEAKER INSTRUMENT IN ANOTHER, which matters more and is NOT hidden: the
+  protocol values "hesitations -- where they paused, re-read, or scrolled back", and says
+  they are cheaper to fix than failures and usually predict them. AN UNATTENDED SESSION
+  LOSES ALL OF THAT. What comes back is what the tester chose to type, which is strictly
+  less than what a facilitator would have seen. If a facilitator is ever available, the
+  attended protocol is the better one and this should not be used instead of it.
+
+  IT DOES NOT SCORE ITSELF. Whether an answer "states the insight" is the judgement B4 #9
+  measures, and a kit that graded its own responses would be the author marking the exam
+  with extra steps. It records verbatim text and stops.
+
+  NO NETWORK, NO ANALYTICS, NO POST. Everything stays in the page until the tester chooses
+  to download it. C9.3/C14.2: the demo has no free text, no accounts and no analytics, and
+  therefore needs no consent banner -- adding a telemetry endpoint here to collect answers
+  would convert a no-consent artifact into a consent-banner one, on the refuse-list. The
+  tester downloads a file and sends it however they like.
+-->
+<style>
+  :root{
+    color-scheme: light dark;
+    --ground:#eceff0; --surface:#fbfcfc; --sunk:#e3e8e9;
+    --ink:#131a1c; --ink-2:#3c4a4d; --muted:#67767a;
+    --rule:#d2dadb; --accent:#1f4e6b; --ok:#2c6a4b; --ok-soft:#dbeae0;
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --ground:#12181a; --surface:#1a2124; --sunk:#0d1214;
+    --ink:#e8eeef; --ink-2:#c3cfd1; --muted:#93a2a5;
+    --rule:#2c3639; --accent:#7ab6d8; --ok:#7cc39a; --ok-soft:#17281f;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:22px;margin:0 0 4px} h2{font-size:17px;margin:28px 0 8px}
+  p{max-width:66ch} .muted{color:var(--muted);font-size:14px}
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+    padding:20px 22px;margin:18px 0}
+  .quote{border-left:3px solid var(--accent);background:var(--sunk);
+    padding:14px 16px;border-radius:3px;margin:14px 0}
+  textarea{width:100%;min-height:120px;padding:10px 12px;border-radius:4px;
+    border:1px solid var(--rule);background:var(--surface);color:var(--ink);
+    font:inherit;font-size:15px;resize:vertical}
+  button{font:inherit;font-size:15px;padding:9px 18px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--accent);background:var(--accent);color:var(--surface)}
+  button.ghost{background:transparent;color:var(--accent)}
+  button[disabled]{opacity:.45;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .step{display:none} .step.on{display:block}
+  .done{background:var(--ok-soft);border-left:3px solid var(--ok);padding:14px 16px;
+    border-radius:3px}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:13.5px}
+  label{display:block;font-weight:600;margin:18px 0 6px}
+  .timer{font-family:ui-monospace,Menlo,monospace;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ------------------------------------------------------------------ 1. brief -->
+<section id="s1" class="step on">
+  <h1>Thanks for doing this</h1>
+  <p>This takes about <strong>15 minutes</strong>. You will look at a web page and answer
+     four questions in your own words.</p>
+
+  <div class="card">
+    <p><strong>I am not testing you.</strong> I am testing whether the page explains
+       itself. If you get stuck or find it confusing, <em>that is the result I need</em> —
+       please say so rather than working harder at it.</p>
+    <p class="muted">There are no right answers, nothing is timed against you, and nobody
+       will see this except the person who sent it to you.</p>
+  </div>
+
+  <h2>Two things that matter</h2>
+  <p><strong>Do not look anything up</strong>, and do not ask the person who sent this
+     what the page means. If you would normally ask, write the question down instead —
+     that is one of the questions below, and it is genuinely useful.</p>
+  <p><strong>Answer from the page alone.</strong> If you already know this project or have
+     seen the demo before, please stop here and say so — the measurement only works with
+     people meeting it fresh.</p>
+
+  <label for="who">Your role, roughly (e.g. “designer”, “backend engineer”, “ops”)</label>
+  <input id="who" style="width:100%;padding:10px 12px;border-radius:4px;
+    border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:inherit">
+
+  <div class="row">
+    <button onclick="go(2)">Start</button>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------------ 2. the question -->
+<section id="s2" class="step">
+  <h1>Open the page, then answer this</h1>
+  <p class="muted">Open the link you were sent in another tab. Take as long as you like —
+     click around, follow anything that interests you. Come back when you feel you have
+     got it.</p>
+
+  <div class="quote">
+    <strong>What is this page telling you about how this AI reasons?</strong>
+  </div>
+
+  <p class="muted timer" id="t2">—</p>
+
+  <label for="q0">Write your answer here, in your own words</label>
+  <textarea id="q0" placeholder="Whatever you would say if someone asked you over coffee."></textarea>
+
+  <div class="row">
+    <button onclick="go(3)">Done — next questions</button>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------------ 3. debrief -->
+<section id="s3" class="step">
+  <h1>Three more, then you are finished</h1>
+
+  <label for="q1">1. In your own words, what is this page showing?</label>
+  <textarea id="q1"></textarea>
+
+  <label for="q2">2. Did anything surprise you?</label>
+  <textarea id="q2"></textarea>
+
+  <label for="q3">3. Was there anything you didn’t trust, or wanted to check?</label>
+  <textarea id="q3"></textarea>
+
+  <label for="q4">4. Was there anything you would have asked, if you could have?</label>
+  <textarea id="q4" placeholder="Every question here is a place the page failed to explain itself. Blank is a fine answer."></textarea>
+
+  <label for="q5">5. Did you get stuck at any point, or nearly give up?</label>
+  <textarea id="q5" placeholder="Where, and what you did next."></textarea>
+
+  <div class="row">
+    <button onclick="finish()">Finish</button>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------------ 4. hand back -->
+<section id="s4" class="step">
+  <h1>That’s everything — thank you</h1>
+  <div class="done">
+    <p style="margin:0"><strong>Nothing has been sent anywhere.</strong> This page has no
+      network connection and no analytics. Download the file below and send it back
+      however you like.</p>
+  </div>
+  <div class="row">
+    <button onclick="download()">Download my answers</button>
+    <button class="ghost" onclick="copy()">Copy to clipboard instead</button>
+  </div>
+  <p class="muted" id="saved"></p>
+  <p class="muted">If you are curious what this was about, ask the person who sent it —
+     <em>after</em> you have sent the file. Knowing the answer first is exactly what the
+     exercise is designed to avoid.</p>
+</section>
+
+</div>
+<script>
+// No framework, no network, no storage that outlives the tab unless the tester downloads.
+let started = null, readSeconds = null;
+const el = (id) => document.getElementById(id);
+
+function go(n){
+  if (n === 2 && !started){
+    started = Date.now();
+    tick();
+  }
+  if (n === 3 && readSeconds === null){
+    readSeconds = Math.round((Date.now() - started) / 1000);
+  }
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('on'));
+  el('s' + n).classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+function tick(){
+  if (readSeconds !== null) return;
+  const s = Math.round((Date.now() - started) / 1000);
+  el('t2').textContent = 'Time on the page: ' + Math.floor(s/60) + 'm ' + (s%60) + 's — no rush, this is recorded but not judged.';
+  setTimeout(tick, 1000);
+}
+
+function payload(){
+  return {
+    kit: 'reasoning-lens B4#9 self-administered',
+    // The kit records; it does NOT score. Whether an answer states the insight is the
+    // judgement B4 #9 measures, and a kit that graded itself would be marking its own exam.
+    scored: false,
+    note: 'Verbatim answers. Scoring is a human step -- see docs/walkthrough-notes.md.',
+    completed_utc: new Date().toISOString(),
+    role: el('who').value.trim() || null,
+    seconds_on_page: readSeconds,
+    attended: false,
+    answers: {
+      main_question: el('q0').value.trim(),
+      in_your_own_words: el('q1').value.trim(),
+      surprised: el('q2').value.trim(),
+      didnt_trust: el('q3').value.trim(),
+      would_have_asked: el('q4').value.trim(),
+      got_stuck: el('q5').value.trim()
+    }
+  };
+}
+
+function finish(){ go(4); }
+
+function download(){
+  const blob = new Blob([JSON.stringify(payload(), null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'reasoning-lens-readthrough.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  el('saved').textContent = 'Downloaded. Please send that file back.';
+}
+
+function copy(){
+  const t = JSON.stringify(payload(), null, 2);
+  navigator.clipboard.writeText(t).then(
+    () => el('saved').textContent = 'Copied. Paste it into a reply.',
+    () => el('saved').textContent = 'Could not copy — use the download button instead.'
+  );
+}
+</script>
+</body>
+</html>
