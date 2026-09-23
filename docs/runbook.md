@@ -389,6 +389,14 @@ dollars honestly — so the guard that actually binds is the **call budget** in
 `/readyz` as `live_run_budget`. Read `spent_usd: 0.0` as *"nothing here can price this"*,
 never as *"this was free"*.
 
+**How long it takes, measured rather than guessed** (`make live-latency`, n=14): p50 **33 s**,
+p90 **102 s**, max **253 s**. The max is `mb-08` — the item the landing page features and the
+one with 4,100 reasoning tokens — so **the single re-run a visitor is most likely to trigger
+is the slowest one in the corpus**, at four minutes. Budget is 120 s at p90.
+
+> The panel's own copy says "takes about a minute", which is right at the median and wrong on
+> the featured item. Open defect, named in the G3 checklist rather than reworded on a guess.
+
 **The report a live run builds is not a published measurement.** It carries `live: true`, no
 `measurement_context`, and it was never stamped. It is one unrepeated run. The cached report
 at `/api/report/{id}` is the number everyone else sees, and the two genuinely differ — a

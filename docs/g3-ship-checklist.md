@@ -5,7 +5,7 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — **11 closed** (E2 and E15 closed 23 Sep), E8 half, 2 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
+| **Status** | ⏳ **in progress** — **11 closed** (E2, E15 closed 23 Sep), **E8 both halves measured — p90 passes, tail fails**, 2 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
 | **Last executed** | **23 Sep 2026 (W7)** — fourth execution. **E15 closed**: its stated condition ("if the demo runs headless") became true and the video is made. E12's queued copy fixes are applied — which changes the page, not the measurement. First execution 12 Sep, re-executed 16 Sep after G2 and 18 Sep with the substitutes |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
@@ -27,7 +27,7 @@ branches ship, and G3 has no failure outcome.
 | **E5** | Spend breaker verified by a **forced trip**, reset procedure in the runbook | ✅ **closed** | `make trip-breaker` / `make reset-breaker` go through the real code path. Runbook procedure **P3**. Test: `test_a_forced_trip_denies_the_live_route` |
 | **E6** | Auto-rollback demonstrated by a deliberately failed smoke test | ⛔ **deleted** | ADR-003: nothing is deployed, so there is nothing to roll back to. ~0.7 h released |
 | **E7** | Live at the custom domain over TLS, incognito + phone | ⛔ **deleted** | ADR-003: no public hostname, no cloud service. The DNS ticket was drafted and correctly never filed |
-| **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **cached half closed; live half now measurable and NOT measured** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. The live half needed E2, and **E2 now exists** — so this stops being *not applicable* and becomes *unmeasured*, which is a worse status honestly stated. Two live runs were observed (97 s and 42 s wall-clock, n=2, uncontrolled) and **that is an observation, not B4 #8's measurement**: no percentiles, no n worth the name. Recorded as **half a measurement** |
+| **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **both halves measured — cached passes, live passes at p90 and FAILS in the tail** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. **Live half measured 23 Sep, n=14/14 over distinct bank items**: p50 **33.2 s**, p90 **101.6 s** against a 120 s budget, max **252.7 s**. The p90 passes. **One run exceeds the budget by 2.1×, and it is `mb-08` — the item the landing page features.** [`b4-8-live-latency.json`](b4-8-live-latency.json). Reported as a pass at p90 **and** a tail failure, because reporting only the first would be the more flattering half of one measurement |
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
@@ -116,22 +116,52 @@ that exists would be the exact failure this project has spent three months refus
 > evidence that the rule holds, not that the service is fast under load — nobody has put
 > it under load, and with one operator nobody will.
 
-**The live half was `null` with a reason, and as of 23 Sep the reason expired.** It read
-*"not applicable — the system that would produce it was deleted by ADR-003"*. E2 is built,
-so there is now a live path and the honest status is **unmeasured**, which is worse than
-not-applicable and is the correct answer.
+**The live half was `null` with a reason, the reason expired on 23 Sep, and it is now
+measured.** It had read *"not applicable — the system that would produce it was deleted by
+ADR-003"*. E2 exists, so it became **unmeasured** — worse, and correct — and then it was
+measured: `make live-latency`, **n = 14 of 14 successful**, one run per distinct bank item.
 
-Two live runs have been observed end to end — **97 s and 42 s** wall-clock, on one laptop,
-with the local model warm. **That is not B4 #8's live half** and must not be quoted as it:
-n=2, no percentiles, no control over what else the machine was doing, and generation time is
-dominated by a 20B model on consumer hardware rather than by anything this service does.
-Publishing a p90 from two runs is precisely the single-run inference this project has had to
-correct in writing twice.
+| | |
+| --- | --- |
+| p50 | **33.2 s** |
+| **p90** | **101.6 s** — under the 120 s budget |
+| max | **252.7 s** — `mb-08`, **2.11× the budget** |
+| spread | 24.9 s – 252.7 s, mean 58.9, σ 59.9 |
 
-> **What it would take:** the harness exists now (`POST /api/runs` plus the status route), so
-> this is a measurement job rather than a build. It spends real analysis calls per run, which
-> is why it has not been run on a whim — and the call budget in `backend/runs.py` is what
-> stops a measurement loop from becoming an unbounded one.
+### The headline passes and the tail does not, and both are the same measurement
+
+Reporting *"B4 #8 live: p90 101.6 s, meets the 120 s budget"* would be true, and would be
+the more flattering half of one result. Two things sit behind it:
+
+**1. The p90 at n=14 is a single observation.** Nearest-rank puts it at the 13th of 14
+values, so **one run determines the headline** — move it and the number moves. This project
+has had to correct single-run inference in writing twice (ADR-010's `backtracking = 0`,
+M2-3's cycle-3 "collapse"), and a percentile resting on one sample is the same error wearing
+a statistic's clothes. The file records `p90_rank` and `p90_rests_on_observations` so a
+reader sees this without recomputing it.
+
+**2. The one run that blows the budget is the one a visitor is most likely to trigger.**
+`mb-08` took **252.7 s** — four minutes — and `mb-08` **is the featured comparison on the
+arrival screen**, chosen by `featured()` because it is the most striking measured contrast in
+the corpus. It is also the item with 4,100 reasoning tokens and no answer, which is *why* it
+is both the best evidence on the site and the slowest thing to re-run.
+
+> **So the most likely single live re-run anybody performs is the worst case, not the
+> median.** A reviewer who opens the demo, reads the featured comparison and presses
+> *"Re-run this item live"* waits **four minutes** against a budget of two, having been told
+> by the panel's own copy that it "takes about a minute".
+>
+> That copy is now wrong on the one item it is most likely to be read on. **Not fixed here**:
+> the panel's estimate should come from this measurement rather than from a guess, and
+> wiring a measured figure into that sentence is a change to a published number's source,
+> not a copy tweak. It is named as an open defect instead of quietly reworded.
+
+**What the number cannot tell you**, and the file repeats these beside the result: one
+machine, one operator, **no concurrency** — this is latency, not capacity; **generation
+dominates and it is local**, so most of the wall clock is `gpt-oss:20b` on consumer hardware
+rather than anything this service does, and different hardware moves the number without the
+code changing; the model was **warm**, so a cold ollama load is excluded and would add tens
+of seconds.
 
 ### E12 and E13 — the two rows no amount of code closes
 
@@ -264,6 +294,10 @@ wording, and those four findings are now untestable. Both halves are recorded in
 > against both — E12's copy queue applied, E13's runbook re-run cold — and **neither moved a
 > criterion**. That is the result, not an apology for it.
 >
-> **One row got worse, and that is the honest consequence of building E2.** E8's live half
-> was *not applicable* while no live path existed; now one does, so it is **unmeasured**.
-> Building the thing that could produce a number does not produce the number.
+> **One row got worse before it got better, and the sequence is the honest part.** E8's live
+> half was *not applicable* while no live path existed; building E2 made it **unmeasured**;
+> measuring it made it **measured, and mixed** — p90 101.6 s inside a 120 s budget, with one
+> run of fourteen at 252.7 s. **The run that blows the budget is `mb-08`, the item the
+> landing page features**, so the most likely live re-run anybody performs is the worst case
+> rather than the median. Building the thing that can produce a number does not produce the
+> number, and producing it does not guarantee you like it.

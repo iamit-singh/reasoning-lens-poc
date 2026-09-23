@@ -1,0 +1,163 @@
+{
+  "_README": "B4 #8's LIVE half (C11.1: p90 < 120 s). Written by `make live-latency`. READ `headline` AND `tail` TOGETHER -- the p90 passes and the tail does not, and reporting only the first would be the more flattering half of one measurement. The CACHED half is measured separately and is not in this file.",
+  "budget_seconds_p90": 120,
+  "caveats": [
+    "THE p90 PASSES AND THE TAIL DOES NOT. Both are the same measurement.",
+    "At this n the p90 is ONE observation (see p90_rests_on_observations). Moving one run moves the headline -- this project has had to correct single-run inference in writing twice.",
+    "One machine, one operator, NO CONCURRENCY. This is latency, not capacity.",
+    "Generation dominates and it is LOCAL: most of the wall clock is gpt-oss:20b on consumer hardware, not this service. Different hardware moves the number without the code changing.",
+    "Model warm. A cold ollama load is excluded and would add tens of seconds.",
+    "Distinct bank items, not one repeated -- the thinking arm's cost is a property of the problem (see finding 13 for the same trap from the other end)."
+  ],
+  "max_seconds": 252.7,
+  "mean_seconds": 58.91,
+  "measured_utc": "2026-09-23T09:08:22Z",
+  "min_seconds": 24.94,
+  "n_attempted": 14,
+  "n_succeeded": 14,
+  "p50_seconds": 33.25,
+  "p90_meets_budget": true,
+  "p90_rank": "13 of 14",
+  "p90_rests_on_observations": 2,
+  "p90_seconds": 101.61,
+  "percentile_method": "nearest-rank, not interpolated",
+  "readyz_at_start": {
+    "analysis_tier": {
+      "ready": true,
+      "reason": "ok"
+    },
+    "bank_items": 14,
+    "breaker": {
+      "allowed": true,
+      "limit_usd": 10.0,
+      "reason": "ok",
+      "spent_usd": 0.0
+    },
+    "cached_reports": 14,
+    "calibration": true,
+    "demo_mode": "live",
+    "frontend_mounted": true,
+    "live_run_budget": {
+      "analysis_calls_limit": 120,
+      "analysis_calls_used": 0,
+      "note": "calls, not dollars -- prices.json is deliberately unpriced",
+      "per_run_limit": 8
+    },
+    "live_runs": true,
+    "stale_reports": [],
+    "status": "ok"
+  },
+  "runs": [
+    {
+      "analysis_calls": 3,
+      "item": "mb-01",
+      "reasoning_tokens": 49,
+      "seconds": 33.19,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-02",
+      "reasoning_tokens": 84,
+      "seconds": 30.37,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-03",
+      "reasoning_tokens": 69,
+      "seconds": 24.94,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-04",
+      "reasoning_tokens": 103,
+      "seconds": 29.67,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-05",
+      "reasoning_tokens": 266,
+      "seconds": 34.51,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-06",
+      "reasoning_tokens": 396,
+      "seconds": 38.8,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-07",
+      "reasoning_tokens": 562,
+      "seconds": 47.37,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-08",
+      "reasoning_tokens": 4100,
+      "seconds": 252.7,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-09",
+      "reasoning_tokens": 1456,
+      "seconds": 101.61,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-10",
+      "reasoning_tokens": 967,
+      "seconds": 77.59,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-11",
+      "reasoning_tokens": 272,
+      "seconds": 29.44,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-12",
+      "reasoning_tokens": 228,
+      "seconds": 33.25,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-13",
+      "reasoning_tokens": 831,
+      "seconds": 60.67,
+      "status": "done"
+    },
+    {
+      "analysis_calls": 3,
+      "item": "mb-14",
+      "reasoning_tokens": 302,
+      "seconds": 30.7,
+      "status": "done"
+    }
+  ],
+  "stdev_seconds": 59.92,
+  "tail": {
+    "over_budget": [
+      {
+        "item": "mb-08",
+        "seconds": 252.7
+      }
+    ],
+    "runs_over_budget": 1,
+    "worst_item": "mb-08",
+    "worst_seconds": 252.7,
+    "worst_vs_budget": 2.11
+  }
+}
