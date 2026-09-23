@@ -1,6 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// A local binding, because the `export { ARM_LABEL } from "./labels"` below re-exports
+// without bringing the name into this module's scope — `startHere()` names the arms.
+import { ARM_LABEL } from "./labels";
+
 /**
  * Report loading — the fixtures-first seam (C4.10).
  *
@@ -188,6 +192,85 @@ export function featured() {
       (b.ratio ?? 0) - (a.ratio ?? 0)
   );
   return scored[0];
+}
+
+/**
+ * Two items worth opening first (E12 queue #4).
+ *
+ * Finding 6 of the heuristic walkthrough review: **the route to the insight is opt-in.**
+ * Soundness verdicts, the flagged-step panel and the escalation state — the places where a
+ * step is shown to be fluent and still not hold up — live *inside* an item page, which a
+ * reader reaches only by choosing one of 27 problems in id order, led by *"what is the
+ * chemical symbol for potassium?"*. A reader who opens `mb-02` (*17 × 4*) meets three arms
+ * agreeing on 68, which correctly demonstrates nothing in particular, two clicks from the
+ * question they were asked.
+ *
+ * So the page offers a couple of doors rather than a directory. **Which doors is derived
+ * from the judged corpus, never a hand-kept list of ids** — the same argument `featured()`
+ * makes one function below: a list typed in today leads with whatever was interesting in
+ * October, and this one would additionally be a claim about the evidence that no longer
+ * matched it.
+ *
+ * The ranking is the strength of the demonstration, and the first rank is the whole point:
+ *
+ *   1. **a correct arm carrying a step the judge called `unsound`** — the right answer with
+ *      reasoning that did not hold up, which is the thesis on one row,
+ *   2. an arm that got it wrong with unsound steps to show for it,
+ *   3. else an item where the arms simply disagree.
+ *
+ * **The featured item is excluded**, since it is already the largest thing on the page, and
+ * authored fixtures are excluded outright: an invented illustration is the last thing that
+ * should be recommended as a starting point to someone deciding whether to trust this.
+ *
+ * Each entry carries `caveat: true` when its reason rests on a judge verdict, because
+ * pooled judge precision is **0.643** and the calibration page's instruction — *"treat every
+ * flagged step as a prompt to look, not as a finding"* — has to travel with the flag rather
+ * than sit on a page the reader may not open.
+ */
+export function startHere(excludeId = null, limit = 2) {
+  const scored = [];
+  for (const report of allReports()) {
+    if (report.item.id === excludeId || isAuthored(report)) continue;
+    const arms = armsOf(report);
+    const unsoundOf = (arm) =>
+      arm.steps.filter((s) => s.validity?.verdict === "unsound").length;
+
+    const rightButUnsound = arms.find((a) => a.correct === true && unsoundOf(a) > 0);
+    const wrongAndUnsound = arms.find((a) => a.correct === false && unsoundOf(a) > 0);
+    const splits =
+      arms.some((a) => a.correct === true) &&
+      arms.some((a) => a.correct === false || a.correct === null);
+
+    if (rightButUnsound) {
+      const n = unsoundOf(rightButUnsound);
+      scored.push({
+        rank: 0,
+        id: report.item.id,
+        prompt: report.item.prompt,
+        caveat: true,
+        reason: `${ARM_LABEL[rightButUnsound.strategy] ?? rightButUnsound.strategy} reached the right answer, and the judge marked ${n === 1 ? "a step" : `${n} steps`} of how it got there as not holding up.`,
+      });
+    } else if (wrongAndUnsound) {
+      scored.push({
+        rank: 1,
+        id: report.item.id,
+        prompt: report.item.prompt,
+        caveat: true,
+        reason: `${ARM_LABEL[wrongAndUnsound.strategy] ?? wrongAndUnsound.strategy} got this wrong, and the trace shows which step it went wrong at.`,
+      });
+    } else if (splits) {
+      scored.push({
+        rank: 2,
+        id: report.item.id,
+        prompt: report.item.prompt,
+        caveat: false,
+        reason: "The three arms do not agree on this one — the traces show where they part.",
+      });
+    }
+  }
+  return scored
+    .sort((a, b) => a.rank - b.rank || a.id.localeCompare(b.id))
+    .slice(0, limit);
 }
 
 /**

@@ -5,8 +5,8 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — 9 closed, 4 deleted by ADR-003, **3 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
-| **Last executed** | **18 Sep 2026 (W6)** — third execution. The three amendment-002 substitutes are filed and **none of them closed a row**; first execution 12 Sep (W5, ahead of W12), re-executed 16 Sep after G2 |
+| **Status** | ⏳ **in progress** — **10 closed** (E15 closed 23 Sep), E8 half, 3 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
+| **Last executed** | **23 Sep 2026 (W7)** — fourth execution. **E15 closed**: its stated condition ("if the demo runs headless") became true and the video is made. E12's queued copy fixes are applied — which changes the page, not the measurement. First execution 12 Sep, re-executed 16 Sep after G2 and 18 Sep with the substitutes |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
 > breakdown's own §1.3 says three rows cannot close and one has no owner at all, and that
@@ -31,10 +31,10 @@ branches ship, and G3 has no failure outcome.
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
-| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. Booking is the only remaining step |
+| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. Booking is the only remaining step. **23 Sep: the four queued copy fixes are applied** — that improves the artifact and measures nothing; see the deviation below |
 | **E13** | Runbook **exercised by another team member** | ⏳ **half closed, and not closable** (amendment 002 §4) | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead |
 | **E14** | Wheel installs in a clean venv and runs on third-party spans | ✅ **closed** | `make wheel`. Failed on its first run — the JSON Schema was not packaged — and that defect is the argument for the check existing |
-| **E15** | Embed snippet + fallback video. **Not a launch gate** | ⛔ **deleted / open** | Embed deleted by ADR-003 (no host, no hostile input path). **The fallback video is not deleted and is not made.** Owner: Lead |
+| **E15** | Embed snippet + fallback video. **Not a launch gate** | ✅ **closed 23 Sep** | Embed **deleted** by ADR-003 (no host, no hostile input path). **The fallback video is made** — `make demo-video`, [`demo-fallback.webm`](demo-fallback.webm), 49 s, 1280×800, five surfaces in one continuous pass with nothing edited, recorded against the cached read path with `OPENAI_API_KEY` stripped. Amendment 002 §4 made it conditional on the demo running headless; on 18 Sep no driver existed here and it was recorded as unmade, and that condition is now met. Provenance in [`demo-fallback.json`](demo-fallback.json). See the deviation below |
 | **E16** | This checklist executed, every open row with an owner and a date | ✅ **closed by this file** | Re-execute at G3 |
 
 ## Deviations, stated rather than smoothed over
@@ -122,17 +122,67 @@ reviewer evidence they did not have, under a name that does not overstate it.
 | Row | Substitute | What it changed | What it did not |
 | --- | --- | --- | --- |
 | **E13** | [`runbook-cold-run.md`](runbook-cold-run.md) | **Eight of the runbook's commands did not work from a clean clone**, including P4's — the procedure E4 and every staleness guarantee rest on — which exited 2. All six procedures now execute cold; `make ci` green from an empty clone in 33 s; `make smoke` 22/22 | **Not a peer.** The agent has read the codebase, so this is a *lower bound on the document's defects*, not a measure of its sufficiency. U2 still owes a peer dry-run |
-| **E12** | [`heuristic-walkthrough-review.md`](heuristic-walkthrough-review.md) | A specific, falsifiable hypothesis about **how B4 #9 would have failed**: the arrival screen argues tool-access while the criterion measures fluent-≠-sound, `sound`/`unsound`/`fluent` appear **zero times** on it, and the best counter-example on the page is labelled `unparsed`. Four queued copy fixes | **Zero naive readers.** B4 #9 stays **lost**. The four fixes are deliberately **not applied** — Hazard 4's argument is that the wording should come from testers' own phrasing, not the author's second guess |
+| **E12** | [`heuristic-walkthrough-review.md`](heuristic-walkthrough-review.md) | A specific, falsifiable hypothesis about **how B4 #9 would have failed**: the arrival screen argues tool-access while the criterion measures fluent-≠-sound, `sound`/`unsound`/`fluent` appear **zero times** on it, and the best counter-example on the page is labelled `unparsed`. Four queued copy fixes, **applied 23 Sep** | **Zero naive readers.** B4 #9 stays **lost**. Applying the fixes improves the artifact and measures nothing; it also spends the diagnostic value of the old wording, and both halves are recorded |
 | **U3 / C15.1 #10** | [`lit-survey-part-a-review.md`](lit-survey-part-a-review.md) | Part A's description of the field held up; **its two forward-looking judgements were both falsified by the PoC it recommended** — A9.3's "biggest risk" fired (κ 0.550, precision 0.643) with its stated mitigation unable to discharge it, and A9.1's faithfulness takeaway returned **0 of 48** on the model actually run. Five concrete fixes listed | **Not a sign-off.** Still an em dash where the owner should be. No source was fetched — no citation was checked against the paper it cites |
 
-**E15 is now decided rather than pending.** The embed half was deleted by ADR-003. The
-fallback video's own condition — amendment 002 §4, *"if the demo runs headless; otherwise
-unmade"* — **is not met**: there is no headless browser driver on this machine, and
-installing one to produce a non-gating artifact is not a call to make unilaterally. **The
-video is unmade and recorded as such.** What it was insurance against is partly covered
-already: `make fe-export-check` proves the static export renders **with every `<script>`
-stripped and nothing running**, so the demo survives a dead backend by construction (I4).
-A video additionally survives a dead *laptop*, and that gap is real and open.
+**E15 was decided rather than pending on 18 Sep, and on 23 Sep the decision reversed
+because its stated condition came true.** The embed half stays deleted by ADR-003 — no host,
+no hostile input path, nothing to set `frame-ancestors` on. The fallback video's condition —
+amendment 002 §4, *"if the demo runs headless; otherwise unmade"* — was **not met** on 18
+Sep: no driver on this machine, and installing one for a non-gating artifact was not a
+unilateral call. It **is** met now, so the video is made rather than argued about.
+
+## Re-executed 23 Sep 2026 (W7) — E15 closes, and E12's queue is applied without closing E12
+
+### E15 — made, and what it is worth is smaller than it looks
+
+`make demo-video` records **one continuous 1280×800 pass over five surfaces, 49 s, nothing
+edited** — unedited being a property of the script rather than a promise: one browser
+context, no cuts, no post-processing. It drives the demo the way P1 brings it up (the
+backend serving the static export, FE-9's single origin) with **`OPENAI_API_KEY` stripped**,
+for the same reason `make smoke` strips it — *we did not call the provider* and *we could
+not call the provider* are different claims, and only the second describes what a viewer is
+watching.
+
+**It refuses rather than recording something misleading.** If the export is not mounted, or
+any report is stale, the recorder exits non-zero: a recording of numbers attributed to a
+system that is no longer running is the most dishonest artifact this repo could ship, and it
+is *more* dangerous than a live page showing the same thing because a video cannot be
+re-checked against `/readyz`. Provenance — commit, browser build, `/readyz` at record time,
+every page's status — is written to [`demo-fallback.json`](demo-fallback.json) beside it.
+
+> **The gap this closes is narrow, and overstating it would be the easy mistake.**
+> `make fe-export-check` already proves the export renders **with every `<script>` stripped
+> and nothing running**, so a dead *backend* is covered by construction (I4) and covered
+> more strongly than by any recording. A video additionally survives a dead **laptop**.
+> That is the whole of what it adds. Whoever demos this should know which half is covered
+> by which artifact.
+>
+> One honest caveat, recorded rather than buried: the browser is **not** the revision
+> Playwright pins — it is the newest build already in this machine's cache, because
+> downloading a fifth copy for a non-gating artifact was not worth ~150 MB. Which build it
+> was is printed and written into the sidecar, never silently substituted.
+
+### E12 — the queue is applied, and E12 is exactly as unmeasured as before
+
+The four copy-and-ordering changes queued on 18 Sep are **applied**. The reason for holding
+them was that the pilot would supply better wording than the author's guesses; the reason
+for releasing them is that **the pilot has no date and the demo is being shown meanwhile.**
+Withholding a known structural fix to preserve a diagnostic opportunity is right while the
+session is coming and becomes simply shipping a worse page once it is not.
+
+**This closes nothing and must not be read as progress on B4 #9.** Zero naive readers have
+seen either version of the page. Applying a fix does not measure whether it worked, and the
+fixes are unvalidated hypotheses that can be wrong in the same direction as the page they
+replaced. What is gained is an arrival screen that gives a reader something to reach the
+insight *with*; what is given up is the chance to learn how readers failed on the old
+wording, and those four findings are now untestable. Both halves are recorded in
+[`heuristic-walkthrough-review.md`](heuristic-walkthrough-review.md).
+
+> **The subtitle deliberately stops short of stating the insight.** A page reading "fluent
+> is not the same as sound" would put the scored sentence on the screen and make B4 #9
+> unmeasurable by construction. Giving a reader something to reach it with is the fix;
+> giving them the sentence would be marking our own exam.
 
 ## Open rows, with owners and dates
 
@@ -140,13 +190,16 @@ A video additionally survives a dead *laptop*, and that gap is real and open.
 | --- | --- | --- | --- |
 | ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, smoke green with the key stripped. **Re-proven from a clean clone 18 Sep**, 22/22 | done |
 | ~~E8~~ | — | **Closed** — p50 0.9 / p90 1.0 / p99 1.3 ms over n=140; live half n/a with its reason (ADR-003) | done |
-| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall.** Heuristic review filed 18 Sep with four queued copy fixes | closed as a gap |
+| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall.** Heuristic review filed 18 Sep; its four copy fixes **applied 23 Sep**, which improves the page and measures nothing | closed as a gap |
 | **E13** | **Tech lead (U2)** | **Not closable by the substitute.** Cold-run filed 18 Sep and it found eight broken commands — which **raises** rather than lowers the odds a peer finds more. A named peer is still owed | open |
-| **E15** | Lead | **Video unmade**, condition not met (no headless driver). Embed deleted by ADR-003. Not a launch gate | open, decided |
+| ~~**E15**~~ | — | **Closed 23 Sep.** Video made (`make demo-video`, 49 s, unedited, provenance stamped); embed deleted by ADR-003. Not a launch gate | done |
 | **C15.1 #10 / U3** | **Reviewer — still unnamed** | Review report filed 18 Sep with five concrete fixes. **A sign-off is a person; the row needs one name** | open |
 | **U4** | **Tech lead + DM** | **The C10.1 contingency conversation. 97.4 h against a 12 h allocation, every C14 lever spent** | **The only row no amount of code advances** |
 
-> **The shape of the gate has not changed and should not be read as having changed.** Nine
-> rows closed, four deleted by ADR-003, and **three that need a human who is not the Lead**
-> — plus U4, which needs two. Three months of work did not make those four go away, and the
-> substitutes filed on 18 Sep are evidence *for* the rows rather than a discharge of them.
+> **The shape of the gate has barely changed, and should not be read as having changed
+> much.** Ten rows closed, three deleted by ADR-003, E8 half-measured, and **two that need a
+> human who is not the Lead** — plus U3, which needs one name, and U4, which needs two
+> people. E15 moved because a machine could finally do the work; **E12 and E13 did not move,
+> and cannot**, because what they measure is people. Three months of work did not make those
+> go away, and the substitutes filed on 18 Sep — plus the fixes applied on 23 Sep — are
+> evidence *for* the rows rather than a discharge of them.

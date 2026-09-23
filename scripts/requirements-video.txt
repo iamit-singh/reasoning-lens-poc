@@ -1,0 +1,12 @@
+# E15 / M3-6 — the fallback demo video ONLY (`make demo-video`).
+#
+# Deliberately its own file, and deliberately NOT in analyzer/backend requirements.
+# M3-5c's cold run found `make ci` could not pass from `make install` on any machine but
+# the author's, because fastapi/uvicorn/httpx were declared nowhere — an undeclared
+# dependency and a missing CI job hiding each other. The repair for that was to declare
+# things where they belong, so a demo-only browser driver gets its own file rather than
+# widening the package every other machine has to install.
+#
+# Nothing in `make ci` imports this. `make demo-video` fails with the install line when it
+# is absent, rather than being skipped silently.
+playwright>=1.44

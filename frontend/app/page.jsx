@@ -1,4 +1,14 @@
-import { allReports, armsOf, featured, isAuthored, replayEntries, tagIndex, ARM_LABEL } from "./lib/reports";
+import {
+  allReports,
+  armsOf,
+  featured,
+  isAuthored,
+  replayEntries,
+  startHere,
+  tagIndex,
+  ARM_LABEL,
+} from "./lib/reports";
+import { calibration } from "./lib/calibration";
 import ArmPanes from "./components/ArmPanes";
 import Provenance from "./components/Provenance";
 import ItemPicker from "./components/ItemPicker";
@@ -45,6 +55,7 @@ export default function Home() {
               after 0 of 16 candidates reproduced, and ADR-006 found the arms do not separate
               on accuracy either. What survived measurement leads instead. */}
           <p className="verdict">{subhead(kind)}</p>
+          {effortNote(arms)}
           <p className="prompt">
             <span className="mono">{report.item.id}</span> — {report.item.prompt}
           </p>
@@ -53,6 +64,11 @@ export default function Home() {
       </section>
 
       <Provenance report={report} />
+
+      <StartHere
+        entries={startHere(report.item.id)}
+        judgePrecision={calibration()?.measurement_context?.judge_precision?.value ?? null}
+      />
 
       <ItemPicker
         tags={tagIndex()}
@@ -106,6 +122,96 @@ function headline(kind, ratio, rescued, report) {
     return `Extended thinking spent ${ratio}× the reasoning tokens — for the same answer.`;
   }
   return report.item.prompt.slice(0, 80);
+}
+
+/**
+ * Two doors instead of a directory (E12 queue #4) — see `startHere()` for how they are picked.
+ *
+ * Renders nothing when the corpus offers nothing to recommend, rather than shipping an empty
+ * heading: on a bank with no disagreement and no flagged step there is no honest shortcut to
+ * offer, and inventing one would be the page asserting interest it cannot show.
+ */
+function StartHere({ entries, judgePrecision }) {
+  if (!entries.length) return null;
+  // E9's rule, applied to this page rather than only to the calibration page: the figure is
+  // READ from the same `measurement_context` the calibration page renders, never typed here.
+  // A percentage typed into JSX is a second copy of a measurement that goes stale silently —
+  // FE-11 already made exactly this mistake once with C1.3's branch thresholds. When the
+  // figure is absent the caveat still ships, without a number: the instruction ("a prompt to
+  // look") is what the reader needs, and it does not depend on the value.
+  const pct =
+    typeof judgePrecision === "number" ? `${Math.round(judgePrecision * 100)}% of the time` : null;
+  return (
+    <section className="starthere">
+      <h2>Start with one of these</h2>
+      <p className="hint">
+        The whole bank is below. These two are where the arms actually come apart.
+      </p>
+      <div className="doors">
+        {entries.map((e) => (
+          <a key={e.id} className="door" href={`/items/${e.id}/`}>
+            <div className="id mono">{e.id}</div>
+            <div className="q">{e.prompt}</div>
+            <div className="why">{e.reason}</div>
+            {e.caveat ? (
+              <div className="caveat">
+                The judge that flagged it is right {pct ?? "less often than you would want"} —
+                a prompt to look, not a finding.
+              </div>
+            ) : null}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The second reading the featured block offers (E12 queue #2).
+ *
+ * The featured contrast is chosen by `featured()` for the most striking *measured* finding,
+ * and on this corpus that is the tool contrast — a clear, well-written argument about **tool
+ * access**. The heuristic walkthrough review's most consequential finding is that a tester
+ * asked *"what is this page telling you about how this AI reasons?"* and answering *"it does
+ * better when it can look things up"* has read the page correctly and missed B4 #9 entirely,
+ * because the page offers no other reading.
+ *
+ * This adds the second reading **alongside** the tool story rather than instead of it — the
+ * tool contrast is a genuine measured result and the cleanest one in the corpus.
+ *
+ * **Derived, and silent when the corpus does not support it.** It renders only when the arm
+ * that spent the most reasoning is *not* an arm that got the answer right, which is a fact
+ * about the three arms in front of the reader and not a thesis typed into a page. If the
+ * featured item ever changes to one where the hardest-reasoning arm also wins, this line
+ * disappears rather than becoming false — the same rule FE-11's gate block follows, and the
+ * same reason E9 forbids a number in the markup.
+ */
+function effortNote(arms) {
+  const scored = arms.filter((a) => a.status !== "failed" && a.metrics?.reasoning_tokens);
+  if (scored.length < 2) return null;
+  const hardest = scored.reduce((a, b) =>
+    b.metrics.reasoning_tokens > a.metrics.reasoning_tokens ? b : a
+  );
+  if (hardest.correct === true) return null;
+  const cheapest = scored.reduce((a, b) =>
+    b.metrics.reasoning_tokens < a.metrics.reasoning_tokens ? b : a
+  );
+  if (cheapest.metrics.reasoning_tokens >= hardest.metrics.reasoning_tokens) return null;
+  const ratio = Math.round(hardest.metrics.reasoning_tokens / cheapest.metrics.reasoning_tokens);
+
+  return (
+    <p className="verdict effort">
+      And a second thing worth looking at, on the same row:{" "}
+      <strong>the arm that reasoned hardest is not the arm that got it right.</strong>{" "}
+      {ARM_LABEL[hardest.strategy] ?? hardest.strategy} spent{" "}
+      {hardest.metrics.reasoning_tokens.toLocaleString()} reasoning tokens over{" "}
+      {hardest.steps.length.toLocaleString()} steps
+      {ratio > 1 ? <> — about {ratio}× the cheapest arm here — </> : " "}
+      and {hardest.correct === false ? "got it wrong" : "never stated an answer"}. How much a
+      model reasons and how well it reasons are separate measurements, and this instrument
+      reports them separately.
+    </p>
+  );
 }
 
 function subhead(kind) {

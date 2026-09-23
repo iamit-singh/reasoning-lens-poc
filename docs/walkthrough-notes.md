@@ -11,6 +11,24 @@
 > *after* watching five people struggle is how a communication test becomes a post-hoc
 > justification.
 
+> ## ⚠️ The page changed on 23 Sep. Record which version each session ran against.
+>
+> The four copy-and-ordering fixes queued by the [heuristic walkthrough
+> review](heuristic-walkthrough-review.md) were **applied** on 23 Sep, because the pilot they
+> were being held for has no date and the demo is being shown meanwhile. The arrival screen
+> a tester now meets is **not** the one that review describes.
+>
+> **This does not change the protocol, the question, or the pass marks** — all of which stay
+> exactly as fixed below, which is the point of having fixed them in advance. It changes only
+> what the sessions are a measurement *of*.
+>
+> Two things follow for whoever runs these:
+>
+> 1. **Put the commit in the record.** A session's result is about a specific page. Add the
+>    `git rev-parse HEAD` of the build the tester saw to their row.
+> 2. **The 18 Sep wording is still in git at `0fb1a67`** if anyone wants the original as a
+>    control arm. Nobody has read either version cold.
+
 ## What this measures, and why nothing else in the project measures it
 
 Every other number here is about whether the instrument is *correct*. This is the only one
@@ -80,15 +98,15 @@ being measured. If they get there, it must be unprompted.
 
 ## The record — fill in after each session
 
-| # | Date | Tester (role) | Completed unaided? | Stated the insight? | Time |
-| - | ---- | ------------- | ------------------ | ------------------- | ---- |
-| Pilot 1 | | | | | |
-| Pilot 2 | | | | | |
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| # | Date | Tester (role) | Build (commit) | Completed unaided? | Stated the insight? | Time |
+| - | ---- | ------------- | -------------- | ------------------ | ------------------- | ---- |
+| Pilot 1 | | | | | | |
+| Pilot 2 | | | | | | |
+| 1 | | | | | | |
+| 2 | | | | | | |
+| 3 | | | | | | |
+| 4 | | | | | | |
+| 5 | | | | | | |
 
 **Result:** *(not yet measured)* — completion _/5 · insight _/5
 

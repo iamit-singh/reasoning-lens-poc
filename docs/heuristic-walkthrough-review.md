@@ -6,6 +6,7 @@
 | **Criterion** | G3 **E12** / **B4 #9** — *5 of 5 testers complete unaided; ≥ 4 of 5 state "fluent ≠ sound"* |
 | **Verdict** | **E12 DOES NOT CLOSE, AND CANNOT.** Zero naive readers were involved. This is a review, not a measurement |
 | **Run** | 18 Sep 2026 (W6), against the shipping export (`make fe-build-measured`, 21 pages) |
+| **Amended** | **23 Sep 2026 — all four queued changes applied.** Findings 1–4 describe the page *as it was on 18 Sep*; see [What changed on 23 Sep](#what-changed-on-23-sep-and-what-it-cost) |
 | **Headline** | **The arrival screen argues a different thesis from the one B4 #9 measures**, and the best evidence for the right thesis is on it, unlabelled |
 
 ---
@@ -190,14 +191,19 @@ Ordered by value per unit of frontend time, which is the constraint §1.4 says i
 > failure modes would be — *"a tag legend nobody notices, a scoreboard whose verdict line
 > buries the point"* — and it predicted correctly.
 
-**They are not applied here.** Hazard 4's whole argument is that these fixes should be driven
-by *what testers actually stumble on*, and the pilot exists so the wording comes from the
-testers' own phrasing rather than the author's second guess — `walkthrough-notes.md`:
-*"if a pilot tester states the insight in better words than the page uses, those are the
-words the page should use."* Acting on my guesses now would spend the pilot's budget on
-changes nobody has evidence for, and would make the eventual sessions a test of my
-speculation rather than of the design. **They are filed as a queue for the session that has
-never been booked.**
+**They were not applied when this review was written (18 Sep).** Hazard 4's whole argument is
+that these fixes should be driven by *what testers actually stumble on*, and the pilot exists
+so the wording comes from the testers' own phrasing rather than the author's second guess —
+`walkthrough-notes.md`: *"if a pilot tester states the insight in better words than the page
+uses, those are the words the page should use."* Acting on my guesses would spend the pilot's
+budget on changes nobody has evidence for, and would make the eventual sessions a test of my
+speculation rather than of the design.
+
+> ### ⚠️ All four were applied on 23 Sep. Read the next section before trusting the page above.
+>
+> The findings above describe the arrival screen **as it was on 18 Sep**. Four of them no
+> longer hold, because they were acted on. What that did and did not buy is
+> [below](#what-changed-on-23-sep-and-what-it-cost).
 
 ---
 
@@ -224,6 +230,60 @@ What this review adds is smaller and should not be mistaken for more:
 > or not, and that would convert the one remaining human measurement in this project into a
 > confirmation of its author's guess — which is the failure mode `walkthrough-notes.md`
 > already refuses in a different costume.
+
+---
+
+## What changed on 23 Sep, and what it cost
+
+**All four queued changes are applied.** The reason for holding them was that the pilot would
+supply better wording than my guesses; the reason for releasing them is that **the pilot has
+no date and the demo is being shown in the meantime.** Withholding a known structural fix to
+preserve a diagnostic opportunity is right while the session is coming, and becomes simply
+shipping a worse page once it is not.
+
+**This is a trade, not a free win, and the losing side is named here rather than left out:**
+
+| Given up | Gained |
+| --- | --- |
+| The chance to learn *how* naive readers fail on the 18 Sep wording. Those four findings are now untestable — the page they describe is gone | An arrival screen that gives a reader something to reach the insight *with*, instead of one that argues tool access and labels its best counter-example `unparsed` |
+
+**The four changes, and where they live:**
+
+| # | Change | Where |
+| - | --- | --- |
+| 1 | The no-answer cell gets one sentence of plain framing, **derived** — "the model never stated an answer, it ran 141 steps and spent 3,966 reasoning tokens" vs. "gave an answer this pipeline could not read". The two are different claims and only the first is a result | `components/ArmPanes.jsx` → `NoAnswerNote` |
+| 2 | A second reading beside the tool story: *the arm that reasoned hardest is not the arm that got it right*. Renders **only when that is true of the arms on screen**, and disappears rather than becoming false if the featured item changes | `page.jsx` → `effortNote()` |
+| 3 | The subtitle says what was found, not what was built. Four pieces of internal vocabulary removed | `layout.jsx` |
+| 4 | Two derived "start here" doors above the 27-item list — ranked by strength of demonstration, first rank being *a correct arm carrying a step the judge called `unsound`* | `lib/reports.js` → `startHere()` |
+
+### Three things worth being uncomfortable about
+
+**1. These are unvalidated hypotheses, and they can be wrong in the same direction as the
+page they replaced.** Nothing here has been read by a naive reader either. The argument for
+them is structural — the words the criterion measures were absent from the one screen every
+reader sees, and the best counter-example was labelled in the tool's own vocabulary — but
+*structurally defensible* is a weaker claim than *measured*, and this document should not be
+read as having closed the gap it opened.
+
+**2. Change #3 deliberately stops short of stating the insight.** A subtitle reading "fluent
+is not the same as sound" would put the scored sentence on the page and make B4 #9
+unmeasurable by construction — a tester could read it back. If the sessions ever happen they
+must still measure a reader *reaching* it. Giving them something to reach it with is the fix;
+giving them the sentence would be marking our own exam.
+
+**3. The 18 Sep wording is recoverable** — it is in git at `0fb1a67`, and the findings above
+quote it verbatim. If a facilitator ever wants the original as a control arm, it exists.
+
+> **If the five sessions are ever booked, the record must say they ran against the 23 Sep
+> page, not this review's subject.** Otherwise a future reader will match findings 1–4
+> against a screen that no longer exists and conclude the testers contradicted them.
+
+### What this does to E12
+
+**Still nothing. E12 is unmeasured and stays unmeasured**, exactly as the section above says.
+Zero naive readers have seen either version. Applying a fix does not measure whether it
+worked, and B4 #9 remains lost (amendment 002 §6) with the shortfall published rather than
+the criterion lowered.
 
 ## Related
 

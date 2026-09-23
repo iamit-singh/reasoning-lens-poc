@@ -107,6 +107,37 @@ a { color: var(--accent); }
 .item .q { font-size: 13.5px; margin: 4px 0 8px; line-height: 1.4; }
 .item .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 
+/* ---------- E12 queue: the arrival screen's route to the insight ----------
+   `.noanswer` and `.effort` carry a left rule and a tinted ground rather than colour alone,
+   which is the rule FE-8's seven banners and FE-2b's validity tags already follow, so both
+   survive greyscale and a reader who does not distinguish red. */
+.noanswer {
+  margin: 8px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-2);
+  background: var(--warn-soft); border-left: 3px solid var(--warn);
+  padding: 7px 9px; border-radius: 2px;
+}
+.noanswer strong { font-weight: 600; }
+.featured .verdict.effort {
+  margin: 9px 0 0; padding: 8px 11px; border-radius: 2px;
+  background: var(--sunk); border-left: 3px solid var(--accent);
+}
+.featured .verdict.effort strong { color: var(--ink); font-weight: 600; }
+
+.starthere { margin-top: 30px; }
+.starthere h2 { font-size: 15px; margin: 0 0 4px; }
+.starthere .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; }
+.door {
+  display: block; text-decoration: none; color: inherit; background: var(--surface);
+  border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  border-radius: 4px; padding: 13px 15px;
+}
+.door:hover { border-color: var(--accent); }
+.door .id { font-size: 11px; color: var(--accent); font-weight: 600; }
+.door .q { font-size: 13.5px; margin: 4px 0 7px; line-height: 1.4; }
+.door .why { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.door .caveat { font-size: 11.5px; color: var(--muted); margin-top: 7px; line-height: 1.4; }
+
 /* ---------- mobile: panes become tabs (C4.10, < 768px) ---------- */
 .tabbar { display: none; gap: 6px; padding: 12px 18px 0; }
 @media (max-width: 767px) {

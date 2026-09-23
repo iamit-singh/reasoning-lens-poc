@@ -188,7 +188,7 @@ batch job** — agreement and hint-verbalisation rates are model-specific.
 `rlens.versions.analyzer_pin()` refuses to be absent *and* refuses a floating alias: a number
 pinned to an alias expires silently.
 
-## The six operating procedures (M3-5a)
+## The seven operating procedures (M3-5a, plus P7 from M3-6)
 
 **Every procedure below was executed once before it was written down.** That is M3-5a's DoD
 and it is not ceremony: a runbook written from the source is a description of what the
@@ -317,6 +317,45 @@ ingests a third-party LangGraph capture. This is the real handover artifact.
 > **Observed on first run:** it failed. The JSON Schema was not packaged, so `load_schema()`
 > raised in any fresh install while the whole test suite stayed green from the source
 > checkout. **Run this after touching `analyzer/`, not before a release.**
+
+### P7 — Re-record the fallback demo video (E15)
+
+```
+make fe-build-measured        # the video must show the demo that ships, not the fixtures
+make demo-video
+```
+
+Records **one continuous unedited pass** over five surfaces at 1280×800 (~49 s) into
+`docs/demo-fallback.webm`, with provenance in `docs/demo-fallback.json`. It starts its own
+server, strips `OPENAI_API_KEY`, and stops the server afterwards — you do not need `make
+serve-api` running first, and if you do have one running, pass `ARGS='--base-url
+http://127.0.0.1:8000'` instead of starting a second.
+
+**`playwright` is a demo-only dependency and is deliberately not installed by `make
+install`.** If it is missing this fails with the install line rather than being skipped:
+
+```
+.venv/bin/pip install -r scripts/requirements-video.txt
+playwright install chromium        # only if no build is already cached
+```
+
+> **It refuses rather than recording something wrong.** No mounted export → exit 1 naming
+> `make fe-build-measured`. Any stale report → exit 1, because a recording of numbers
+> attributed to a system that is no longer running cannot be re-checked by whoever watches
+> it. Any page not returning 200 → exit 1 after writing the file, so you can see what it
+> caught.
+>
+> **Observed on first run (23 Sep):** the server never came up, and the recorder said only
+> *"never became ready"* until it was changed to keep the server's output. The real error
+> was `ValueError: could not convert string to float: '10  # was 150...'` — the recorder had
+> re-implemented `.env` parsing in Python and did not strip the trailing inline comments
+> this file's own `.env` carries. **It now sources `.env` through the shell, exactly as
+> `make serve-api` and `make smoke` do**, because a second interpreter of that file is a
+> second thing that can disagree with it.
+
+**Re-record it when the shipping export changes**, not on a schedule. A video of last
+week's page is the same class of problem as a stale report, minus the guard — the sidecar
+records the commit so the two can at least be compared.
 
 ---
 

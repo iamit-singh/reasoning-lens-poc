@@ -11,7 +11,7 @@ ANALYZER := analyzer
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
         boundaries schema-freeze rubric-drift calibration-page backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
-        serve-local demo clean
+        serve-local demo demo-video clean
 
 help:  ## show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -245,6 +245,15 @@ pin-local:  ## record the generation pin tuple -- an id alone does not reproduce
 
 demo:  ## the demo: cached-only, zero external dependency
 	DEMO_MODE=cached docker compose up
+
+# E15 / M3-6's fallback video. Needs `make fe-build-measured` first -- it refuses rather
+# than recording an unmounted export or a stale cache, since a recording of numbers
+# attributed to a system that is no longer running is worse than no recording at all.
+#
+# `playwright` is DEMO-ONLY and lives in its own requirements file (see the note there).
+# Install it into the same venv when you need it:  $(BIN)/pip install -r scripts/requirements-video.txt
+demo-video:  ## E15 -- record the unedited fallback demo capture (cached path, key stripped)
+	$(BIN)/python scripts/record_demo_video.py $(ARGS)
 
 # ---------------------------------------------------------------- spikes
 spike-s1:  ## S1 -- reasoning-trace fidelity: local (gates arm 2) + OpenAI
