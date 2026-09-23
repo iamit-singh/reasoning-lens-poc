@@ -32,14 +32,15 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import threading
 import time
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 
-from backend import breaker, cache
+from backend import breaker, cache, runs
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BANK_DIR = ROOT / "problem-bank/items"
@@ -49,6 +50,13 @@ FAITHFULNESS = ROOT / "faithfulness/panel.json"
 SEEDED_DIR = ROOT / "calibration/seeded"
 REPLAY_REPORTS = ROOT / "calibration/seeded/reports"
 FRONTEND_OUT = ROOT / "frontend/out"
+
+#: Server-minted run ids: `run-` plus the lowercase hex of a millisecond clock.
+#: Anchored, bounded, and checked before the id is used for anything at all.
+_RUN_ID_RE = re.compile(r"run-[0-9a-f]{1,16}")
+
+#: One message for both refusals. See `_checked_run_id`.
+_UNKNOWN_RUN = "unknown run id (runs do not survive a restart)"
 
 #: C9. A visitor cannot raise this and a run cannot lower it.
 RATE_LIMIT_PER_MIN = int(os.environ.get("RUNS_PER_MIN", "3"))
@@ -219,6 +227,12 @@ def readyz() -> dict[str, Any]:
         "frontend_mounted": any(r.path == "" for r in app.routes if hasattr(r, "path")),
         "live_runs": demo_mode() != "cached" and state.allowed and analysis_ready()[0],
         "analysis_tier": {"ready": analysis_ready()[0], "reason": analysis_ready()[1]},
+        # **What the dollar breaker below cannot see.** `analyzer/prices.json` carries null
+        # rates on purpose, so no live run can report an honest `est_cost_usd` and
+        # `breaker.record()` has nothing truthful to be given. Reporting the call budget
+        # beside the breaker keeps the operator from reading `spent_usd: 0.0` as "this ran
+        # for free" when it means "nothing here can price it". See `backend/runs.py`.
+        "live_run_budget": runs.budget_state(),
         "breaker": {
             "allowed": state.allowed,
             "reason": state.reason,
@@ -377,10 +391,117 @@ async def create_run(request: Request) -> JSONResponse:
     item_id = body.get("item_id")
     if not isinstance(item_id, str):
         raise HTTPException(status_code=400, detail="item_id is required")
-    _checked_id(item_id)
+    item = _checked_id(item_id)
 
-    run_id = f"run-{int(time.time() * 1000):x}"
-    return JSONResponse({"run_id": run_id, "item_id": item_id}, status_code=202)
+    run = runs.start(item)
+    # **202 with somewhere to look.** The route accepted work that has not happened yet, and
+    # a caller holding only an id has to guess the URL of the thing it was given an id for.
+    return JSONResponse(
+        {
+            "run_id": run.run_id,
+            "item_id": item_id,
+            "status_url": f"/api/runs/{run.run_id}",
+            "events_url": f"/api/runs/{run.run_id}/events",
+            "stages": list(runs.STAGES),
+        },
+        status_code=202,
+    )
+
+
+def _checked_run_id(run_id: str) -> Any:
+    """Resolve a run id, or 404. **The third place a visitor writes a string.**
+
+    `item_id` and `case_id` are checked against a STATIC allowlist. A run id cannot be:
+    it is minted by the server at `POST /api/runs`, so the set is not known until runtime.
+    What replaces the static list is a **shape check plus a membership check against a
+    registry the visitor cannot add to** — the ids are server-generated, the registry is
+    in-memory and bounded, and an id that is not in it is refused.
+
+    That is a narrower gate than the bank allowlist rather than a wider one: the bank has
+    14 permanent entries, this has at most `runs.MAX_RUNS` and only ones this process
+    minted. The shape check runs first so a malformed string is refused at the door instead
+    of becoming a dictionary key, and so the 404 for "wrong shape" and the 404 for "no such
+    run" are the same answer to a caller — which is deliberate, since distinguishing them
+    would confirm which ids exist.
+    """
+    if not _RUN_ID_RE.fullmatch(run_id):
+        raise HTTPException(status_code=404, detail=_UNKNOWN_RUN)
+    run = runs.get(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail=_UNKNOWN_RUN)
+    return run
+
+
+@app.get("/api/runs/{run_id}")
+def get_run(run_id: str) -> Any:
+    """A run's current state. The polling fallback for a client with no `EventSource`.
+
+    **A `GET` here calls no model**, exactly like every other read on this service: it
+    returns what the background task has recorded so far. C4.9's rule is about the read
+    path as a whole, not about one route.
+    """
+    # Runs are in-memory (ADR-011) and bounded, so an id from before a restart is gone
+    # rather than wrong. 404 with the reason beats 404 with nothing.
+    return _checked_run_id(run_id).public()
+
+
+@app.get("/api/runs/{run_id}/report")
+def run_report(run_id: str) -> Any:
+    """The report a live run produced. **Flagged `live: true` in the payload, not the UI.**
+
+    Without this route E2's "end to end" stopped one step short: a run completed, the
+    stream said `done`, and the object it had just built was unreachable in memory.
+
+    **The flag is on the data for the same reason `/api/replay` puts `illustrative` there.**
+    This report is a fourth provenance category. It is not a published measurement — it is
+    not in `out/reports`, it carries no `measurement_context`, it was never stamped by
+    `make stamp-reports`, and its numbers are from one unrepeated run on whatever the pin
+    happened to be. It is also not an authored fixture, because a real model really produced
+    it. Rendering it identically to a cached report would show a reader fresh numbers with a
+    published report's authority, which is the single most damaging thing this surface could
+    do — and it would travel, because the object goes to a download and possibly a
+    screenshot.
+    """
+    run = _checked_run_id(run_id)
+    if run.report is None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"run is {run.status}; no report to serve"
+            + (f": {run.error}" if run.error else ""),
+        )
+    return {
+        "live": True,
+        "run_id": run.run_id,
+        "note": (
+            "A live re-run. NOT a published measurement: no measurement_context, not "
+            "stamped, one unrepeated run. Compare with /api/report/{id} for the cached one."
+        ),
+        "est_cost_usd": None,
+        "analysis_calls": run.calls,
+        "report": run.report,
+    }
+
+
+@app.get("/api/runs/{run_id}/events")
+async def run_events(run_id: str) -> StreamingResponse:
+    """The progress stream — E2's SSE half.
+
+    Replays the run from its first event and then streams live ones, always terminating
+    with an `end` frame. See `runs.subscribe` for why replay is load-bearing rather than
+    a convenience.
+    """
+    run = _checked_run_id(run_id)
+    return StreamingResponse(
+        runs.subscribe(run),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-store",
+            # Nothing in this demo sits behind nginx, but a buffering proxy is the classic
+            # way an SSE stream turns into one big response at the end -- which looks
+            # exactly like the progress UI being broken.
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ---------------------------------------------------------------- the static mount (FE-9)

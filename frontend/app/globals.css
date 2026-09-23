@@ -138,6 +138,33 @@ a { color: var(--accent); }
 .door .why { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 .door .caveat { font-size: 11.5px; color: var(--muted); margin-top: 7px; line-height: 1.4; }
 
+/* ---------- E2: the live-run progress ladder ----------
+   State is carried by a left rule and a label, never by colour alone -- the same rule
+   FE-8's banners and FE-2b's validity tags follow, so the ladder survives greyscale. */
+.liverun { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.liverun h2 { font-size: 15px; margin: 0 0 4px; }
+.liverun .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; max-width: 78ch; }
+.ladder { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 4px; }
+.rung {
+  display: flex; gap: 12px; align-items: baseline; font-size: 12.5px;
+  padding: 6px 10px; border-radius: 2px; background: var(--sunk);
+  border-left: 3px solid var(--rule-2); color: var(--muted);
+}
+.rung .name { min-width: 104px; font-weight: 600; }
+.rung .detail { color: var(--muted); overflow-wrap: anywhere; }
+.rung.ok { border-left-color: var(--ok); color: var(--ink-2); background: var(--ok-soft); }
+.rung.degraded { border-left-color: var(--warn); color: var(--ink-2); background: var(--warn-soft); }
+.rung.failed { border-left-color: var(--stop); color: var(--ink-2); background: var(--stop-soft); }
+.degradedlist { list-style: none; margin: 12px 0 0; padding: 0; font-size: 12.5px; display: grid; gap: 4px; }
+.degradedlist li { padding: 6px 10px; border-radius: 2px; background: var(--warn-soft); border-left: 3px solid var(--warn); }
+.degradedlist li.failed { background: var(--stop-soft); border-left-color: var(--stop); }
+.runend {
+  margin-top: 14px; padding: 10px 12px; border-radius: 2px; font-size: 13px;
+  background: var(--sunk); border-left: 3px solid var(--accent);
+}
+.runend.failed, .runend.unknown { background: var(--stop-soft); border-left-color: var(--stop); }
+.runend .hint { margin: 6px 0 0; }
+
 /* ---------- mobile: panes become tabs (C4.10, < 768px) ---------- */
 .tabbar { display: none; gap: 6px; padding: 12px 18px 0; }
 @media (max-width: 767px) {

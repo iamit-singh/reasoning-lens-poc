@@ -30,6 +30,12 @@ export default [
         Blob: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
+        // Added with E2's live-run panel (M3-1b). The list is an allowlist on purpose, so
+        // a new browser global is a deliberate entry rather than a rule that stopped
+        // noticing: `EventSource` is the SSE client, and `AbortController` bounds the
+        // readiness probe so the panel cannot hang on `file://`, where there is no API.
+        EventSource: "readonly",
+        AbortController: "readonly",
       },
     },
     rules: {

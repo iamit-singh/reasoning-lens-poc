@@ -6,6 +6,7 @@ import Trace from "../../components/Trace";
 import Scoreboard from "../../components/Scoreboard";
 import FlaggedPanel from "../../components/FlaggedPanel";
 import Download from "../../components/Download";
+import LiveRun from "../../components/LiveRun";
 import Banners from "../../components/Banners";
 import { taxonomy } from "../../lib/taxonomy";
 
@@ -101,6 +102,12 @@ export default async function ItemPage({ params }) {
       <FlaggedPanel arms={arms} />
 
       <Download report={report} />
+
+      {/* E2. Renders nothing unless the backend reports `live_runs: true`, so the static
+          export and the cached demo are untouched. A replay entry is a deliberately
+          mutated trace, so re-running it live would produce a clean report under a
+          planted-error id -- the one combination that would be actively misleading. */}
+      {replay ? null : <LiveRun itemId={report.item.id} />}
 
       <footer>
         {report.measurement_context &&

@@ -186,6 +186,30 @@ def main(argv: list[str] | None = None) -> int:
     status, body = post(base, "/api/runs", {"item_id": "../../etc/passwd"})
     r.check(status != 202, "run route rejects a traversal id", f"status {status}")
 
+    # ---------------------------------------------------------------- E2's stream (M3-1b)
+    # The progress routes are READS and must behave like every other read here: no model
+    # call, and an id that is not a live run gets the same 404 whatever shape it had.
+    # Checked against a real server because the shape guard and the registry lookup are
+    # two different refusals that have to be indistinguishable from outside.
+    status, _ = get(base, "/api/runs/run-deadbeef")
+    r.check(status == 404, "an unknown run id is 404", f"status {status}")
+
+    status, _ = get(base, "/api/runs/..%2f..%2fetc%2fpasswd")
+    r.check(status in (404, 405), "a malformed run id is refused", f"status {status}")
+
+    status, _ = get(base, "/api/runs/run-deadbeef/events")
+    r.check(status == 404, "the event stream refuses an unknown run", f"status {status}")
+
+    # `live_run_budget` is the guard standing in for a dollar breaker the price table
+    # cannot feed. An operator reading `spent_usd: 0.0` needs to see why it is zero.
+    status, body = get(base, "/readyz")
+    budget = (body or {}).get("live_run_budget") if isinstance(body, dict) else None
+    r.check(
+        isinstance(budget, dict) and budget.get("analysis_calls_limit", 0) > 0,
+        "readiness reports the live-run CALL budget, not just dollars",
+        f"{budget}",
+    )
+
     # ---------------------------------------------------------------- the static mount (FE-9)
     # The whole demo is "one laptop, one origin". These run against a REAL server rather
     # than a TestClient because the failure they catch -- a mount resolved at import time
