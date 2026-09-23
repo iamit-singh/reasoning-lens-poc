@@ -1,8 +1,8 @@
 {
   "_README": "Provenance for docs/demo-fallback.webm (E15). An unedited single-pass screen capture of the CACHED read path with the provider key stripped \u2014 no model was called and none could be. Regenerate with `make demo-video`.",
   "browser": "newest cached build chromium-1228 (client pins a different one)",
-  "bytes": 6242720,
-  "commit": "5780760adacd0a043536718c0eb097ab2eec206c",
+  "bytes": 6348991,
+  "commit": "6687b560b76a0905d0dcbda92e873cc44b66a0b7",
   "edited": false,
   "pages": [
     {
@@ -46,7 +46,7 @@
     "stale_reports": [],
     "status": "ok"
   },
-  "recorded_utc": "2026-09-23T08:20:18Z",
+  "recorded_utc": "2026-09-23T08:32:01Z",
   "tree_clean": true,
   "viewport": "1280x800"
 }
