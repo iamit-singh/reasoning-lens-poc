@@ -188,7 +188,7 @@ batch job** — agreement and hint-verbalisation rates are model-specific.
 `rlens.versions.analyzer_pin()` refuses to be absent *and* refuses a floating alias: a number
 pinned to an alias expires silently.
 
-## The seven operating procedures (M3-5a, plus P7 from M3-6)
+## The eight operating procedures (M3-5a, plus P7 from M3-6 and P8 from M3-1b)
 
 **Every procedure below was executed once before it was written down.** That is M3-5a's DoD
 and it is not ceremony: a runbook written from the source is a description of what the
@@ -356,6 +356,43 @@ playwright install chromium        # only if no build is already cached
 **Re-record it when the shipping export changes**, not on a schedule. A video of last
 week's page is the same class of problem as a stale report, minus the guard — the sidecar
 records the commit so the two can at least be compared.
+
+### P8 — Run a live re-run, and watch it (E2)
+
+```
+DEMO_MODE=live MOCK_LLM=0 make serve-api
+# then, against a real bank id:
+curl -s -X POST localhost:8000/api/runs -H 'content-type: application/json' -d '{"item_id":"mb-06"}'
+curl -N localhost:8000/api/runs/<run_id>/events      # the progress stream
+curl -s localhost:8000/api/runs/<run_id>/report      # what it built, flagged live:true
+```
+
+Or open any item page while the server runs with `DEMO_MODE=live`: the **Re-run this item
+live** panel appears at the bottom and streams the same events. It renders **nothing** when
+live runs are off, which is deliberate — a control that offers to re-run a model and then
+fails is worse than no control, because the reader cannot tell whether the demo is broken or
+the feature is switched off.
+
+> **`MOCK_LLM=1` is the default in `.env`, and a run under it is NOT a live run.** It replays
+> cassettes and finishes in well under a second. That is a perfectly good test of the
+> plumbing and it is not evidence the model was called — *"we did not call it"* and *"we
+> could not call it"* are different claims, and so are *"we called it"* and *"we replayed
+> it"*. **If a run finishes in under a second, it did not talk to a model.**
+>
+> **Observed:** mb-01 in **97 s**, mb-06 in **42 s**, with `gpt-oss:20b` warm in ollama.
+> Most of that is local generation.
+
+**This spends real analysis calls.** Three per run, one per arm. The dollar breaker cannot
+see them — `analyzer/prices.json` is deliberately unpriced, so nothing can convert tokens to
+dollars honestly — so the guard that actually binds is the **call budget** in
+`backend/runs.py` (`LIVE_RUN_CALL_BUDGET`, `LIVE_PROCESS_CALL_BUDGET`), reported by
+`/readyz` as `live_run_budget`. Read `spent_usd: 0.0` as *"nothing here can price this"*,
+never as *"this was free"*.
+
+**The report a live run builds is not a published measurement.** It carries `live: true`, no
+`measurement_context`, and it was never stamped. It is one unrepeated run. The cached report
+at `/api/report/{id}` is the number everyone else sees, and the two genuinely differ — a
+live `mb-06` returned `direct` with 2 steps where the cached report has 3, one `unsound`.
 
 ---
 

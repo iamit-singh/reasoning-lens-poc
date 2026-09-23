@@ -5,7 +5,7 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — **10 closed** (E15 closed 23 Sep), E8 half, 3 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
+| **Status** | ⏳ **in progress** — **11 closed** (E2 and E15 closed 23 Sep), E8 half, 2 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
 | **Last executed** | **23 Sep 2026 (W7)** — fourth execution. **E15 closed**: its stated condition ("if the demo runs headless") became true and the video is made. E12's queued copy fixes are applied — which changes the page, not the measurement. First execution 12 Sep, re-executed 16 Sep after G2 and 18 Sep with the substitutes |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
@@ -21,13 +21,13 @@ branches ship, and G3 has no failure outcome.
 | # | Criterion | State | Evidence |
 | - | --- | --- | --- |
 | **E1** | Read-only endpoints serve with **zero LLM calls**, key removed | ✅ **closed** | `make smoke` starts a real server with `OPENAI_API_KEY` stripped and runs 18 checks; `test_the_cached_read_path_makes_no_model_call` replaces both provider entry points with something that raises. **18/18 green, 12 Sep**, against a real server with `OPENAI_API_KEY` stripped |
-| **E2** | Live re-run end to end, SSE, every degraded branch reachable | ❌ **not built** | `POST /api/runs` exists, allowlisted, rate-limited and breaker-checked. **There is no SSE and there will not be** — ADR-003 made this a static export with no server to stream from, and M3-1b is marked droppable. Every *degraded branch* is reachable and rendered (FE-8, seven states). See the deviation below |
+| **E2** | Live re-run end to end, SSE, every degraded branch reachable | ✅ **closed 23 Sep** | **Built.** `POST /api/runs` now runs the pipeline and streams stages over SSE at `/api/runs/{id}/events`; the report it builds is served flagged `live: true`. Verified against a real live run (`MOCK_LLM=0`, ollama + real analysis tier): **mb-01 in 97 s, mb-06 in 42 s**, full stage sequence over the wire, UI driven in a real browser. Degraded branches reachable at the transport, not only in fixtures. **The cached demo is untouched** — `DEMO_MODE=cached` still refuses with 503. See the deviation below, which has been rewritten |
 | **E3** | Redis reachable, and the breaker fails closed without it | ✅ **closed, restated** | [ADR-011](decisions/ADR-011-no-redis.md): there is no Redis, because one process has nothing to coordinate with. The fail-closed *principle* is implemented literally and tested — an unreadable spend file **denies**, a missing one allows. 5 parametrised cases incl. `{"usd": true}` |
 | **E4** | Cache warmed **once**, at the shipping pin; every report's `versions` matches the running service | ✅ **closed** | The startup assertion exists and **works** — `assert_fresh` refuses to start on a stale cache and names which version moved; `/readyz` reports `stale_reports`. **14 reports, 0 stale.** The run also exposed that an *unconfigured* pin read as a *changed* one — fixed, since re-warming would have cost 14 items of spend to repair a missing env var. **This is one of the two rows that carry the month** |
 | **E5** | Spend breaker verified by a **forced trip**, reset procedure in the runbook | ✅ **closed** | `make trip-breaker` / `make reset-breaker` go through the real code path. Runbook procedure **P3**. Test: `test_a_forced_trip_denies_the_live_route` |
 | **E6** | Auto-rollback demonstrated by a deliberately failed smoke test | ⛔ **deleted** | ADR-003: nothing is deployed, so there is nothing to roll back to. ~0.7 h released |
 | **E7** | Live at the custom domain over TLS, incognito + phone | ⛔ **deleted** | ADR-003: no public hostname, no cloud service. The DNS ticket was drafted and correctly never filed |
-| **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **cached half closed; live half not applicable** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. The live half needs E2, which ADR-003 deleted. Recorded as **half a measurement**, not as a pass |
+| **E8** | B4 #8 measured, **both halves**, with n | ⚠️ **cached half closed; live half now measurable and NOT measured** | **p50 0.9 ms · p90 1.0 ms · p99 1.3 ms over n=140 requests** across all 14 items — 4,800× inside the 5 s budget, because C4.9's cache-first rule makes this a disk read and nothing else. The live half needed E2, and **E2 now exists** — so this stops being *not applicable* and becomes *unmeasured*, which is a worse status honestly stated. Two live runs were observed (97 s and 42 s wall-clock, n=2, uncontrolled) and **that is an observation, not B4 #8's measurement**: no percentiles, no n worth the name. Recorded as **half a measurement** |
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
@@ -39,22 +39,64 @@ branches ship, and G3 has no failure outcome.
 
 ## Deviations, stated rather than smoothed over
 
-### E2 — the live re-run is not a slipped task, it is a deleted one
+### E2 — recorded as deleted scope, and the reasoning went one step too far
 
-C10.4 budgets M3-1b and FE-8's SSE half against a hosted service that streams progress
-while a model runs. ADR-003 deleted the service. What remains is a **static export served
-from a laptop**, and there is no process to stream from — so the SSE sequence test has
-nothing to test and the progress UI has nothing to display.
+**This row said "not built, and there will not be" until 23 Sep. That was wrong, and the
+error is worth keeping visible rather than quietly editing out.**
 
-**What the plan actually wanted from E2 survives and is built:** every degraded branch is
-reachable and rendered. FE-8 shows seven run-level states — failed arm, unannotated arm,
-provider-summarised trace, partial trace, escalation capped, budget bound, cached-only —
-and all seven are exercised today by `report_degraded.json`. The states were the point; the
-transport was the plan's assumption about how a reader would reach them.
+C10.4 budgeted M3-1b and FE-8's SSE half against a hosted service. ADR-003 deleted the
+hosting, and the conclusion drawn was *"there is no process to stream from"*. That covered
+the **deployment** and was then applied one step further than it reached: the backend still
+runs — one process on a laptop, serving the page and the API from one origin (FE-9) — and
+`POST /api/runs` has existed since M3-1a, allowlisted and breaker-checked. There was always
+a process. What was actually missing is that **the route returned `202` and then did
+nothing at all**, which is a different and much smaller gap than "the architecture cannot
+support this".
 
-> This should be read as **scope deleted by an accepted ADR**, not as scope missed. The
-> distinction matters at a gate: one is a decision with a written reason, the other is a
-> shortfall.
+> **How a deleted-scope row goes stale.** ADR-003 was right about hosting on the day it was
+> written. The row inherited its conclusion and then stopped being re-checked against a
+> system that kept changing underneath it — FE-9 added the single origin in W5, and nobody
+> revisited what that made possible. A decision with a written reason is still a decision
+> about the world at one moment.
+
+**What is built now.** `backend/runs.py`: a bounded in-memory registry (ADR-011 — one
+process, one operator, nothing to coordinate with), a staged executor, and an SSE stream
+that **replays from the first event**. That last part is load-bearing rather than a nicety:
+the early stages are the fast ones, so the common case is a viewer who connects during
+`classifying`, and a stream carrying only live events would show them a run that appears to
+begin in the middle. It always terminates with an `end` frame, because a progress UI that
+never receives one is indistinguishable from one still working.
+
+**Degraded branches are now reachable two ways**, and both are worth having. FE-8's seven
+run-level states remain exercised by `report_degraded.json` — that was always the valuable
+half — and a live run can now actually *deliver* one over the wire: a failed arm is written
+and streamed as degraded, and the other arms still render (C4.1/B6.5).
+
+#### The spend gap this uncovered, which is the real finding
+
+`breaker.record()` is implemented, tested, and **was called from nowhere in production.**
+Harmless while nothing spent money; not harmless the moment a live path exists. The obvious
+repair — record dollars per run — **cannot be done honestly**, because `analyzer/prices.json`
+carries null rates deliberately: *"an invented rate would make `est_cost_usd` look measured
+when it was assumed."*
+
+So the dollar breaker is still checked, and it is **supplemented rather than replaced** by a
+budget in a unit that is actually countable: **analysis calls**, per run and per process.
+`est_cost_usd` is `null` everywhere with its reason attached, and `/readyz` reports the call
+budget so nobody reads `spent_usd: 0.0` as *"this ran for free"* when it means *"nothing
+here can price it"*.
+
+#### A live report is a fourth provenance category
+
+Not in `out/reports`, no `measurement_context`, never stamped, one unrepeated run — and a
+real model really produced it, so it is not an authored fixture either. It is served with
+`live: true` **on the payload**, exactly as `/api/replay` flags `illustrative`, because the
+object travels to a download and possibly a screenshot. This is not hypothetical: a live
+`mb-06` returned `direct` with 2 steps where the cached report has 3, one of them `unsound`.
+
+> **Scope that was deleted by an accepted ADR and later turned out to be buildable is still
+> not the same as scope that was missed** — but it is not a closed question either, and a
+> gate checklist that never re-opens one is a checklist that can only ratchet one way.
 
 ### E8 — half a measurement, reported as half
 
@@ -74,9 +116,22 @@ that exists would be the exact failure this project has spent three months refus
 > evidence that the rule holds, not that the service is fast under load — nobody has put
 > it under load, and with one operator nobody will.
 
-**The live half is `null`, and stays null.** Not "pending": the system that would produce
-it was deleted by ADR-003. A reader should see an explicit not-applicable with a reason,
-not an empty cell that looks like an unfinished job.
+**The live half was `null` with a reason, and as of 23 Sep the reason expired.** It read
+*"not applicable — the system that would produce it was deleted by ADR-003"*. E2 is built,
+so there is now a live path and the honest status is **unmeasured**, which is worse than
+not-applicable and is the correct answer.
+
+Two live runs have been observed end to end — **97 s and 42 s** wall-clock, on one laptop,
+with the local model warm. **That is not B4 #8's live half** and must not be quoted as it:
+n=2, no percentiles, no control over what else the machine was doing, and generation time is
+dominated by a 20B model on consumer hardware rather than by anything this service does.
+Publishing a p90 from two runs is precisely the single-run inference this project has had to
+correct in writing twice.
+
+> **What it would take:** the harness exists now (`POST /api/runs` plus the status route), so
+> this is a measurement job rather than a build. It spends real analysis calls per run, which
+> is why it has not been run on a whim — and the call budget in `backend/runs.py` is what
+> stops a measurement loop from becoming an unbounded one.
 
 ### E12 and E13 — the two rows no amount of code closes
 
@@ -196,10 +251,19 @@ wording, and those four findings are now untestable. Both halves are recorded in
 | **C15.1 #10 / U3** | **Reviewer — still unnamed** | Review report filed 18 Sep with five concrete fixes. **A sign-off is a person; the row needs one name** | open |
 | **U4** | **Tech lead + DM** | **The C10.1 contingency conversation. 97.4 h against a 12 h allocation, every C14 lever spent** | **The only row no amount of code advances** |
 
-> **The shape of the gate has barely changed, and should not be read as having changed
-> much.** Ten rows closed, three deleted by ADR-003, E8 half-measured, and **two that need a
-> human who is not the Lead** — plus U3, which needs one name, and U4, which needs two
-> people. E15 moved because a machine could finally do the work; **E12 and E13 did not move,
-> and cannot**, because what they measure is people. Three months of work did not make those
-> go away, and the substitutes filed on 18 Sep — plus the fixes applied on 23 Sep — are
-> evidence *for* the rows rather than a discharge of them.
+> **Eleven rows closed, two deleted by ADR-003, E8 half-measured, and two that need a human
+> who is not the Lead** — plus U3, which needs one name, and U4, which needs two people.
+>
+> **Two rows moved on 23 Sep and both moved for the same reason: a machine could do the
+> work, and nobody had checked recently whether it could.** E15's condition ("if the demo
+> runs headless") had become true. E2 was never blocked on the hosting ADR-003 deleted — it
+> was blocked on a route that returned `202` and did nothing, and the single origin FE-9
+> added in W5 had quietly made the rest possible.
+>
+> **E12 and E13 did not move, and cannot.** What they measure is people. Real work landed
+> against both — E12's copy queue applied, E13's runbook re-run cold — and **neither moved a
+> criterion**. That is the result, not an apology for it.
+>
+> **One row got worse, and that is the honest consequence of building E2.** E8's live half
+> was *not applicable* while no live path existed; now one does, so it is **unmeasured**.
+> Building the thing that could produce a number does not produce the number.
