@@ -5,8 +5,8 @@
 | **Gate** | G3 · launch |
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
-| **Status** | ⏳ **in progress** — **11 closed** (E2, E15 closed 23 Sep), **E8 both halves measured — p90 passes, tail fails**, 2 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
-| **Last executed** | **23 Sep 2026 (W7)** — fifth execution. **E12 CLOSED BY MEASUREMENT**: five naive testers ran the self-administered kit and B4 #9 passed 5/5 · 5/5. The hardest external dependency in the project is discharged. **E15 closed** earlier the same day; **E2 and E8** likewise. **E13 is now the only open criterion** — plus U3 (one name) and U4 (two people). The sessions surfaced **E12-D**, a shipped defect nobody inside the project had caught |
+| **Status** | ✅ **CLOSED 28 Sep 2026 — the PoC ended on what exists.** **13 closed**, **2 deleted** by ADR-003 (E6, E7), **E13 unmet at close** (no peer dry-run). U3 and U4 unowned at close; the launch branch line is left for the reviewer. See [poc-conclusion.md](poc-conclusion.md) |
+| **Last executed** | **28 Sep 2026** — sixth and final execution, at close-out. All eleven E12 defects closed or decided (D9 fixed, D11 decided the reversible way). A clean copy of the tree then found four more — blank shipping pins, an unstamped P1, two CI jobs that could not pass on a checkout, and `test_runs.py` running nowhere — all fixed and re-verified from the clean copy. Earlier: **23 Sep (W7)**, fifth execution, E12 closed by measurement |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
 > breakdown's own §1.3 says three rows cannot close and one has no owner at all, and that

@@ -5,10 +5,21 @@ visible: three strategy arms over the same problem bank, span-tree ingest, deter
 segmentation, behavior classification, and a calibration page that publishes the agreement
 numbers whatever they turn out to be.
 
-**Status: Month 2, Week 5.** Months 1–3 all have work in them, and that is not drift —
-G1's freeze is what let six frontend surfaces be built against a stationary object with no
-backend running, and they came in **under** estimate for the first sustained time in the
-project.
+**Status: CLOSED 28 Sep 2026.** Read [`docs/poc-conclusion.md`](docs/poc-conclusion.md)
+first — the answer to the hypothesis, every success criterion's final state, and what is
+left for anyone who picks this up. The notes below are the working record and are kept as
+they were written.
+
+**To see the demo from a clean clone:**
+
+```
+make install PY=python3.12
+cp .env.example .env      # carries the shipping pins -- the cassettes were recorded at them
+make demo-data            # cassettes -> spans -> 14 reports, stamped. Offline, no key
+make fe-build-measured    # the static export
+make serve-api            # http://localhost:8000
+make smoke                # 26/26, with the provider key stripped
+```
 
 See [`docs/ledger.md`](docs/ledger.md) for actuals, [`docs/findings.md`](docs/findings.md)
 for the five results that contradicted the plan, and
@@ -80,8 +91,8 @@ make label ARGS="--annotator you" # M1-11: the blind labelling tool
 | `python -m rlens` — span trees → a report, end to end | ✅ | M1-10 |
 | Rubric v1, blind labelling tool, the random-90 draw | ✅ tooling · ⛔ **40 labels need a human** | M1-11 |
 | Cassette recording + offline replay — **49 analysis cassettes; the whole bank replays with the socket broken** | ✅ | M1-14 |
-| S4 — cue injection — **0 of 48 trials flipped, all four cue types** | ✅ [ADR-009](docs/decisions/ADR-009-cues-do-not-flip.md) | M1-13 |
-| Behavior taxonomy — **82.3% `linear`** over 3,579 rows; `backtracking` **2.0%**, `backward_chaining` **0.2%** | ⚠️ [ADR-010](docs/decisions/ADR-010-taxonomy-barely-populates.md) **+ amendment** | M1-9 / M2-4 |
+| S4 — cue injection — **0 of 48 trials flipped, all four cue types** | ✅ [ADR-009](docs/decisions/ADR-009-cue-injection-does-not-reproduce.md) | M1-13 |
+| Behavior taxonomy — **82.3% `linear`** over 3,579 rows; `backtracking` **2.0%**, `backward_chaining` **0.2%** | ⚠️ [ADR-010](docs/decisions/ADR-010-the-taxonomy-barely-populates.md) **+ amendment** | M1-9 / M2-4 |
 | **Judge recall — 8/10 seeded errors, 0 false flags on 24 known-good steps** | ✅ **B4 #3 met** · [ADR-012](docs/decisions/ADR-012-judge-thresholds.md) | M2-6 |
 | Calibration scoring CLI — κ checked against sklearn to 10 dp | ✅ | M2-13 |
 | Escalation tier · consistency checker | ⏳ built, off behind flags until their numbers exist | M2-5 / M2-8 |
@@ -92,7 +103,7 @@ make label ARGS="--annotator you" # M1-11: the blind labelling tool
 | Measured-data build — the shipping export, 17 item pages, all 10 trace states | ✅ | FE-9 |
 | Analyzer wheel — installs in a clean venv, ingests third-party spans | ✅ | M3-8 |
 | Runbook — six procedures, **each executed before being written** | ✅ | M3-5a |
-| G3 ship checklist — **9 closed, 4 deleted, 3 open** with owners | ⏳ [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
+| G3 ship checklist — **13 closed, 2 deleted, E13 unmet at close** | ✅ closed · [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
 | Calibration frame — random-90 **and** the enriched draw, **which came up 31 of 60** | ⚠️ t13 fired | M1-11 / M2-14 |
 
 Weeks 1–4 are closed and W5 is well past its budget. **G0 is 6 of 6 and G1 is 10 of 10** —
