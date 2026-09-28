@@ -1,8 +1,8 @@
 {
   "_README": "Provenance for docs/demo-fallback.webm (E15). An unedited single-pass screen capture of the CACHED read path with the provider key stripped \u2014 no model was called and none could be. Regenerate with `make demo-video`.",
-  "browser": "newest cached build chromium-1228 (client pins a different one)",
-  "bytes": 6348991,
-  "commit": "6687b560b76a0905d0dcbda92e873cc44b66a0b7",
+  "browser": "playwright's own pinned build (Contents)",
+  "bytes": 6321514,
+  "commit": "9a5cf31d4133eb80eb4807e05785fe44372d8cac",
   "edited": false,
   "pages": [
     {
@@ -42,11 +42,17 @@
     "calibration": true,
     "demo_mode": "live",
     "frontend_mounted": true,
+    "live_run_budget": {
+      "analysis_calls_limit": 60,
+      "analysis_calls_used": 0,
+      "note": "calls, not dollars -- prices.json is deliberately unpriced",
+      "per_run_limit": 8
+    },
     "live_runs": false,
     "stale_reports": [],
     "status": "ok"
   },
-  "recorded_utc": "2026-09-23T08:32:01Z",
+  "recorded_utc": "2026-09-28T05:24:15Z",
   "tree_clean": true,
   "viewport": "1280x800"
 }
