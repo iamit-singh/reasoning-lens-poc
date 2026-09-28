@@ -35,7 +35,7 @@ function Soundness({ arm, context }) {
       <span className={measured ? "bars" : "bars unmeasured"}>
         {measured
           ? `judge P ${(precision * 100).toFixed(0)}% · R ${(recall * 100).toFixed(0)}%`
-          : "judge accuracy not yet measured"}
+          : "judge accuracy not calibrated for this report"}
       </span>
     </span>
   );
@@ -116,11 +116,12 @@ export default function Scoreboard({ report, arms }) {
 
       {unmeasured ? (
         <p className="i3note">
-          <b>No soundness score on this page has been calibrated yet.</b> The judge&apos;s
-          precision and recall are measured once, at M2-17, against human labels — until then
-          every field of <code>measurement_context</code> is null and this row says so. I3:
-          a score without its error bars is an assertion, and this page does not make
-          assertions.
+          <b>No soundness score on this page is qualified by the published calibration.</b>{" "}
+          The judge&apos;s precision and recall on <a href="/calibration/">/calibration/</a>{" "}
+          were measured against human labels and stamped into the reports they qualify; this
+          report does not carry that stamp (see Provenance above), so its scores render
+          without error bars. I3: a score without its error bars is an assertion, and this
+          page does not make assertions.
         </p>
       ) : null}
     </section>

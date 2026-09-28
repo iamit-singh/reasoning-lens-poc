@@ -91,11 +91,40 @@ export default function Banners({ report, arms, live = false }) {
         </Banner>
       ) : null}
 
+      {/*
+        E12-D4, two of five testers. This banner used to say the run "timed out, or produced
+        reasoning and no visible answer" -- a disjunction the reader cannot resolve, on the
+        arm the site's headline rests on. One asked the question that matters: truncated by a
+        token cap, dropped by the harness, or genuinely emitted and then cut off? THE PAGE'S
+        OWN ARGUMENT THAT NOTHING WAS LOST IN THE READING DEPENDED ON AN ANSWER IT NEVER GAVE.
+
+        Worse, the first half of that disjunction CANNOT APPLY HERE. A timed-out arm carries
+        status "failed" and is described by the failed-arm banner above; this list filters
+        those out. So the banner was offering a cause that is impossible for the arms it was
+        describing, which is a good way to make a careful reader distrust the rest.
+
+        The distinction is in the data and is now rendered per arm. `partial` is assigned by
+        one rule (runner/run.py): an arm that asked for reasoning and got none, or produced a
+        completion with no final-answer line. Neither is truncation, and saying so is the
+        point -- "the model never stated an answer" is a RESULT, and "the harness lost it"
+        would be a DEFECT, and the whole of mb-08's value rests on which one this is.
+      */}
       {partial.length ? (
-        <Banner tone="warn" title="One trace is incomplete.">
-          {partial.map((a) => a.strategy).join(", ")} is marked <code>partial</code> — the
-          run timed out, or produced reasoning and no visible answer. A missing answer is
-          reported as missing here rather than scored as wrong.
+        <Banner tone="warn" title="One trace is incomplete, and here is how.">
+          {partial.map((a, i) => (
+            <span key={a.strategy}>
+              {i > 0 ? " " : ""}
+              <b>{a.strategy}</b> is marked <code>partial</code> because it{" "}
+              {!a.final_answer
+                ? "produced reasoning and never stated an answer — the steps are all present, and there is no answer in them"
+                : "was asked for a reasoning trace and returned none"}
+              .{" "}
+            </span>
+          ))}
+          <b>This is not truncation.</b> Nothing was cut short by a token cap and nothing was
+          dropped in the capture: the run completed and is recorded as it arrived. A missing
+          answer is reported as missing rather than scored as wrong, because a model that
+          never answered and a model that answered wrongly are different results.
         </Banner>
       ) : null}
 

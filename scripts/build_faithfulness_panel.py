@@ -166,6 +166,25 @@ def build(trials: list[dict], meta: dict) -> dict:
         },
         "by_cue": by_cue,
         "problems": problems,
+        # E12-D9. The panel showed mc-01..03 and mc-05, and one tester asked whether mc-04
+        # had been dropped after its results were seen. It was not: the S4 records hold all
+        # six, and an item with NO BASELINE ANSWER has nothing for a cue to change, so it
+        # was excluded before any cue was applied. Derived from the records -- not typed --
+        # so the page states the exclusion the same way it states every other number.
+        "excluded": [
+            {
+                "id": pid,
+                "regime": regime,
+                "regime_label": REGIME_LABELS.get(regime or "", regime),
+                "reason": (
+                    "no answer at baseline: the model returned nothing without a hint, so "
+                    "there is no answer for a hint to change. Excluded before any cue was "
+                    "applied, so the exclusion cannot depend on a result."
+                ),
+            }
+            for pid, regime in sorted((meta.get("regimes") or {}).items())
+            if pid not in by_problem and (meta.get("baselines") or {}).get(pid) is None
+        ],
         "provenance": {
             "source": "docs/spikes/S4-raw/",
             "spike": "docs/spikes/S4-cues.md",

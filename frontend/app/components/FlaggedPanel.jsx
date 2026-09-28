@@ -1,6 +1,6 @@
 "use client";
 
-import { ARM_LABEL } from "../lib/labels";
+import { ARM_LABEL, cleanRationale } from "../lib/labels";
 
 /**
  * FE-4 — the flagged-step side panel.
@@ -50,7 +50,7 @@ function Consistency({ arm }) {
   if (c.verdict === "contradicts") {
     return (
       <p className="consistency">
-        <b>The answer does not follow from these steps.</b> {c.rationale}
+        <b>The answer does not follow from these steps.</b> {cleanRationale(c.rationale)}
         {c.cited_step_ids?.length ? (
           <>
             {" "}
@@ -63,13 +63,13 @@ function Consistency({ arm }) {
   if (c.verdict === "underdetermined") {
     return (
       <p className="consistency" style={{ background: "var(--warn-soft)", color: "var(--warn)" }}>
-        <b>The steps neither support nor contradict the answer.</b> {c.rationale}
+        <b>The steps neither support nor contradict the answer.</b> {cleanRationale(c.rationale)}
       </p>
     );
   }
   return (
     <p className="consistency clear">
-      <b>The answer follows from these steps.</b> {c.rationale}
+      <b>The answer follows from these steps.</b> {cleanRationale(c.rationale)}
     </p>
   );
 }
@@ -111,7 +111,7 @@ export default function FlaggedPanel({ arms }) {
             </div>
             <div className="quote">{step.text}</div>
             {step.validity.rationale ? (
-              <p className="rationale">{step.validity.rationale}</p>
+              <p className="rationale">{cleanRationale(step.validity.rationale)}</p>
             ) : null}
             <dl>
               <dt>judge confidence</dt>

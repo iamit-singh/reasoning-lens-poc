@@ -1,6 +1,6 @@
 "use client";
 
-import { ARM_LABEL } from "../lib/labels";
+import { ARM_LABEL, cleanRationale } from "../lib/labels";
 
 /**
  * FE-2 — the annotated trace renderer.
@@ -111,7 +111,7 @@ function Steps({ arm, definitions }) {
             </div>
             <div className="text">{step.text}</div>
             {step.validity?.rationale ? (
-              <div className="why">{step.validity.rationale}</div>
+              <div className="why">{cleanRationale(step.validity.rationale)}</div>
             ) : null}
           </li>
         );

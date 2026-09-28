@@ -9,7 +9,7 @@ ANALYZER := analyzer
 
 .DEFAULT_GOAL := help
 .PHONY: help venv install lint typecheck test unit contract integration-mock \
-        boundaries schema-freeze rubric-drift calibration-page runbook-check backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
+        boundaries schema-freeze rubric-drift calibration-page runbook-check backend-tests serve-api fe-export-check wheel seeded-errors trip-breaker reset-breaker label draw-sample fe-install fe-build fe-build-measured demo-data stamp-check stamp-reports bundle-check fe-dev ci warm-cache calibrate faithfulness faithfulness-check smoke \
         record-cassettes classify-reliability taxonomy-coverage confidence-histogram report spans traps arm-contrast spike-s1 spike-s3 spike-s4 spike-s6 spike-s2 spike-deps models pin-local \
         serve-local demo demo-video live-latency clean
 
@@ -79,7 +79,7 @@ runbook-check:  ## E13 -- every command the runbook prints must exist
 # runbook's opening pair did not, so `make install && make ci` was green only where `out/`
 # already existed. Replay is offline, free and takes seconds -- there was never a reason
 # for the caller to have to know.
-ci: spans lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page runbook-check  ## everything a PR runs
+ci: spans lint typecheck unit contract backend-tests faithfulness-check integration-mock boundaries schema-freeze rubric-drift calibration-page runbook-check stamp-check bundle-check  ## everything a PR runs
 
 # ---------------------------------------------------------------- measurement & ops
 warm-cache:  ## STUB (M3-2) -- run the bank x arms for keys invalidated by C2.3
@@ -106,6 +106,17 @@ pooled-precision:  ## M2-7 / B4 #4 -- pooled precision + false-flag rate. Reads 
 stamp-reports:  ## M2-10b -- stamp measurement_context + verdict lines into all 42 reports
 	@set -a; [ -f .env ] && . ./.env; set +a; $(BIN)/python scripts/stamp_reports.py $(ARGS)
 
+bundle-check:  ## E12-D2 -- fail if any rendered report ships an undeclared prompt bundle
+	$(BIN)/python scripts/check_bundle_vintage.py
+
+# P1's data half from committed inputs only: cassettes -> spans -> reports -> stamped.
+# Needs the shipping pins in .env (cp .env.example .env) -- they are what the cassettes
+# were recorded at, and without them every arm replays as analysis_unavailable.
+demo-data: spans report stamp-reports  ## rebuild the 14 shipped reports from committed cassettes, stamped
+
+stamp-check:  ## E12-D1 -- fail if any report's measurement_context is stale or absent
+	$(BIN)/python scripts/stamp_reports.py --check
+
 # M2-9, as ADR-009 re-scoped it: 3.5 h -> ~1.0 h. The panel is BUILT and SHIPPED, and what
 # it publishes is the negative result with its denominator. No model call: this reads S4's
 # committed trial records, whose adjudication is an INPUT rather than a step.
@@ -116,7 +127,7 @@ faithfulness-check:  ## CI -- fail if the committed panel is out of date with S4
 	$(BIN)/python scripts/build_faithfulness_panel.py --check
 
 backend-tests:  ## C4.9 route-table posture, the spend breaker, cache staleness. No server
-	$(BIN)/python -m pytest backend/tests/test_api.py -q
+	$(BIN)/python -m pytest backend/tests/test_api.py backend/tests/test_runs.py -q
 
 serve-api:  ## run the API against the local cache (ADR-003: localhost, no deployment)
 	@set -a; [ -f .env ] && . ./.env; set +a; \
@@ -244,7 +255,9 @@ $(FRONTEND)/node_modules:
 fe-build: $(FRONTEND)/node_modules  ## FE-1+ -- static export against the COMMITTED FIXTURES. No backend, no network
 	cd $(FRONTEND) && npm run build
 
-fe-build-measured: $(FRONTEND)/node_modules  ## static export against out/reports -- what the demo ships (M3)
+# E12-D1's structural fix. The export REFUSES to build from reports that do not carry the
+# current calibration, because that is exactly the state four of five testers found shipped.
+fe-build-measured: $(FRONTEND)/node_modules stamp-check  ## static export against out/reports -- what the demo ships (M3)
 	cd $(FRONTEND) && npm run build:measured
 
 fe-dev: $(FRONTEND)/node_modules  ## the frontend dev server, fixtures-first

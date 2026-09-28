@@ -358,3 +358,35 @@ table.sb td.failed { color: var(--muted); font-style: italic; }
 .cal .block.shortfall .lede { padding: 10px 16px 0; margin: 0; font-size: 13px; }
 .cal .block.shortfall .limits { padding: 10px 16px 14px; margin: 0; }
 .cal .block.shortfall .limits li b { display: inline; }
+
+/* E12-D7 -- the bank grouped by provenance.
+   Three of five testers read 27 near-identical cards as one dataset. The group heading has
+   to be visible enough that a scanner cannot miss which kind of item they are looking at,
+   which is why it carries a rule rather than only a size change: a heading distinguished by
+   weight alone disappears when someone is skimming for a card, and skimming for a card is
+   exactly what these readers were doing. Never colour alone -- same rule as FE-8's banners,
+   so it survives greyscale and a reader who does not distinguish red. */
+.group { margin-top: 26px; }
+.group:first-of-type { margin-top: 14px; }
+.group > h3 {
+  font-size: 13.5px;
+  margin: 0 0 3px;
+  padding-left: 9px;
+  border-left: 3px solid var(--rule);
+  line-height: 1.35;
+}
+.group-measured > h3 { border-left-color: var(--accent); }
+.group > h3 .n { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.group > .hint { padding-left: 12px; }
+.hint.small { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+
+/* E12-D2/D3 -- the planted-error banner's vintage line. Set apart from the sentence above
+   it because it answers a different question: that one says what was done to the trace,
+   this one says which build judged it. Same banner, so a reader who reads one reads both. */
+.notice.planted .vintage {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-size: 12.5px;
+}

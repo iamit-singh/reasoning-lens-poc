@@ -21,7 +21,32 @@ import { useEffect, useRef, useState } from "react";
  * `<script>` and asserts the page still reads; this component contributes no text to that
  * view by design, so the static export's guarantee is untouched.
  */
-export default function LiveRun({ itemId }) {
+/**
+ * How long a re-run takes, from B4 #8's live measurement -- never a typed guess. The old
+ * copy said "about a minute", which is the median and was off by four on the featured item.
+ * States this item's own measured time when there is one, and the bank's median and worst
+ * case beside it, with n, because one run per item is one observation.
+ */
+function Duration({ latency }) {
+  if (!latency) return null;
+  const { itemSeconds, p50, max, n, measured } = latency;
+  const mins = (s) => (s >= 90 ? `${(s / 60).toFixed(1)} min` : `${Math.round(s)} s`);
+  return (
+    <>
+      {itemSeconds !== null ? (
+        <>
+          Measured on {measured}, this item took <b>{mins(itemSeconds)}</b>
+        </>
+      ) : (
+        <>Measured on {measured}</>
+      )}
+      ; across the bank the median was {mins(p50)} and the slowest {mins(max)} (n = {n}, one
+      run each, one machine, model already loaded).
+    </>
+  );
+}
+
+export default function LiveRun({ itemId, latency }) {
   const [available, setAvailable] = useState(null); // null = still asking
   const [run, setRun] = useState(null);
   const [events, setEvents] = useState([]);
@@ -93,8 +118,8 @@ export default function LiveRun({ itemId }) {
     <section className="liverun">
       <h2>Re-run this item live</h2>
       <p className="hint">
-        Generates all three arms again on the local model, then classifies them. Takes about
-        a minute and spends real analysis calls.{" "}
+        Generates all three arms again on the local model, then classifies them, and spends
+        real analysis calls. <Duration latency={latency} />{" "}
         <strong>The result is not a published measurement</strong> — the numbers on this page
         are the cached run everyone else sees.
       </p>

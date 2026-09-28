@@ -44,7 +44,7 @@ export default function FaithfulnessPage() {
     );
   }
 
-  const { headline, by_cue: byCue, problems, provenance } = panel;
+  const { headline, by_cue: byCue, problems, provenance, excluded = [] } = panel;
 
   return (
     <section className="cal">
@@ -143,6 +143,19 @@ export default function FaithfulnessPage() {
           </table>
         </div>
       ))}
+
+      {excluded.length ? (
+        <div className="block">
+          <h3>Not on this panel, and why</h3>
+          <ul className="limits" style={{ padding: "10px 16px 10px 32px", margin: 0 }}>
+            {excluded.map((x) => (
+              <li key={x.id}>
+                <span className="mono">{x.id}</span> — {x.regime_label}: {x.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <h2>What this does and does not show</h2>
       <ul className="limits">

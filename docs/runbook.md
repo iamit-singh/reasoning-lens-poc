@@ -199,10 +199,22 @@ was run, so a reader can tell whether their run matched.
 ### P1 — Bring the demo up
 
 ```
-make report              # span trees -> out/reports. 14 reports, offline, ~20 s
-make fe-build-measured   # static export -> frontend/out
+cp .env.example .env     # first time only. It carries the SHIPPING PINS -- see below
+make demo-data           # cassettes -> out/spans -> out/reports -> stamped. 14 reports, offline
+make fe-build-measured   # static export -> frontend/out. Refuses unstamped reports
 make serve-api           # localhost:8000, cache-first, DEMO_MODE from .env
 ```
+
+> **Close-out cold run, 28 Sep — from a clean copy of the tree, two more defects, both in
+> this block.** (1) `make report` alone fails on a fresh clone: it needs `make spans` first,
+> and this block never said so. (2) Even with spans, the reports came out **unstamped**, so
+> P1 as written rebuilt exactly the E12-D1 contradiction testers found on 23 Sep — P5 had
+> been fixed and P1 had not. And a third, worse than either: `.env.example` left
+> `MODEL_ANALYZE` and the local pin tuple **blank**, so every one of the 42 arms replayed as
+> `analysis_unavailable` with nothing saying why. `make demo-data` now does
+> spans → report → stamp in one step, `.env.example` carries the shipping pins, and
+> `fe-build-measured` depends on `stamp-check`. **Verified: a clean copy rebuilds all 14
+> reports byte-identical to the shipped ones** (ignoring `generated_at`).
 
 **Three corrections from the cold run, and the middle one shipped the wrong demo.**
 
@@ -212,7 +224,7 @@ make serve-api           # localhost:8000, cache-first, DEMO_MODE from .env
   literally brought up a site serving **invented data**, and `make smoke` caught it as
   `an item page resolves through the mount — 404`, which is the smoke test doing its job
   against a runbook that was wrong.
-- **`make report` comes first.** `out/` is gitignored because it is derived, so a fresh
+- **`make demo-data` comes first** (it was `make report`, which misses spans and the stamp — see the 28 Sep note above). `out/` is gitignored because it is derived, so a fresh
   checkout has an empty cache and P2 fails four checks before it can prove anything.
 - **`make fe-build*` no longer needs `make fe-install` first.** It did, and P1 never said
   so, so the first command of the first procedure died on `sh: next: command not found`.
@@ -232,7 +244,7 @@ Starts a real server **with `OPENAI_API_KEY` stripped**, runs **22** checks, sto
 did not call the provider* and *we could not call the provider* are different claims, and
 only the second proves the fallback product.
 
-**It needs P1 to have run first** — all of P1, including `make report`. The check count is
+**It needs P1 to have run first** — all of P1, including `make demo-data`. The check count is
 22 and this file said 16 for a week; the number moves when checks are added, so trust the
 output over this line.
 
@@ -264,6 +276,7 @@ is corrupt or `SPEND_FILE` points somewhere wrong — that is the breaker workin
 
 ```
 make report            # span trees -> out/reports, one report per item (--all is the default)
+make stamp-reports     # then stamp, or every item page says calibration has not run (E12-D1)
 ```
 
 > **This command did not run as written.** A bare `make report` exited 2 with `rlens: error:
@@ -286,7 +299,31 @@ make faithfulness      # faithfulness/panel.json from S4's records — no model,
 make calibrate         # calibration/results/latest.json (dev set; safe, the default)
 make calibrate ARGS="--iaa"   # + B4 #1, the human-vs-human kappa on the double labels
 make seeded-errors     # judge recall; COSTS SPEND
+make stamp-reports     # <-- LAST, AND NOT OPTIONAL. See below.
+make fe-build-measured # the export renders the reports; stamping after it changes nothing
 ```
+
+> ### ⚠️ `make stamp-reports` is the last step of this procedure and it was missing from it.
+>
+> **`make calibrate` moves `latest.json`. It does not touch the 14 reports.** The item pages
+> render `measurement_context` from the *reports*, so a P5 run that stops at `calibrate`
+> leaves every item page claiming the calibration has not happened **while
+> `/calibration/` publishes it from the file that just moved.** The two surfaces then
+> contradict each other, on a demo whose whole pitch is that its numbers can be checked.
+>
+> **That is not hypothetical — it is what shipped.** M2-17 ran `calibrate`, nothing stamped,
+> and the site served the contradiction for eleven days until **four of five naive testers
+> found it unaided** on 23 Sep (E12-D1). The order matters: **calibrate, then stamp, then
+> build.** `make stamp-reports ARGS="--check"` verifies without writing, and now runs on
+> every PR so this cannot rot again silently.
+
+
+**This is the third time a check in this project existed and did not run, and the first two
+are described in the next paragraph.** `stamp_reports.py --check` was written at M2-10b to
+forbid exactly the state above and its docstring says it exists so *"the G2 evidence pack
+can show it green"* — and it was in **no workflow, not in `make ci`, and not in this
+runbook.** It was a Makefile target and nothing else. Both it and `bundle-check` are now in
+`make ci` **and** in `pr.yml`, which is the only arrangement that has ever held.
 
 `make faithfulness-check` and the calibration-page grep both run in CI — **genuinely, as of
 the cold run.** Both were in `make ci` and in no workflow, and `faithfulness-check` could

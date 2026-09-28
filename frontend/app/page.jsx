@@ -67,7 +67,7 @@ export default function Home() {
 
       <StartHere
         entries={startHere(report.item.id)}
-        judgePrecision={calibration()?.measurement_context?.judge_precision?.value ?? null}
+        judgePrecision={calibration()?.measurement_context?.judge_precision ?? null}
       />
 
       <ItemPicker
@@ -139,8 +139,31 @@ function StartHere({ entries, judgePrecision }) {
   // FE-11 already made exactly this mistake once with C1.3's branch thresholds. When the
   // figure is absent the caveat still ships, without a number: the instruction ("a prompt to
   // look") is what the reader needs, and it does not depend on the value.
-  const pct =
-    typeof judgePrecision === "number" ? `${Math.round(judgePrecision * 100)}% of the time` : null;
+  // E12-D5. THIS SENTENCE USED TO SHIP THE POINT ESTIMATE ALONE, and two testers caught it.
+  // The reviewer put it exactly: the calibration page "would never let that sentence stand
+  // unqualified", and propagating the interval "costs eleven characters". A bare point
+  // estimate on the one screen every reader sees, with the caveats one click away, is this
+  // site doing the thing it spends the rest of its space disavowing -- and the readers who
+  // only see the home page are precisely the ones the caveats are for.
+  //
+  // Read from the same measurement_context as everything else; still never typed here.
+  const v = judgePrecision?.value;
+  const lo = judgePrecision?.ci_low;
+  const hi = judgePrecision?.ci_high;
+  const n = judgePrecision?.n;
+  const pct = typeof v === "number" ? `${Math.round(v * 100)}% of the time` : null;
+  // The qualifier renders only when the whole of it is present. A half-qualified figure --
+  // the estimate with its n but no interval -- is not a smaller version of the honest
+  // sentence: it implies the interval was checked and found unremarkable, which is the
+  // opposite of what this one says.
+  //
+  // E9's grep caught both of these comments when they quoted the figure as text, and it was
+  // right to. A number typed into this file goes stale whether or not it renders, and the
+  // next reader cannot tell a comment's stale figure from a current one.
+  const qualifier =
+    typeof lo === "number" && typeof hi === "number" && typeof n === "number"
+      ? ` (95% CI ${Math.round(lo * 100)}\u2013${Math.round(hi * 100)}%, n=${n})`
+      : "";
   return (
     <section className="starthere">
       <h2>Start with one of these</h2>
@@ -155,8 +178,8 @@ function StartHere({ entries, judgePrecision }) {
             <div className="why">{e.reason}</div>
             {e.caveat ? (
               <div className="caveat">
-                The judge that flagged it is right {pct ?? "less often than you would want"} —
-                a prompt to look, not a finding.
+                The judge that flagged it is right {pct ?? "less often than you would want"}
+                {qualifier} — a prompt to look, not a finding.
               </div>
             ) : null}
           </a>

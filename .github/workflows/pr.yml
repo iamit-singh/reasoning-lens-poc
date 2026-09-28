@@ -83,7 +83,9 @@ jobs:
       # relying on fastapi arriving as somebody else's transitive dependency is the whole
       # point of declaring it.
       - run: pip install -r backend/requirements.txt
-      - run: pytest backend/tests/test_api.py -q
+      # test_runs.py (M3-1b, 11 tests) was in neither this job nor `make ci` until the
+      # 28 Sep close-out -- the fourth check here that existed and never ran.
+      - run: pytest backend/tests/test_api.py backend/tests/test_runs.py -q
 
   # E10's evidence line says "`make faithfulness-check` in CI". That was true of `make ci`
   # and false of every workflow, which is the gap this job closes: the committed panel is
@@ -98,6 +100,55 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install -e "./analyzer[dev]"
       - run: python scripts/build_faithfulness_panel.py --check
+
+  # E12-D1. FOUND BY FOUR OF FIVE NAIVE TESTERS ON 23 SEP, AND BY NOBODY HERE IN ELEVEN DAYS.
+  # Every item page rendered "calibration has not run, every field null" while /calibration/
+  # published kappa 0.55, P 0.64 and R 0.80 from the same repository -- the site contradicting
+  # its own central claim, on a demo whose entire pitch is that its numbers can be checked.
+  #
+  # THE ASSERTION ALREADY EXISTED AND HAD NEVER BEEN RUN. stamp_reports.py --check was written
+  # at M2-10b precisely to forbid this state, is documented in its own module docstring as
+  # "the G2 evidence pack can show it green", and was in NO WORKFLOW, NOT IN `make ci`, and
+  # NOT IN THE RUNBOOK -- a Makefile target and nothing else. The third instance of the gap
+  # the faithfulness-check job above was added to close, and the widest of the three. An
+  # assertion that exists and does not run is not a weaker check than one that runs; it is
+  # worse, because the project cites it as covered. Stamping the 14 reports fixes the data
+  # once; THIS JOB is the fix, because nothing else stops M2-17's successor re-opening it.
+  stamp-check:
+    name: every report carries the calibration that qualifies it (E12-D1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      # out/ is gitignored, so a checkout has NO reports and this check exited 2 on every
+      # clean clone (found at the 28 Sep close-out). It now builds them the way P1 does --
+      # which makes it a check on the RECIPE: a P1 that forgets to stamp fails here.
+      # A real venv, because the Makefile addresses $(VENV)/bin.
+      - run: python -m venv .venv && .venv/bin/pip install -e "./analyzer[dev]"
+      - run: cp .env.example .env && make demo-data
+      - run: make stamp-check
+
+  # E12-D2, from the same five sessions. The calibration page says every figure expires if
+  # the prompt bundle changes; the site was already serving two bundles while saying it, and
+  # NOTHING FAILED. Two testers found it independently and one asked for precisely this:
+  # "a build-time assertion that fails the build rather than a sentence asking the reader to
+  # check". The drift is in the rendered artifacts, not the measurements -- M2-6's raw
+  # evidence is at the shipping bundle, so recall 0.80 is correctly attributed -- but an
+  # expiry rule nothing enforces is not a rule. A second vintage may still ship; it may not
+  # ship undeclared.
+  bundle-check:
+    name: no undeclared prompt-bundle vintage on any rendered report (E12-D2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      # Without the 14 shipped reports on disk this only ever checked the 10 committed
+      # seeded ones, and passed. Build them first so it checks what ships.
+      - run: python -m venv .venv && .venv/bin/pip install -e "./analyzer[dev]"
+      - run: cp .env.example .env && make demo-data
+      - run: make bundle-check
 
   contract:
     name: contract (span trees, ReasoningReport schema)

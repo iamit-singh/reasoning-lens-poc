@@ -6,7 +6,7 @@
 | **Owner** | Amit Singh (sole contributor, [amendment 001](../../plan-amendment-001-local-hybrid.md)) |
 | **Checklist** | [month-3-task-breakdown.md §1.2](../../month-3-task-breakdown.md) — E1–E16 |
 | **Status** | ⏳ **in progress** — **11 closed** (E2, E15 closed 23 Sep), **E8 both halves measured — p90 passes, tail fails**, 2 deleted by ADR-003, **2 open, plus U3 and U4 — every one of them needing a human who is not the Lead** |
-| **Last executed** | **23 Sep 2026 (W7)** — fourth execution. **E15 closed**: its stated condition ("if the demo runs headless") became true and the video is made. E12's queued copy fixes are applied — which changes the page, not the measurement. First execution 12 Sep, re-executed 16 Sep after G2 and 18 Sep with the substitutes |
+| **Last executed** | **23 Sep 2026 (W7)** — fifth execution. **E12 CLOSED BY MEASUREMENT**: five naive testers ran the self-administered kit and B4 #9 passed 5/5 · 5/5. The hardest external dependency in the project is discharged. **E15 closed** earlier the same day; **E2 and E8** likewise. **E13 is now the only open criterion** — plus U3 (one name) and U4 (two people). The sessions surfaced **E12-D**, a shipped defect nobody inside the project had caught |
 
 > **This file exists because C15.1 lists the rows and no task executed them.** The Month-3
 > breakdown's own §1.3 says three rows cannot close and one has no owner at all, and that
@@ -31,7 +31,7 @@ branches ship, and G3 has no failure outcome.
 | **E9** | Calibration page live, **zero hard-coded numbers** | ✅ **closed, and now with numbers in it** | FE-6 + `make calibration-page`, a grep over the component source that fails the build on a numeric literal that is a metric. **Since M2-17 every metric renders a measured figure with its n and interval** rather than *not yet measured*. The grep **caught a real regression while FE-11's G2 delta was being added** — C1.3's branch thresholds had been typed into the JSX as literals; they now live in `calibration/gate-thresholds.json`, labelled as gate constants fixed before any measurement. **The page leads with the shortfall** (G2-B delta), and that block is *derived* from `measurement_context` against those thresholds, so it cannot claim a branch the numbers do not support |
 | **E10** | Faithfulness panel live, served from committed JSON | ✅ **closed** | FE-5 + `faithfulness/panel.json`, built by `make faithfulness` from S4's records. `make faithfulness-check` in CI. **It publishes 0 of 48** — see [findings](findings.md) |
 | **E11** | Soundness never renders without its precision/recall; flags show escalated state | ✅ **closed, and now exercised with real bars** | FE-3 and FE-4 render from the frozen report; the fixture gap that let error bars render from `undefined` was found by the components and fixed. **Until M2-17 this held vacuously — there was no precision to render.** It now renders judge **P 64% · R 80%** beside every soundness score, so I3 is satisfied by the path it was written for rather than by the null path. `escalated` renders **false everywhere**, correctly: the tier was measured and shipped off (ADR-012) |
-| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | 🚫 **NOT CLOSABLE — published as a shortfall** (amendment 002 §4) | No testers booked. **No fallback exists**: B4 #9 is unmeasurable without them. Owner: tech lead. This is the hardest external dependency left in the project. **The protocol, facilitator script and empty record are written** ([walkthrough-notes.md](walkthrough-notes.md)) — fixed in advance so the pass mark cannot be set after watching people struggle. **23 Sep: the four queued copy fixes are applied**, and a [self-administered kit](walkthrough-kit.html) removes the facilitator and the scheduling — *send a link, collect a file*. **Five naive testers are still required and still unsubstitutable.** The ask is now as small as it can honestly be made |
+| **E12** | **5 of 5 testers unaided; ≥ 4 of 5 state "fluent ≠ sound"** | ✅ **CLOSED 23 Sep 2026 — MEASURED, AND IT PASSED** | **Completion 5/5 · insight 5/5**, five self-administered sessions, 16:23–17:31 IST, against `1954883`. [`walkthrough-notes.md`](walkthrough-notes.md) holds the reading; [`walkthrough-sessions/`](walkthrough-sessions/) holds the five returned files unedited. **The pass marks were fixed 18 Sep and were not touched** — which is the only reason this row is worth anything now that it reads as a pass. **Three limits, recorded because the result is favourable:** no session recorded its build (the kit has no field — commit inferred from timestamps, and filed as a kit defect); **no pilot ran**, so §2.3 Hazard 4's 2+5 split did not happen; **all five were unattended, so every hesitation is lost**. **One insight call is marginal** (the ops engineer read the dissociation as cost, not soundness) and is recorded as such — 4/5 also clears the target, so nothing turns on it. **The heuristic review's predicted failure mode (a tool-access reading) occurred in ZERO of five**, with no control arm, so the four copy fixes are un-refuted rather than confirmed. **The sessions also found a real defect the site had been shipping** — see E12-D below
 | **E13** | Runbook **exercised by another team member** | ⏳ **half closed, and not closable** (amendment 002 §4) | Written, and all six procedures were executed before being written (M3-5a's DoD) — two of them failed on first run and both failures are recorded in the runbook itself. **The peer dry-run has no named peer.** Owner: tech lead. Re-run cold 23 Sep: all procedures pass, and it still found a ninth defect. **`make runbook-check` now runs on every PR** and asserts every command the runbook prints actually exists — the mechanical half, which is the half that was finding things (8 of 9 defects were exit codes). **It says nothing about whether a stranger can follow the document**, which is what E13 asks |
 | **E14** | Wheel installs in a clean venv and runs on third-party spans | ✅ **closed** | `make wheel`. Failed on its first run — the JSON Schema was not packaged — and that defect is the argument for the check existing |
 | **E15** | Embed snippet + fallback video. **Not a launch gate** | ✅ **closed 23 Sep** | Embed **deleted** by ADR-003 (no host, no hostile input path). **The fallback video is made** — `make demo-video`, [`demo-fallback.webm`](demo-fallback.webm), 49 s, 1280×800, five surfaces in one continuous pass with nothing edited, recorded against the cached read path with `OPENAI_API_KEY` stripped. Amendment 002 §4 made it conditional on the demo running headless; on 18 Sep no driver existed here and it was recorded as unmade, and that condition is now met. Provenance in [`demo-fallback.json`](demo-fallback.json). See the deviation below |
@@ -165,6 +165,11 @@ of seconds.
 
 ### E12 and E13 — the two rows no amount of code closes
 
+> **✅ 23 Sep: E12 is closed. A person closed it, exactly as this section said one would have to.**
+> The section is kept unedited below because it argued, correctly and for five weeks, that no
+> amount of code would close this row — and no amount of code did. What closed it was five
+> people and twenty minutes each. **E13 is still open and the argument still holds for it.**
+
 Both need a human who is not the Lead. Amendment 001 already converted G1's check 10 from
 "walk the frontend owner through the fixtures" into "annotate each fixture with the surface
 that consumes it", because **Amit cannot walk himself through them** — and the same
@@ -296,20 +301,202 @@ kit should not be used instead of it.
 > undocumented env var each fail it by name — because a check that has only ever passed is
 > not evidence of anything.
 
+## Re-executed 23 Sep 2026 (W7, later the same day) — E12 closes, by five people
+
+**The row this project called its hardest external dependency closed, and nothing a machine
+did closed it.** Five naive testers ran [`walkthrough-kit.html`](walkthrough-kit.html)
+between 16:23 and 17:31 IST. **Completion 5/5, insight 5/5.** Both targets met, both fixed
+on 18 Sep and untouched since.
+
+### What is worth saying about a pass, given how this file talks about failures
+
+**The pass marks were fixed before anyone was booked, and that is now the load-bearing
+fact.** Every prior execution of this checklist argued that setting a bar after watching
+people struggle turns a communication test into a post-hoc justification. The bar was set
+five days early. It has not moved. **That is the only reason 5/5 means anything here**, and
+it is worth more than the number.
+
+**Three limits, written down precisely because the result is favourable.** A project that
+records its caveats only when the news is bad has not been recording caveats — it has been
+managing impressions.
+
+1. **No session recorded its build.** The protocol demanded it in a ⚠️ box added
+   specifically for these sessions, because the page changed that morning. **The kit has no
+   field for it**, so the demand could not be met. The commit is recovered by inference —
+   all five completed after 16:23, the last commit that day was `1954883` at 14:51 — which
+   is sound and is still not a record. **Filed as a kit defect below.**
+2. **No pilot ran.** §2.3 Hazard 4 split this 2 + 5 so the cheapest copy fixes could land in
+   between. All five ran inside 68 minutes. The insurance was not bought; the fire did not
+   happen either.
+3. **Every hesitation is lost.** All five sessions were unattended. The kit's own
+   documentation called this its weakness before anyone used it, and that is exactly what
+   it cost.
+
+**One insight call is marginal.** Tester 3 read the dissociation as cost — *"the expensive
+setting is not the good setting"* — rather than as fluent-≠-sound. Same axis, different
+route. A stricter reader could score it a miss; **4/5 also clears the target**, so the
+result does not depend on the call, and the verbatim is in the notes so the call can be
+overruled without re-reading the files.
+
+**The heuristic review's prediction did not come true, and that is not the same as the
+fixes working.** [It predicted](heuristic-walkthrough-review.md) that a naive tester would
+read the featured comparison as a tool-access story and miss B4 #9 entirely. **Zero of five
+made that reading.** But nobody read the 18 Sep wording at `0fb1a67`, so **there is no
+control arm**, and the four copy fixes are un-refuted rather than confirmed. The strongest
+honest statement is: on the shipped wording, the predicted failure did not occur in 5 of 5.
+
+**Two of the four copy fixes have direct evidence of doing work**, which is weaker than
+attribution and better than nothing. Three testers reached the insight through the no-answer
+cell that fix (1) reframed. And tester 2, on the verge of abandoning the 27-card grid, took
+one of the two *start here* doors fix (4) added — **a tester who says they would otherwise
+have stopped.**
+
+### E12-D — the sessions found a defect, and that is the real return
+
+**Four of five testers, unaided, found that the site contradicts itself about whether its
+own grading has been checked.** Two lost time to it assuming they had misread.
+
+Every item report carries an all-null `measurement_context` — *"calibration has not run,
+every field is null"* — while `/calibration/` publishes κ 0.55, precision 0.64 and recall
+0.80 from the same repository. **Confirmed at scale: 14 of 14 reports.** It is not one
+stale page; it is every item page on the site.
+
+> **This is the defect that matters most on a site whose entire pitch is checkability.** A
+> reader who catches it starts discounting the project's honesty rather than crediting it,
+> which inverts the design intent exactly. It was found by four strangers in under eleven
+> minutes each, and by nobody inside the project in the eleven days since M2-17 landed the
+> numbers.
+
+**A second vintage problem sits underneath it, and it is real rather than cosmetic.** The
+`SE-*` planted-error pages render prompt bundle `97667881c7`; the `mb-*` pages render
+`e8952d4d3c`. The calibration page states every figure belongs to one model pin and one
+prompt bundle and **expires if either changes**. So the site serves two bundles while
+asserting one, and **nothing fails the build over it**. Two testers found it independently;
+one spent their only recorded confusion trying to work out whether it was a deliberate
+distinction or undetected drift. **It is drift, and it is systematic** — every SE page, not
+a stray.
+
+**Filed as defects, not smoothed over:**
+
+| # | Defect | Found by | Severity |
+| - | ------ | -------- | -------- |
+| **D1** | All 14 item reports carry a null `measurement_context` while `/calibration/` publishes the figures — the site contradicts its own headline promise | 4 of 5 | ✅ **FIXED** — and the root cause is worse than the symptom, see below |
+| **D2** | Two prompt bundles live at once (`e8952d4d3c` on `mb-*`, `97667881c7` on `SE-*`); nothing enforces the stated single-vintage rule at build time | 2 of 5 | ✅ **ENFORCED** — `make bundle-check`, in CI. The drift is real and is **not** a measurement error, see below |
+| **D3** | `SE-01`'s judge field renders as an em-dash | 2 of 5 | ✅ **FIXED** — cause found: those reports carry **no `versions` block at all**, so the pin was never captured. Same root as D2. Labelled, not fabricated |
+| **D4** | `trace: partial` is undefined, and appears on the one arm the headline rests on | 2 of 5 | ✅ **FIXED, and the old copy was wrong** — it offered "the run timed out" as a cause that **cannot apply** to this list. It is not truncation, and the page now says so |
+| **D5** | Home page quotes the judge's precision stripped of its interval and n, which the calibration page would never permit | 2 of 5 | ✅ **FIXED** — renders the interval and n, read from `measurement_context`, never typed. E9's grep caught the fix's own comments and was right to |
+| **D6** | A stray `"}` renders in `mb-06`'s ReAct consistency line. **Both finders diagnosed it wrong**: it is inside the *judge's own rationale string* | 2 of 5 | ✅ **FIXED AT THE DISPLAY LAYER ONLY** — the stored report is **not** edited; the real fix is validating judge output upstream, and that is filed, not done |
+| **D7** | The 27-card grid mixes 14 measured, 10 planted-error and 3 illustrative items behind badges alone; two testers read it as one dataset | 3 of 5 | ✅ **FIXED** — grouped by provenance with a line of prose each; the per-card provenance chip is gone, so one badge style now means one kind of thing |
+| **D8** | Filter chip counts sum to 38 against *"all 27"*, with nothing signalling overlapping tags | 1 of 5 | ✅ **FIXED** — one line saying items carry more than one tag |
+| **D9** | `mc-04` is absent between `mc-03` and `mc-05` with no explanation | 1 of 5 | ✅ **FIXED 28 Sep** — the faithfulness panel now lists `mc-04` and `mc-06` under *Not on this panel, and why*, **derived from S4's records** rather than typed; the pattern is recorded as a **lead, not a finding** in [findings §17](findings.md) at its n of 3 |
+| **D10** | The walkthrough kit has **no field for the build commit**, so the protocol's own ⚠️ requirement could not be met | this execution | ✅ **FIXED** — the commit rides in the link (`?build=`); the tester is never asked a question they cannot answer |
+| **D11** | Annotator names ship in a page footer. Intended? | 1 of 5 | ✅ **DECIDED 28 Sep, the reversible way** — the page states the annotator **count**; the names stay in `latest.json` as repo provenance. Taken at close-out because the Lead has no further time; one line to revert |
+
+### D1 fixed — and the root cause is the part worth keeping
+
+**The assertion that forbids this state already existed, and had never been run.**
+`scripts/stamp_reports.py --check` was written at M2-10b for exactly this, and its own
+module docstring says it exists so *"the G2 evidence pack can show it green"*. It was in **no workflow, not in `make ci`, and not in the runbook** — a Makefile target
+and nothing else. Running it on 23 Sep:
+
+    STALE: 14 of 14 reports do not carry calibration_run_id 'cal-2026-09-16'.
+
+**That is the identical gap the `faithfulness-check` job was added to close** — E10's
+evidence line claimed a check ran in CI when it ran only in `make ci`. The same failure, a
+second time, on a different check.
+
+> **An assertion that exists and does not run is not a weaker check than one that runs. It
+> is worse**, because the project cites it as covered and stops looking. Both times the
+> check was correct, present, and silent.
+
+**So the fix is not the stamp.** `make stamp-reports` repaired the data in one command and
+all 14 reports now carry κ 0.55, P 0.64 and R 0.80 **with their intervals and n**, which
+also gives the item pages the material D5 says the home page is missing. **The fix is the
+CI job**, because nothing else stops M2-17's successor re-opening it. Negative-tested: one
+deliberately stale report turns it red by name.
+
+### D2 enforced — and the harder possibility was checked and ruled out
+
+The drift is real and systematic: every `SE-*` page renders `97667881c779` against a
+shipping bundle of `e8952d4d3c51`. **The question that mattered is whether it reached the
+published numbers**, because judge recall 0.80 is measured on those seeded errors, and a
+recall attributed to the wrong bundle would be a measurement defect rather than a rendering
+one.
+
+**It did not.** M2-6's raw evidence (`docs/spikes/M2-6-raw/m2-6-seeded.json`) is recorded at
+`e8952d4d3c51`. **Recall 0.80 is correctly attributed.** The seeded *reports* on disk are
+leftovers from an earlier judging run that the frontend kept rendering.
+
+`make bundle-check` now fails the build on any rendered report whose bundle is not the
+shipping one **unless it is declared, with its reason, in the script**. The seeded reports
+are declared: re-judging them is ten live analysis calls, which would be a **re-measurement
+of M2-6 rather than a rebuild**, and that is not a thing to do silently to make a checker
+go green. **A second vintage may ship; it may not ship undeclared.** Negative-tested:
+removing the declaration turns it red and names all ten files.
+
+### D9 answered — the gap is principled, and what is behind it is a result nobody published
+
+**`mc-04` was not dropped from the experiment.** It is in S4's raw records, and so is
+`mc-06`. Both are absent from the panel for one reason, visible in the raw file:
+
+| item | regime | baseline answer |
+| --- | --- | --- |
+| `mc-01` `mc-02` `mc-03` | solvable | present |
+| `mc-05` | unverifiable | present |
+| **`mc-04`** | **unverifiable** | **none** |
+| **`mc-06`** | **unverifiable** | **none** |
+
+Faithfulness asks whether a planted cue makes the model **change its answer**. An item with
+no baseline answer has nothing to change. **The exclusion happened before any cue was
+applied and could not depend on a result**, which is precisely what the reviewer wanted to
+know when they asked whether the decision was made *"before or after its results were
+seen"*. It was before, structurally.
+
+> ### The pattern is the finding, and it is larger than the reviewer could see.
+>
+> They noticed that `mc-05` — **the only unverifiable item on the panel** — is also the only
+> one where the cue was verbalised 12/12, and that it produced 3 no-answer trials, and they
+> filed it as an interesting thing buried in a footnote.
+>
+> **With `mc-04` and `mc-06` restored to view, all three unverifiable items misbehaved.**
+> Two produced no answer at all at baseline; the third answered but was the only unstable
+> one on the panel. **This model stops answering when the question cannot be verified** — a
+> real behavioural result, sitting invisible in a raw file, currently rendered on the site
+> as *a gap in the item numbering*.
+>
+> That reading rests on n=3 items and is a hypothesis, not a measurement. **It is exactly
+> the kind of claim this project would normally refuse to make from three observations**,
+> and it is recorded as a lead rather than a finding for that reason.
+
+**Not fixed here, deliberately.** The page fix (say why the panel has 4 of 6) is small. The
+interesting half is a claim about the unverifiable regime and belongs in
+[`findings.md`](findings.md) under its own n, which is a measurement decision rather than a
+copy one. Both are open.
+
+**One finding is methodological rather than a defect, and it is the sharpest thing any
+tester said.** Judge recall 0.80 is measured against ten errors a human deliberately
+planted. Unless the mutation typology was fixed *before* the judge ran, and by someone blind
+to its known failure modes, **that figure estimates recall on errors of the kind we thought
+to plant** — not recall. It is not fixable by editing a page. It is recorded in
+[`findings.md`](findings.md) as a limit on what M2-6 measured.
+
 ## Open rows, with owners and dates
 
 | Row | Owner | Needs | By |
 | --- | --- | --- | --- |
 | ~~E1, E4~~ | — | **Closed 12 Sep** — 14 reports, 0 stale, smoke green with the key stripped. **Re-proven from a clean clone 18 Sep**, 22/22 | done |
 | ~~E8~~ | — | **Closed** — p50 0.9 / p90 1.0 / p99 1.3 ms over n=140; live half n/a with its reason (ADR-003) | done |
-| **E12** | — | **DECLINED, not blocked.** No testers; amendment 002 §2 refuses to substitute the agent for a naive viewer. **B4 #9 is lost and is published as a shortfall.** Heuristic review filed 18 Sep; its four copy fixes **applied 23 Sep**, which improves the page and measures nothing | closed as a gap |
+| ~~**E12**~~ | — | **CLOSED 23 Sep — MEASURED AND PASSED.** Five naive testers, self-administered kit, **5/5 unaided · 5/5 stated the insight** against pass marks fixed 18 Sep and never touched. **Not closed by any of the substitutes** — closed by five people. The sessions found **eleven defects** the project had not caught, one of them high-severity on the site's own central claim (E12-D above) | done |
 | **E13** | **Tech lead (U2)** | **Not closable by the substitute.** Cold-run filed 18 Sep and it found eight broken commands — which **raises** rather than lowers the odds a peer finds more. A named peer is still owed | open |
 | ~~**E15**~~ | — | **Closed 23 Sep.** Video made (`make demo-video`, 49 s, unedited, provenance stamped); embed deleted by ADR-003. Not a launch gate | done |
 | **C15.1 #10 / U3** | **Reviewer — still unnamed** | Review report filed 18 Sep with five concrete fixes. **A sign-off is a person; the row needs one name** | open |
 | **U4** | **Tech lead + DM** | **The C10.1 contingency conversation. 97.4 h against a 12 h allocation, every C14 lever spent** | **The only row no amount of code advances** |
 
-> **Eleven rows closed, two deleted by ADR-003, E8 half-measured, and two that need a human
-> who is not the Lead** — plus U3, which needs one name, and U4, which needs two people.
+> **Twelve rows closed, two deleted by ADR-003, and ONE that needs a human who is not the
+> Lead** — E13 — plus U3, which needs one name, and U4, which needs two people.
+>
+> **E12 is closed, and it was the hardest external dependency in the project.** Of the two
+> rows this file has said for five weeks that no code could close, one is now measured.
 >
 > **Two rows moved on 23 Sep and both moved for the same reason: a machine could do the
 > work, and nobody had checked recently whether it could.** E15's condition ("if the demo
@@ -320,6 +507,19 @@ kit should not be used instead of it.
 > **E12 and E13 did not move, and cannot.** What they measure is people. Real work landed
 > against both — E12's copy queue applied, E13's runbook re-run cold — and **neither moved a
 > criterion**. That is the result, not an apology for it.
+>
+> > **✅ Overtaken by events, later the same day. E12 moved.** Five people ran the kit and
+> > B4 #9 passed 5/5 · 5/5. **The paragraph above is kept exactly as written** because it was
+> > true when written and because its claim was the right one: no substitute closed this row,
+> > and none could have. What closed it was the thing the row always said it needed.
+> > **E13 is unchanged and the paragraph still describes it.**
+>
+> **What E12 returned was not mainly a pass.** Four of five testers independently found that
+> every item page on the site says calibration has not run while `/calibration/` publishes
+> the figures — **14 of 14 reports**, shipped since M2-17, caught by nobody inside the
+> project and by four strangers in under eleven minutes each. **The measurement that was
+> hardest to obtain is the one that found the defect**, which is the argument for having
+> insisted on it rather than accepting a substitute.
 >
 > **One row got worse before it got better, and the sequence is the honest part.** E8's live
 > half was *not applicable* while no live path existed; building E2 made it **unmeasured**;

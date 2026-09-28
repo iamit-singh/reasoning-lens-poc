@@ -108,6 +108,26 @@
   <input id="who" style="width:100%;padding:10px 12px;border-radius:4px;
     border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:inherit">
 
+  <!-- E12-D10. THE FIRST FIVE SESSIONS COULD NOT RECORD THIS AND THE PROTOCOL REQUIRED IT.
+       walkthrough-notes.md added a warning box on 23 Sep saying "a session's result is about
+       a specific page -- add the git rev-parse HEAD of the build the tester saw", on the same
+       morning the page changed. THE KIT HAD NOWHERE TO PUT IT, so five results were recorded
+       against a build recovered afterwards by comparing commit timestamps to completion
+       times. That inference was sound and it is not a record.
+
+       THE TESTER IS NOT ASKED. They have no way to know the commit and asking would be a
+       question the page cannot answer, which is the failure mode this whole exercise
+       measures. The SENDER puts it in the link -- walkthrough-kit.html?build=1954883 -- and
+       it is captured silently. The visible field is the fallback for a sender who forgets,
+       and it says who it is for. -->
+  <div id="buildrow" style="display:none">
+    <label for="build">Build commit <span class="muted">(for the person who sent this —
+      leave alone if you are the tester)</span></label>
+    <input id="build" placeholder="git rev-parse HEAD" style="width:100%;padding:10px 12px;
+      border-radius:4px;border:1px solid var(--rule);background:var(--surface);
+      color:var(--ink);font:inherit">
+  </div>
+
   <div class="row">
     <button onclick="go(2)">Start</button>
   </div>
@@ -182,6 +202,15 @@
 let started = null, readSeconds = null;
 const el = (id) => document.getElementById(id);
 
+// E12-D10. The commit rides in the link the sender pastes. Shown as an editable field only
+// when the link did not carry one, so the common path asks the tester nothing.
+const BUILD_FROM_LINK = new URLSearchParams(location.search).get('build');
+if (BUILD_FROM_LINK) {
+  el('build').value = BUILD_FROM_LINK;
+} else {
+  el('buildrow').style.display = 'block';
+}
+
 function go(n){
   if (n === 2 && !started){
     started = Date.now();
@@ -211,6 +240,11 @@ function payload(){
     note: 'Verbatim answers. Scoring is a human step -- see docs/walkthrough-notes.md.',
     completed_utc: new Date().toISOString(),
     role: el('who').value.trim() || null,
+    // null, never a guess. A session whose build is unknown must SAY so -- a plausible
+    // default here would be indistinguishable from a recorded fact in the returned file,
+    // which is the exact confusion this field was added to end.
+    build: (el('build').value.trim() || null),
+    build_source: el('build').value.trim() ? (BUILD_FROM_LINK ? 'link' : 'typed') : null,
     seconds_on_page: readSeconds,
     attended: false,
     answers: {

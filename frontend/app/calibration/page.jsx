@@ -200,7 +200,15 @@ export default function CalibrationPage() {
               <span className="mono">{data.run?.analyzer_version}</span> · judge{" "}
               <span className="mono">{data.run?.judge_triage_pin ?? "unpinned"}</span> ·{" "}
               {data.run?.labels_loaded} human labels from{" "}
-              {data.run?.annotators?.length ? data.run.annotators.join(", ") : "nobody yet"}.
+              {/* E12-D11, decided at the 28 Sep close-out: the page names no annotator. It
+                  published two colleagues' first names to anyone holding the link, which one
+                  tester flagged and nobody had decided. The count is what the reader needs;
+                  the names stay in latest.json as provenance for whoever audits the repo.
+                  Reversible in one line if the Lead decides otherwise. */}
+              {data.run?.annotators?.length
+                ? `${data.run.annotators.length} annotators (named in calibration/results/latest.json)`
+                : "nobody yet"}
+              .
             </p>
           </div>
 

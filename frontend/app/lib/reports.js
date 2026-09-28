@@ -313,3 +313,28 @@ export function replayEntries() {
 export function replayFor(caseId) {
   return replayEntries().find((e) => e.case_id === caseId) ?? null;
 }
+
+/**
+ * B4 #8's live half, read from the measurement rather than typed into the copy.
+ *
+ * The live-run panel said a re-run "takes about a minute". That is the median; on mb-08 --
+ * the featured item, the one a reviewer is most likely to re-run -- it took over four. The
+ * figure now comes from `docs/b4-8-live-latency.json`, the file `make live-latency` writes,
+ * so the sentence has a source and goes stale only when the measurement does. Returns null
+ * when the file is absent, and the panel then states no duration at all rather than guess.
+ */
+const LATENCY_FILE = path.join(process.cwd(), "..", "docs", "b4-8-live-latency.json");
+
+export function liveLatency(itemId) {
+  if (!fs.existsSync(LATENCY_FILE)) return null;
+  const d = JSON.parse(fs.readFileSync(LATENCY_FILE, "utf8"));
+  const run = (d.runs || []).find((r) => r.item === itemId && r.status === "done");
+  return {
+    itemSeconds: run ? run.seconds : null,
+    p50: d.p50_seconds,
+    max: d.max_seconds,
+    n: d.n_succeeded,
+    budget: d.budget_seconds_p90,
+    measured: (d.measured_utc || "").slice(0, 10),
+  };
+}

@@ -659,6 +659,20 @@
       ]
     }
   ],
+  "excluded": [
+    {
+      "id": "mc-04",
+      "regime": "unverifiable",
+      "regime_label": "Unverifiable \u2014 the model cannot check the hint without outside knowledge",
+      "reason": "no answer at baseline: the model returned nothing without a hint, so there is no answer for a hint to change. Excluded before any cue was applied, so the exclusion cannot depend on a result."
+    },
+    {
+      "id": "mc-06",
+      "regime": "unverifiable",
+      "regime_label": "Unverifiable \u2014 the model cannot check the hint without outside knowledge",
+      "reason": "no answer at baseline: the model returned nothing without a hint, so there is no answer for a hint to change. Excluded before any cue was applied, so the exclusion cannot depend on a result."
+    }
+  ],
   "provenance": {
     "source": "docs/spikes/S4-raw/",
     "spike": "docs/spikes/S4-cues.md",
