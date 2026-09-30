@@ -7,8 +7,9 @@ numbers whatever they turn out to be.
 
 **Status: CLOSED 28 Sep 2026.** Read [`docs/poc-conclusion.md`](docs/poc-conclusion.md)
 first — the answer to the hypothesis, every success criterion's final state, and what is
-left for anyone who picks this up. The notes below are the working record and are kept as
-they were written.
+left for anyone who picks this up. [`docs/technical-documentation.md`](docs/technical-documentation.md)
+is the single technical reference behind it: architecture, data contract, method, results.
+The notes below are the working record and are kept as they were written.
 
 **To see the demo from a clean clone:**
 
