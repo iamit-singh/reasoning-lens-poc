@@ -70,7 +70,7 @@ figures. All eleven are now closed or decided. D6's upstream half is filed, see 
 | B4 #7 | Cost of thought visible | **Reported** — median 5.13× reasoning tokens, range 1.22–53.59×, n=14 |
 | B4 #8 | p90 latency | **Cached: met** (1.0 ms, n=140). **Live: p90 101.6 s against 120 s, max 252.7 s** — the tail fails, on the featured item |
 | B4 #9 | ≥ 4 of 5 testers state the insight | **Met** — 5 of 5 |
-| G3 E1–E5, E9–E12, E14–E16 | Launch checklist | **Closed** ([g3-ship-checklist.md](g3-ship-checklist.md)) |
+| G3 E1–E5, E9–E12, E14–E16 | Launch checklist | **Closed** |
 | G3 E6, E7 | Rollback drill; live at a custom domain | **Deleted by [ADR-003](decisions/ADR-003-hosting.md)** — nothing is deployed |
 | G3 E8 | B4 #8, both halves | **Closed as measured**, with the tail failure published |
 | **G3 E13** | Runbook exercised by another team member | **Unmet at close.** The mechanical half runs as `make runbook-check`. Whether a stranger can *follow* it was never tested |
@@ -123,7 +123,7 @@ None of these block the conclusion. Each would change a number if someone picked
 [amendment 002](../../plan-amendment-002-no-human-capacity.md) is booked at 0.0, as the
 amendment specifies. That keeps the Lead figure honest, but it also means the figure
 understates the total effort after 16 Sep. Every cut lever (L1–L4, L6) was spent.
-[ledger.md](ledger.md) holds every session.
+The session-by-session ledger was removed from the tree on 30 Sep 2026 and remains in git history.
 
 **The lesson worth carrying into the next PoC is about sequencing, not scope.** The plan
 put measurement before UI so that a negative result would arrive while hours remained, and

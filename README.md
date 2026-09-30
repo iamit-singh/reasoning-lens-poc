@@ -22,8 +22,7 @@ make serve-api            # http://localhost:8000
 make smoke                # 26/26, with the provider key stripped
 ```
 
-See [`docs/ledger.md`](docs/ledger.md) for actuals, [`docs/findings.md`](docs/findings.md)
-for the five results that contradicted the plan, and
+See [`docs/findings.md`](docs/findings.md) for the five results that contradicted the plan, and
 [`../month-1-task-breakdown.md`](../month-1-task-breakdown.md) for the plan this repo
 executes — as amended by [plan amendment 001](../plan-amendment-001-local-hybrid.md).
 
@@ -104,7 +103,7 @@ make label ARGS="--annotator you" # M1-11: the blind labelling tool
 | Measured-data build — the shipping export, 17 item pages, all 10 trace states | ✅ | FE-9 |
 | Analyzer wheel — installs in a clean venv, ingests third-party spans | ✅ | M3-8 |
 | Runbook — six procedures, **each executed before being written** | ✅ | M3-5a |
-| G3 ship checklist — **13 closed, 2 deleted, E13 unmet at close** | ✅ closed · [g3-ship-checklist.md](docs/g3-ship-checklist.md) | M3-9 |
+| G3 ship checklist — **13 closed, 2 deleted, E13 unmet at close** | ✅ closed | M3-9 |
 | Calibration frame — random-90 **and** the enriched draw, **which came up 31 of 60** | ⚠️ t13 fired | M1-11 / M2-14 |
 
 Weeks 1–4 are closed and W5 is well past its budget. **G0 is 6 of 6 and G1 is 10 of 10** —

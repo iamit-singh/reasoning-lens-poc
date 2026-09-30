@@ -319,7 +319,5 @@ measured shortfall, and **the demo ships anyway.**
 ## Related
 
 - [`walkthrough-sessions/`](walkthrough-sessions/) — the five returned files, unedited
-- [`g3-ship-checklist.md`](g3-ship-checklist.md) — E12 is this, and it **closes on this
-  measurement**; the defects the testers found are filed there
 - [`runbook.md`](runbook.md) — E13's peer dry-run is the other human-dependent row, and it
   needs a different person than these five

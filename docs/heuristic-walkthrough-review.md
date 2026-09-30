@@ -289,5 +289,4 @@ the criterion lowered.
 
 - [`walkthrough-notes.md`](walkthrough-notes.md) — the protocol, the facilitator script, and the empty record
 - [`runbook-cold-run.md`](runbook-cold-run.md) — E13's substitute, same shape, same boundary
-- [`g3-ship-checklist.md`](g3-ship-checklist.md) — E12's row
 - [amendment 002 §§2, 5, 6](../../plan-amendment-002-no-human-capacity.md) — why no substitution closes this

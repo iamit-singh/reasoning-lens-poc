@@ -406,7 +406,7 @@ The plan ran measurement before UI so a negative result would arrive while hours
 | ADR-001 to ADR-012 | 10–12 Sep | Runtime, span contract, hosting, arm regimes, the three non-reproducing phenomena, the segmenter unit, no Redis, judge thresholds |
 | Cut levers L1–L4, L6 | from kickoff | Bank 18 → 14, lookup corpus 30 → 12, and further cuts; all spent |
 
-### Hours (`docs/ledger.md`, C10.5)
+### Hours (C10.5)
 
 | Period | Lead hours | Against |
 | --- | --- | --- |
@@ -483,7 +483,7 @@ The product repo is `reasoning-lens/` (GitHub: `iamit-singh/reasoning-lens-poc`,
 | `problem-bank/` | `items/`, `corpus/facts.json`, `traps/`, `arm-contrast.md` |
 | `calibration/` | `rubric.md`, `sampling.json`, `labels/`, `seeded/`, `results/latest.json`, `adjudication-queue.md`, `annotator-2.md` |
 | `faithfulness/` | `panel.json` |
-| `docs/` | `poc-conclusion.md`, `g2-measurement-report.md`, `findings.md` (17 findings), `ledger.md`, `runbook.md`, `g3-ship-checklist.md`, `walkthrough-notes.md`, `decisions/` (ADR-001 to ADR-012), `spikes/` |
+| `docs/` | `poc-conclusion.md`, `g2-measurement-report.md`, `findings.md` (17 findings), `runbook.md`, `walkthrough-notes.md`, `decisions/` (ADR-001 to ADR-012), `spikes/` |
 | `../poc-reasoning-lens.md` | PoC definition: B1–B12 |
 | `../implementation-plan.md` | Implementation plan: C-sections, Appendix D decisions |
 | `../month-{1,2,3}-task-breakdown.md` | Task breakdowns |

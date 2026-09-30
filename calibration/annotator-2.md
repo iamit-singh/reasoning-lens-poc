@@ -19,7 +19,7 @@ them can detect it. That is what a second annotator is for, and it is why the *p
 matters as much as the number.
 
 Appendix D #5 names the annotator: **Ankit**, committed for ~2 h in W6
-([day-1 unblock](../docs/day-1-unblock.md)). There is no fallback. B4 #1 is unmeasurable
+(the day-1 unblock). There is no fallback. B4 #1 is unmeasurable
 without a second human.
 
 ---

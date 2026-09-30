@@ -1,7 +1,7 @@
 # Problem bank
 
 `items/*.json` — 14 items under lever **L1** (down from 18; the L1/L2 decision is recorded
-in [`../docs/day-1-unblock.md`](../docs/day-1-unblock.md)). Floors held: **≥ 5
+in the day-1 unblock). Floors held: **≥ 5
 `tool_required`, 3 `easy`, 3 `multi_step`**. ~~3 traps~~ — the trap floor is **withdrawn**
 by [ADR-005](../docs/decisions/ADR-005-traps-do-not-reproduce.md).
 

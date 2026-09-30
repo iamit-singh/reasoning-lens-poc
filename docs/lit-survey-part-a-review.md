@@ -213,7 +213,5 @@ forgotten** — §1.3.1 said so in W0, and that is still the live risk.
 
 ## Related
 
-- [`g3-ship-checklist.md`](g3-ship-checklist.md) — C15.1 #10's row
-- [`month-3-unblock.md`](month-3-unblock.md) — U3, the owner nobody has ever named
 - [`findings.md`](findings.md) · [`g2-measurement-report.md`](g2-measurement-report.md) — the measurements §2 checks against
 - [`decisions/ADR-009-cue-injection-does-not-reproduce.md`](decisions/ADR-009-cue-injection-does-not-reproduce.md) · [`decisions/ADR-010-the-taxonomy-barely-populates.md`](decisions/ADR-010-the-taxonomy-barely-populates.md)
